@@ -658,6 +658,9 @@ void fastNLOCreate::SetScenConstsDefaults() {
 #else
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
+   fScenConsts.CacheMax  = 2;
+   fScenConsts.CacheType = 20;
+   fScenConsts.CacheComp = 2;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
@@ -702,6 +705,9 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(OutputFilename,fSteerfile))              fScenConsts.OutputFilename = STRING_NS(OutputFilename,fSteerfile);
    if (EXIST_NS(OutputPrecision,fSteerfile))             fScenConsts.OutputPrecision = INT_NS(OutputPrecision,fSteerfile);
    if (EXIST_NS(OutputCompression,fSteerfile))           fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
+   if (EXIST_NS(CacheMax ,fSteerfile))                   fScenConsts.CacheMax  = INT_NS(CacheMax, fSteerfile);
+   if (EXIST_NS(CacheType,fSteerfile))                   fScenConsts.CacheType = INT_NS(CacheType,fSteerfile);
+   if (EXIST_NS(CacheComp,fSteerfile))                   fScenConsts.CacheComp = INT_NS(CacheComp,fSteerfile);
    if (EXIST_NS(FlexibleScaleTable,fSteerfile))          fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
    fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
    if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
@@ -756,11 +762,14 @@ void fastNLOCreate::PrintScenConsts() {
    logger.info["PrintScenConsts"] << "Second scale, only used in flexible-scale tables: " << fScenConsts.ScaleDescriptionScale2 << endl;
    // Single-, double, triple-differential binnings
    logger.info["PrintScenConsts"] << "Center-of-mass energy in [GeV]: " << fScenConsts.CenterOfMassEnergy << endl;
-   logger.info["PrintScenConsts"] << "PDF of 1st hadron: " << fScenConsts.PDF1 << endl;
-   logger.info["PrintScenConsts"] << "PDF of 2nd hadron: " << fScenConsts.PDF2 << endl;
+   logger.info["PrintScenConsts"] << "PDF of 1st hadron:  " << fScenConsts.PDF1 << endl;
+   logger.info["PrintScenConsts"] << "PDF of 2nd hadron:  " << fScenConsts.PDF2 << endl;
    logger.info["PrintScenConsts"] << "Filename of fastNLO output table: " << fScenConsts.OutputFilename << endl;
    logger.info["PrintScenConsts"] << "If zlib available, gzip output table: " << fScenConsts.OutputCompression << endl;
    logger.info["PrintScenConsts"] << "Number of decimal digits to store in output table: " << fScenConsts.OutputPrecision << endl;
+   logger.info["PrintScenConsts"] << "Cache type (0,1,2): " << fScenConsts.CacheType << endl;
+   logger.info["PrintScenConsts"] << "Maximum cache size: " << fScenConsts.CacheMax << endl;
+   logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheComp << endl;
    logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
    logger.info["PrintScenConsts"] << "InclusiveJets setting for NNLOJET: " << fScenConsts.InclusiveJets << endl;
    for (unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++) {
@@ -931,10 +940,14 @@ void fastNLOCreate::Instantiate() {
    // init member variables
    fReader = NULL;
 
-   fCacheMax =   20; // implemented only for flex
    fWarmupXMargin = 4; // was 4
    fWarmupNDigitMu1 = 1; //1 by purpose
    fWarmupNDigitMu2 = 2; //2 by purpose
+
+   fCacheType = fScenConsts.CacheType ? fScenConsts.CacheType :  2;
+   fCacheMax  = fScenConsts.CacheMax  ? fScenConsts.CacheMax  : 20;
+   fCacheComp = fScenConsts.CacheComp ? fScenConsts.CacheComp :  2;
+   SetCacheSize(fCacheMax,fCacheComp,fCacheType);
 
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
@@ -2491,48 +2504,65 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       cout<<"Error! caching not implemented for scalevar tables."<<endl;
       exit(3); // also 'FlushCache has to be changed!'
    }
+
    fScenario._iOB = GetBin(); // we can calculate the bin number right now.
-   for ( auto& cachelem : fWeightCache ) {
-      if (cachelem.second._p   != fEvent._p)       continue;
-      if ( fScenario._iOB != cachelem.first._iOB)  continue;
-      //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
+   if ( fScenario._iOB < 0 ) return; // nothing to do. 
+   //for ( auto& cachelem : fWeightCache ) {
 
-      static const double epscomp = 1.e-6;
-      if ( fabs(cachelem.second._x1  - fEvent._x1     ) >     (cachelem.second._x1 ) * epscomp  ) continue;
-      if ( fabs(cachelem.second._x2  - fEvent._x2     ) >     (cachelem.second._x2 ) * epscomp  ) continue;
-      if ( fabs(cachelem.first._m1   - fScenario._m1  ) >     (cachelem.first._m1  ) * epscomp  ) continue;
-      if ( fabs(cachelem.first._m2   - fScenario._m2  ) > fabs(cachelem.first._m2  ) * epscomp  ) continue;
+   if ( fCacheType==2 && fWeightCacheBinProc.empty() ) {
+      fWeightCacheBinProc.resize(GetNObsBin());
+      for ( auto& cc : fWeightCacheBinProc ) {
+	 cc.resize(GetNSubprocesses());
+	 for ( auto& bb : cc ) {
+	    bb.reserve(int(fCacheMax*0.5)); // *0.7 because most of the bins will not receive the max limit
+	 }
+      }
+   }
 
-      // if (cachelem.first._m1   != fScenario._m1)   continue;
-      // if (cachelem.first._m2   != fScenario._m2)   continue;
-      // if (cachelem.second._x1  != fEvent._x1)      continue;
-      // if (cachelem.second._x2  != fEvent._x2)      continue;
+   static const double epscomp = 1.e-10;
+   if ( fCacheType==1 ) {
+      for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheComp) ; ii-- ) {
+	 auto& cachelem = fWeightCache[ii];
+	 if ( cachelem.second._p  != fEvent._p)       continue;
+	 if ( fScenario._iOB != cachelem.first._iOB)  continue;
+	 //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
+	 // if ( fWeightCache[ii].second._x1  == fEvent._x1  ) continue;
+	 // if ( fWeightCache[ii].second._x2  == fEvent._x2  ) continue;
+	 if ( fabs(cachelem.second._x1  - fEvent._x1     ) >     (cachelem.second._x1 ) * epscomp  ) continue;
+	 if ( fabs(cachelem.second._x2  - fEvent._x2     ) >     (cachelem.second._x2 ) * epscomp  ) continue;
+	 if ( fabs(cachelem.first._m1   - fScenario._m1  ) >     (cachelem.first._m1  ) * epscomp  ) continue;
+	 if ( fabs(cachelem.first._m2   - fScenario._m2  ) > fabs(cachelem.first._m2  ) * epscomp  ) continue;
 
-      // if (cachelem.first._m1   != fScenario._m1)   cout<<"  "<< cachelem.first._m1  << ", "<< fScenario._m1 <<endl;
-      // if (cachelem.first._m2   != fScenario._m2)   cout<<"  "<< cachelem.first._m2  << ", "<< fScenario._m2 <<endl;
-      // if (cachelem.second._x1  != fEvent._x1)      cout<<"  "<< cachelem.second._x1 << ", "<< fEvent._x1    <<endl;
-      // if (cachelem.second._x2  != fEvent._x2)      cout<<"  "<< cachelem.second._x2 << ", "<< fEvent._x2    <<endl;
-
-      // if ( cachelem.second._p   != fEvent._p )                                                  continue; // different process
-      // if (fScenario._iOB != -1 && fScenario._iOB != cachelem.first._iOB) continue; // different observable
-      // else if ( fabs(cachelem.first._o[0] - fScenario._o[0]) <= fabs(cachelem.first._o[0]) * epscomp  ) continue; // different observable
-      // if ( fabs(cachelem.second._x1  - fEvent._x1     ) <= fabs(cachelem.second._x1 ) * epscomp  ) continue;
-      // if ( fabs(cachelem.second._x2  - fEvent._x2     ) <= fabs(cachelem.second._x2 ) * epscomp  ) continue;
-      // if ( fabs(cachelem.first._m1   - fScenario._m1  ) <= fabs(cachelem.first._m1  ) * epscomp  ) continue;
-      // if ( fabs(cachelem.first._m2   - fScenario._m2  ) <= fabs(cachelem.first._m2  ) * epscomp  ) continue;
-
-      //cout<<"cache_w: "<<cachelem.second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
-      cachelem.second._w   += fEvent._w;
-      cachelem.second._wf  += fEvent._wf;
-      cachelem.second._wr  += fEvent._wr;
-      cachelem.second._wrr += fEvent._wrr;
-      cachelem.second._wff += fEvent._wff;
-      cachelem.second._wrf += fEvent._wrf;
-      // cout<<"    sum w: "<<fWeightCache[iev].second._w<<endl;
+	 cachelem.second._w   += fEvent._w;
+	 cachelem.second._wf  += fEvent._wf;
+	 cachelem.second._wr  += fEvent._wr;
+	 cachelem.second._wrr += fEvent._wrr;
+	 cachelem.second._wff += fEvent._wff;
+	 cachelem.second._wrf += fEvent._wrf;
+	 return; // done !
+      }
+      fWeightCache.push_back(make_pair(fScenario,fEvent));
+   }
+   else if ( fCacheType==2 ) {
+      auto& cachelem = fWeightCacheBinProc[fScenario._iOB][fEvent._p];
+      for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheComp) ; ii-- ) {
+	 if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
+	 if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
+	 if ( fabs(cachelem[ii].first._m1   - fScenario._m1  ) >     (cachelem[ii].first._m1  ) * epscomp  ) continue;
+	 if ( fabs(cachelem[ii].first._m2   - fScenario._m2  ) > fabs(cachelem[ii].first._m2  ) * epscomp  ) continue;
+	 cachelem[ii].second._w   += fEvent._w;
+	 cachelem[ii].second._wf  += fEvent._wf;
+	 cachelem[ii].second._wr  += fEvent._wr;
+	 cachelem[ii].second._wrr += fEvent._wrr;
+	 cachelem[ii].second._wff += fEvent._wff;
+	 cachelem[ii].second._wrf += fEvent._wrf;
+	 return; // done !
+      }
+      cachelem.push_back(make_pair(fScenario,fEvent));
+   }
+   else {
+      // nothing todo!
       return;
-
-      // } else {
-      // 	 cout<<"This is  a bug!"<<endl;
    }
    // for ( unsigned int iev = 0 ; iev<fWeightCache.size() ; iev++) {
    //    if (fWeightCache[iev].second._p   != fEvent._p)       continue;
@@ -2564,7 +2594,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
    //    }
    //}
    // cout<<"Adding new weight to cache"<<endl;
-   fWeightCache.push_back(make_pair(fScenario,fEvent));
+   //fWeightCache.push_back(make_pair(fScenario,fEvent));
 }
 
 
@@ -2576,6 +2606,10 @@ void fastNLOCreate::FlushCache() {
 
    const bool OrderedFill = false;
    if ( OrderedFill ) {
+      if ( fCacheType!=1 ) {
+	 cout<<"ERROR. OrderedFill() only implemented for cache-type 1."<<endl;
+	 exit(3);
+      }
       // fScenario:
       //    std::map<int,double> _o;
       //    double _m1, _m2;
@@ -2642,16 +2676,33 @@ void fastNLOCreate::FlushCache() {
       }
    }      
    else {
-      for ( const auto& cachelem : fWeightCache ) {
-	 fScenario = cachelem.first;
-	 fEvent = cachelem.second;
-	 //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
-	 FillContribution(0); // todo! not working if scalevar is != 0
+      if ( fCacheType==1 ) {
+	 for ( const auto& cachelem : fWeightCache ) {
+	    fScenario = cachelem.first;
+	    fEvent = cachelem.second;
+	    //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
+	    FillContribution(0); // todo! not working if scalevar is != 0
+	 }
+      }
+      else if (fCacheType==2) {
+	 for ( const auto& bin : fWeightCacheBinProc ) {
+	    for ( const auto& proc : bin ) {
+	       for ( const auto& elem : proc ) {
+		  fScenario = elem.first;
+		  fEvent = elem.second;
+		  FillContribution(0); // todo! not working if scalevar is != 0                                                                                  
+	       }
+	    }
+	 }
+      }
+      else {
+	 logger.error["FlushCache()"]<<"fCacheType = "<<fCacheType<<endl;
       }
    }
 
    fWeightCache.clear();
-   fWeightCache.reserve(fCacheMax);
+   if ( fCacheType==1 ) fWeightCache.reserve(fCacheMax);
+   fWeightCacheBinProc.clear();
 }
 
 
@@ -2713,7 +2764,9 @@ void fastNLOCreate::Fill(int scalevar) {
       if (fIsFlexibleScale) {
          if (fCacheMax > 1) {
             FillWeightCache(scalevar);
-            if ((int)fWeightCache.size() >= fCacheMax)
+            if (fCacheType==1 && (int)fWeightCache.size() >= fCacheMax)
+               FlushCache();
+            if (fCacheType==2 && !fWeightCacheBinProc.empty() && fScenario._iOB>=0 && (int)fWeightCacheBinProc[fScenario._iOB][fEvent._p].size() >= fCacheMax )
                FlushCache();
          } else {
             FillContribution(scalevar);
@@ -3313,7 +3366,7 @@ void fastNLOCreate::NormalizeCoefficients(double wgt) {
    //! accordingly
    //! This means, that the information about the
    //! number of events is essentially lost (now remained stored in fWgt)
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    GetTheCoeffTable()->NormalizeCoefficients(wgt);
    fStats._nEv=wgt;
    //    double nev = GetTheCoeffTable()->GetNevt(0,0);
@@ -3324,7 +3377,7 @@ void fastNLOCreate::NormalizeCoefficients(double wgt) {
 void fastNLOCreate::NormalizeCoefficients(const std::vector<std::vector<double> >& wgtProcBin) {
    //! Set number of events to wgtProcBin[iProc][iBin]
    //! sigmatilde is weighted accordingly.
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    GetTheCoeffTable()->NormalizeCoefficients(wgtProcBin);
    fStats._nEv=-1;
 }
@@ -3333,7 +3386,7 @@ void fastNLOCreate::NormalizeCoefficients(const std::vector<std::vector<double> 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByBinSize() {
    //! Multiply all coefficients by binsize
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (unsigned int i=0; i<GetNObsBin(); i++) {
@@ -3379,7 +3432,7 @@ void fastNLOCreate::MultiplyCoefficientsByBinSize() {
 // ___________________________________________________________________________________________________
 void fastNLOCreate::DivideCoefficientsByBinSize() {
    //! Divide all coefficients by binsize
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       for (unsigned int i=0; i<c->SigmaTildeMuIndep.size(); i++) {
@@ -3427,7 +3480,7 @@ void fastNLOCreate::DivideCoefficientsByBinSize() {
 // ___________________________________________________________________________________________________
 void fastNLOCreate::MultiplyCoefficientsByConstant(double coef) {
    //! Divide all coefficients by binsize
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    if (fIsFlexibleScale) {
       fastNLOCoeffAddFlex* c = (fastNLOCoeffAddFlex*)GetTheCoeffTable();
       c->MultiplyCoefficientsByConstant(coef);
@@ -3503,7 +3556,7 @@ void fastNLOCreate::WriteTable() {
    //! Write fastNLO file to disk
    //if ( GetTheCoeffTable()->GetNevt(0,0) <= 0 ) {
    // flush cache with remaining events
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    if (GetTheCoeffTable()->Nevt <= 0) {
       logger.warn["WriteTable"]<<"Number of events seems to be not filled. Please use SetNumberOfEvents(int) before writing table."<<endl;
       exit(1);
@@ -3574,7 +3627,7 @@ void fastNLOCreate::PrintWarmupValues() {
 
 // ___________________________________________________________________________________________________
 void fastNLOCreate::OutWarmup(ostream& strm) {
-   if (fWeightCache.size())  FlushCache();
+   if (fWeightCache.size() || fWeightCacheBinProc.size())  FlushCache();
    if (fWxRnd.empty()) {
       logger.warn["OutWarmup"]<<"Warmup arrays not initialized. Did you forgot to fill values?"<<endl;
       //       logger.warn["OutWarmup"]<<"  Continuting, but writing unreasonalby large/small values as warmup values..."<<endl;
@@ -4435,6 +4488,40 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
    }
    return NULL; // default return
 }
+
+
+// ___________________________________________________________________________________________________
+void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
+   //! Set Cache for filling the weights
+   //! fCacheType: Type. Allowed values:
+   //!      0: disable cache
+   //!      1: a single cache for all weights
+   //!      2: a cache for each obsbin and proc
+   //!
+   //! MaxCache:    Maximum number of entries in cache.
+   //!             in case of CacheType==2: maximum number of entries for a single cache element
+   //! CacheComp:  Number of entries to be compared to the new weight.
+   //!             In case all are (almost) equivalent: the weights are merged prior to filling.
+   if ( MaxCache <= 0 ) fCacheType=0;
+   if ( fCacheType==0 ) 
+      logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
+   if (fCacheType == 0 ) CacheComp=0;
+   if ( CacheComp > MaxCache ) {
+      logger.warn["SetCacheSize"]<<"Warning. CacheComp cannot be larger than MaxCache."<<endl;
+      CacheComp=MaxCache;
+   }
+   fCacheMax  = MaxCache; 
+   fCacheComp = CacheComp; 
+   fCacheType = CacheType;
+   // some messages
+   if ( fCacheType!=0 )
+      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheComp="<<CacheComp<<endl;
+   if ( fCacheMax > 10000 && fCacheType==2 ) 
+      logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType="<<fCacheType<<", CacheSize="<<fCacheMax<<")"<<endl;
+   if ( fCacheComp > 200 ) 
+      logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large. This may slow down the execution."<<endl;
+
+}   
 
 
 // ___________________________________________________________________________________________________

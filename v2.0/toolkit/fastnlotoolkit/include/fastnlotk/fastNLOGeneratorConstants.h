@@ -110,6 +110,11 @@ namespace fastNLO {
       bool IgnoreWarmupBinningCheck;//!< Don't check warmup binning to avoid too many floating precision issues
       bool ApplyPDFReweighting;//!<  Apply reweighting of pdfs for an optimized interpolation, def.=true.
       bool CheckScaleLimitsAgainstBins;//!< For warmup-run! Set limits for scale nodes to bin borders, if possible
+
+      int CacheType; //!< Cache type: 1 or 2, 0 for deactivation
+      int CacheMax ; //!< maximum size of cache
+      int CacheComp; //!< number of elements to be compared with new entry
+
       /**# -------------------------------------------------------------------- #
          #   Choose fastNLO interpolation kernels and distance measures
          # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -159,6 +164,9 @@ namespace fastNLO {
 #else
          OutputCompression=false;
 #endif /* HAVE_LIBZ */
+	 CacheType =  2;
+	 CacheMax  = 20;
+	 CacheComp =  2;
          OutputPrecision=8;
          FlexibleScaleTable=false;
          ScaleVariationFactors.clear();
