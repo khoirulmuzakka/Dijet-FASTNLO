@@ -164,7 +164,7 @@ datglob  = order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*.dat'
 datfiles = glob.glob(datglob)
 if not datfiles:
     print >> sys.stderr, 'No NNLOJET dat files matching', datglob ,'found, aborted!'
-    sys.exit(1) 
+    sys.exit(1)
 datfiles.sort()
 ixscol = 3 + 2 * (fscl-1)
 for datfile in datfiles:
@@ -199,7 +199,7 @@ wgttup.sort(key = lambda row: (row[0]))
 # Unzip again
 allnames,allweights = zip(*wgttup)
 for name in allnames:
-    print 'Weight file line no. ', nlin, ' is for ', name 
+    print 'Weight file line no. ', nlin, ' is for ', name
     if seeds[nlin] not in name:
         print 'seeds[',nlin,'] = ', seeds[nlin],', weight file name = ', name
         sys.exit('ERROR: Mismatch in result sort order between NNLOJET and NNLOJET weights. Aborted!')
@@ -231,10 +231,7 @@ print 'Using ', nlin, 'weight lines.'
 #xs_fnla = np.array(xs_fnla)
 
 # Evaluate cross sections from pre-evaluated fastNLO tables
-if fscl == 1:
-    fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_0.log')
-else:
-    fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*_6.log')
+fnlologs = glob.glob(order+'/'+proc+'.'+jobn+'.'+kinn+'.'+obsv+'.s*.log')
 fnlologs.sort()
 for fnlolog in fnlologs:
     print 'fastNLO file no. ', nlog, ' is ', fnlolog
@@ -244,10 +241,7 @@ for fnlolog in fnlologs:
     else:
         print 'NNLOJET and fastNLO result correctly matched. seed is ', seeds[nlog]
     xs_tmp = np.loadtxt(fnlolog,usecols=(6,),comments=['#',' #','C','L'])
-    if fscl == 1:
-        indi = 0
-    else:
-        indi = (fscl-2)*nobs
+    indi = (fscl-1)*nobs
     indf = indi + nobs
     xs_sub = xs_tmp[indi:indf]
     xs_fnll.append(xs_sub)
