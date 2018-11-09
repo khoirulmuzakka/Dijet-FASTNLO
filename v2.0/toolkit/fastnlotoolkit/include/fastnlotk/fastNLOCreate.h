@@ -103,7 +103,7 @@ public:
    void FillAllSubprocesses(const std::vector<std::vector<fnloEvent> >& events, const fnloScenario& scen);        //!< Fill a list of subprocesses for various scale-variations into a fixed-scale table
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}                    //!< The number of subprocesses (channels)
    const std::vector<double>& GetScaleVariations() const { return fScaleFac; }                       //!< Get list of scale variations
-   const int GetScaleVarMax() const { return fScaleFac.size(); }                                //!< Get no. of scale variations
+   int GetScaleVarMax() const { return fScaleFac.size(); }                                //!< Get no. of scale variations
 
    void WriteTable(std::string filename);                                                            //!< Write fastNLO table to file filename
    void WriteTable();                                                                           //!< Write fastNLO table to disk.
@@ -145,10 +145,12 @@ public:
 
    void Clear() { GetTheCoeffTable()->Clear();};                                                //!< Clear coefficient table
    void PrintStats() const { fStats.PrintStats();}                                              //!< Print statistics
-   void SetGlobalVerbosity(std::string sverb);                                                       //!< Set GlobalVerbosity using std::string variable
+   void SetGlobalVerbosity(std::string sverb);                                                  //!< Set GlobalVerbosity using std::string variable
 
-   void SetCacheSize(int MaxCache) {fCacheMax = MaxCache;}                                      //!< Set maximum number of events in cache. Set to 0 to deactivate caching
+   void SetCacheSize(int MaxCache, int CacheComp, int CacheType=2);                             //!< Set maximum number of events in cache. Set to 0 to deactivate caching, CacheComp: maximum numbers of entries to be compared with new element; fCacheType: 0: deactivate, 1: 1D cache, 2: cache per ObsBin and Proc
    int GetCacheSize() const { return fCacheMax; }                                               //!< Get max cache size
+   int GetCacheComp() const { return fCacheComp; }                                              //!< Get cache comp value
+   int GetCacheType() const { return fCacheType; }                                              //!< Get cache type
 
 protected:
    fastNLOCreate();                                                                             //!< don't use the default constructor. fastNLOCreate is only reasonable with input steering.
@@ -244,8 +246,11 @@ protected:
    std::vector<std::pair<double,double> > fWMu2Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
 
-   int fCacheMax;// = 30;                                                                                  //!< maximum number of entries in weight cahce
+   int fCacheMax = 30;                                                                                 //!< maximum number of entries in weight cahce
+   int fCacheComp = 5;                                                                                        //!< maximum number of entries in weight cahce
+   int fCacheType = 2;                                                                                        //!< maximum number of entries in weight cahce
    std::vector<std::pair<fnloScenario,fnloEvent> > fWeightCache;                                          //!< cache for fill-weights
+   std::vector<std::vector<std::vector<std::pair<fnloScenario,fnloEvent> > > > fWeightCacheBinProc;       //!< alternative cache for fill-weights 
    void FillWeightCache(int scalevar);                                                                    //!< Fill weight into cache, merge weights for identical phase space points
    void FlushCache();                                                                                     //!< Fill weights from cache into table
 

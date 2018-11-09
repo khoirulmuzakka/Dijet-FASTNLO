@@ -55,7 +55,7 @@ void fastNLOInterpolLagrange::CalcNodeValues(vector<pair<int,double> >& nodes, d
 
 
    static vector <double> kern(nS);
-   // --- Catmul Rom interpolation kernel
+   // --- Lagrange interpolation kernel
    if (nnode == 0 ) { // --- left boundary
       kern[0] = 1.0 - 11./6.*delta + delta*delta - 1./6.*delta*delta*delta;
       kern[1] = 3.0*delta - 2.5*delta*delta + 0.5*delta*delta*delta;
@@ -87,8 +87,14 @@ void fastNLOInterpolLagrange::CalcNodeValues(vector<pair<int,double> >& nodes, d
 
    nodes.resize(nS);
    for ( unsigned int i = 0 ; i<nS ; i++ ){
-      nodes[i] = make_pair(nmod-1+i,kern[i]);
+   	 nodes[i] = make_pair(nmod-1+i,kern[i]);
    }
+
+   // nodes.clear();
+   // for ( unsigned int i = 0 ; i<nS ; i++ ){
+   //    if ( kern[i] != 0 )
+   // 	 nodes.push_back(make_pair(nmod-1+i,kern[i]));
+   // }
 
    if (fLastGridPointWasRemoved ) {
       if ( nodes.back().first==(int)fgrid.size() ) {
