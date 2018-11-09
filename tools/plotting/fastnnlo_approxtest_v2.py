@@ -14,7 +14,7 @@
 import argparse
 import glob, os, pylab, sys
 import matplotlib as mpl
-mpl.use('Agg')
+#mpl.use('Agg')
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -454,7 +454,8 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values): #takes pre-cal
 
     #Settings for x-axis of plots
     #For setting small xticks for each bin with only certain labels
-    majorLocator = MultipleLocator(nobs//6)
+    #Set minimum > unity in MultipleLocator
+    majorLocator = MultipleLocator(max((nobs//6),1.1))
     majorFormatter = FormatStrFormatter('%d')
     minorLocator = MultipleLocator(1) #set minor tick for each observable bin
 
