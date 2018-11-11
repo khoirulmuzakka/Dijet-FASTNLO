@@ -600,31 +600,18 @@ AC_SUBST(GITREV)
 # Initialize Doxygen doc
 if test "x$DOXYGEN" != "x"; then
    DX_INIT_DOXYGEN($PROJECT, doxygen.cfg, doc/doxygen)
-# or set missing conditionals to false
-else
-   DX_COND_doc_TRUE=
-   DX_COND_doc_FALSE='#'
-   DX_COND_dot_TRUE=
-   DX_COND_dot_FALSE='#'
-   DX_COND_man_TRUE=
-   DX_COND_man_FALSE='#'
-   DX_COND_rtf_TRUE=
-   DX_COND_rtf_FALSE='#'
-   DX_COND_html_TRUE=
-   DX_COND_html_FALSE='#'
-   DX_COND_chm_TRUE=
-   DX_COND_chm_FALSE='#'
-   DX_COND_chi_TRUE=
-   DX_COND_chi_FALSE='#'
-   DX_COND_xml_TRUE=
-   DX_COND_xml_FALSE='#'
-   DX_COND_latex_TRUE=
-   DX_COND_latex_FALSE='#'
-   DX_COND_ps_TRUE=
-   DX_COND_ps_FALSE='#'
-   DX_COND_pdf_TRUE=
-   DX_COND_pdf_FALSE='#'
 fi
+AM_CONDITIONAL(DX_COND_doc, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_dot, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_man, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_rtf, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_html, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_chm, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_chi, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_xml, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_latex, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_ps, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_pdf, [test "x$DOXYGEN" != "x"])
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
