@@ -100,6 +100,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
 
         fig.savefig('%s.png' %filename)
         print '[fastnnlo_scaleunc]: Plot saved as: %s.png' %filename
+        fig.savefig('%s.eps' %filename)
+        print '[fastnnlo_scaleunc]: Plot saved as: %s.eps' %filename
 
 
 ########################################################################################################################
@@ -117,8 +119,8 @@ def main():
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='+', type=str, choices=['LO', 'NLO', 'NNLO'],
                             help='Blank-separated list of orders up to which the scale uncertainty is shown: LO, NLO, and/or NNLO. If nothing is chosen, successively produce plots for all orders that are available in table.')
-        parser.add_argument('-s', '--scale', default=1, required=False, nargs='?', type=int, choices=[1, 2],
-                                help='For flexible-scale tables define central scale choice for MuR and MuF by choosing "1" (kScale1) or "2" (kScale2).')
+        parser.add_argument('-s', '--scale', default=1, required=False, nargs='?', type=int, choices=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                                help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("1"=kScale1, "2"=kScale2, "3"=kQuadraticSum).')
         parser.add_argument('-a', '--asymmetric', action="store_true",
                             help='If -a is chosen, use asymmetric (6P) scale variations; otherwise use symmetric ones (2P).')
         parser.add_argument('-f', '--filename', default=None, type=str,
