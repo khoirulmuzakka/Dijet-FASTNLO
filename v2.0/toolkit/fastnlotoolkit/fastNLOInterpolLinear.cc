@@ -38,9 +38,14 @@ void fastNLOInterpolLinear::CalcNodeValues(vector<pair<int,double> >& nodes, dou
    int nnode = FindLargestPossibleNode(x);
    // --- set nodes
    nodes.resize(2);
-   nodes[0] = make_pair(nnode,delta);
-   nodes[1] = make_pair(nnode+1,1.-delta);
-   
+   nodes[0] = make_pair(nnode,  1.-delta);
+   nodes[1] = make_pair(nnode+1,delta);
+
+   // std::cout<<" *** node: x="<<x<<"\tdelta="<<delta<<"\tnnode="<<nnode
+   // 	    <<"\tn0="<<nodes[0].first<<"\tv0="<<nodes[0].second
+   // 	    <<"\tn1="<<nodes[1].first<<"\tv0="<<nodes[1].second
+   // 	    <<endl;
+	    
    if (fLastGridPointWasRemoved ) {
       if ( nodes.back().first==(int)fgrid.size() ) {
 	 nodes.resize(1);
