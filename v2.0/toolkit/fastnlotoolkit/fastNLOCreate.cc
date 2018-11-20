@@ -732,6 +732,13 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(Mu2_Kernel,fSteerfile))                  fScenConsts.Mu2_Kernel = STRING_NS(Mu2_Kernel,fSteerfile);
    if (EXIST_NS(Mu2_DistanceMeasure,fSteerfile))         fScenConsts.Mu2_DistanceMeasure = STRING_NS(Mu2_DistanceMeasure,fSteerfile);
    if (EXIST_NS(Mu2_NNodes,fSteerfile))                  fScenConsts.Mu2_NNodes = INT_NS(Mu2_NNodes,fSteerfile);
+
+   if (EXIST_NS(GeneratorName,fSteerfile))               fGenConsts.Name = STRING_NS(GeneratorName,fSteerfile);
+   if (EXIST_NS(GeneratorReferences,fSteerfile))         fGenConsts.References = STRING_ARR_NS(GeneratorReferences,fSteerfile);
+   if (EXIST_NS(ProcessReferences,fSteerfile))           fProcConsts.References = STRING_ARR_NS(ProcessReferences,fSteerfile);
+   if (EXIST_NS(ProcessName,fSteerfile))                 fProcConsts.Name = STRING_NS(ProcessName,fSteerfile);
+   
+
 }
 
 
