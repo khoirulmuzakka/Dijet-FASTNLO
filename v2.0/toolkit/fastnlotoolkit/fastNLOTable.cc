@@ -1,4 +1,6 @@
-#include "config.h"
+// This include must come first to enable conditional compilation e.g. using HAVE_LIBZ!
+#include <config.h>
+
 #include <algorithm>
 #include <cfloat>
 #include <cstdlib>
@@ -9,7 +11,7 @@
 // zlib wrapper library
 #ifdef HAVE_LIBZ
 #include "fastnlotk/zstr.hpp"
-#endif
+#endif /* HAVE_LIBZ */
 
 using namespace std;
 using namespace fastNLO;
@@ -2411,7 +2413,7 @@ std::istream* fastNLOTable::OpenFileRead() {
    }
    std::istream* strm = (istream*)(new ifstream(ffilename.c_str(),ios::in));
    return strm;
-#endif
+#endif /* HAVE_LIBZ */
 
 }
 
@@ -2438,7 +2440,7 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
 #else
    std::ostream* stream = (ostream*)(new std::ofstream(ffilename));
    if ( compress ) logger.info["OpenFileWrite"]<<"gz-compression requested, but compilation was performed without zlib."<<endl;
-#endif
+#endif /* HAVE_LIBZ */
 
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
