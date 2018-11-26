@@ -18,7 +18,7 @@ dist_check_SCRIPTS = fnlo-nj-wrmtest.pl fnlo-nj-lotest.pl fnlo-nj-nlotest.pl
 TESTS = $(dist_check_SCRIPTS)
 
 # Additional clean up for check targets
-CLEANFILES = *.log *.tab *.str *.txt
+CLEANFILES = *.log *.tab *.str *.txt *.wrm
 clean-local: clean-local-check
 .PHONY: clean-local-check
 clean-local-check:

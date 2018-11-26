@@ -768,7 +768,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       cout << " # INIT:  [inputfunc] ---------- initializing ... ----------" << endl;
       // --- read in steering and create fastNLO table accordingly
       // --- ftable is a global constant
-      ftable = new fastNLOCreate("InclusiveNJetEvents.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
+      ftable = new fastNLOCreate(UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC(),"InclusiveNJetEvents.str");
       if ( ftable->TestParameterInSteering("LeadingOrder") ) {
          ftable->GetParameterFromSteering("LeadingOrder",ILOord);
       } else {
