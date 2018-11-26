@@ -158,6 +158,7 @@ private:
    bool ldphi;                // Switch to use jet distance dphi/true or dR/false (default is true)
    int Njetmin;               // Minimal number of overall jets in at least one of the two jet collections (default here is 3)
    bool lsamejets;            // Switch to use same or different second jet algorithm (default is true)
+   bool lptmax;               // True when only ptmax is used as scale
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
 };
@@ -263,11 +264,13 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       say::warn["ScenarioCode"] << "No description of scale 2, flexible-scale tables not possible!" << endl;
    }
    // scale descriptions define the scales
+   lptmax = true;
    for ( unsigned int i = 0; i < 2; i++ ) {
       if ( ScaleLabel[i] == "pT_max_[GeV]" ) {
          mudef[i] = PTMAX;
       } else if ( ScaleLabel[i] == "pT_jet_[GeV]" ) {
          mudef[i] = PTJET;
+         lptmax = false;
       } else {
          say::error["ScenarioCode"] << "Unknown scale, i.e. scale description, aborted!" << endl;
          say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
@@ -480,7 +483,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    //            requires a minimal jet pT of 1 GeV. If this is a problem, the ptmin value
    //            in fj-jets.cc needs to be changed.
    // There should never be more than four jets in NLOJet++
-   if (nj < Njetmin && nj2 < Njetmin) {
+   if ((int)nj < Njetmin && (int)nj2 < Njetmin) {
       say::debug["ScenarioCode"] << "This event from NLOJet++ has only two jets with pT > 1 GeV. Skipped!" << endl;
       return;
    } else if (nj > 4 || nj2 > 4) {
@@ -514,7 +517,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    size_t njet = std::remove_if(pj.begin(), pj.end(), SelJets) - pj.begin();
    size_t njet2 = njet;
    if ( ! lsamejets ) {
-      size_t njet2 = std::remove_if(pj2.begin(), pj2.end(), SelJets) - pj2.begin();
+      njet2 = std::remove_if(pj2.begin(), pj2.end(), SelJets) - pj2.begin();
    }
 
    // --- sort selected n jets at beginning of jet array pj, by default decreasing in pt
@@ -552,38 +555,37 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    }
 
    // ---- fastNLO v2.2
-   // Analyze jet  in double jet loop (Attention: Includes double counting!)
+   // Analyze jet in double jet loop
    // set one possible scale choice (Attention: Only correct if jets sorted descending in pT)
-   double ptmax = pj[1].perp();
-   vector< vector<double> > vobs;
-   vector<int> iobs;
-   vector<int> wobs;
+   double ptmax = max(pj[1].perp(),pj2[1].perp());
+   int imuscl = -1;
 
-   // 1st loop over jets k
+   // 1st jet loop k
+   map<int,int> count;
+   map<int,int> acount;
+   map<int,double> scale;
+   map<int,vector <double>> value;
    for (unsigned int k = 1; k <= njet; k++) {
-
+      vector<double> vobs;
       // --- calculate observable of nth dimension
       for ( int i = 0; i<NDim; i++ ) {
          switch(obsdef[i]) {
          case PTJETGEV :
             // jet pT
             obs[i] = pj[k].perp();
-            vobs[k].push_back(obs[i]);
+            imuscl = i;
             break;
          case YJET :
             // jet rapidity
             obs[i] = abs(pj[k].rapidity());
-            vobs[k].push_back(obs[i]);
             break;
          case ETAJET :
             // jet pseudorapidity
             obs[i] = abs(pj[k].prapidity());
-            vobs[k].push_back(obs[i]);
             break;
          case PHIJET :
             // jet azimuthal angle
             obs[i] = atan2(pj[k].Y(), pj[k].X());
-            vobs[k].push_back(obs[i]);
             break;
          default :
             say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
@@ -591,67 +593,53 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             say::error["ScenarioCode"] << "Please complement this scenario to include the requested observable." << endl;
             exit(1);
          }
+         vobs.push_back(obs[i]);
       }
-      // --- get ObsBin number for jet k
-      iobs.push_back(ftable->GetObsBinNumber( vobs[k] ));
-
-      // --- set the renormalization and factorization scales
-      // --- calculate the requested scales
-      for ( unsigned int i = 0; i < 2; i++ ) {
-         switch(mudef[i]) {
-         case PTMAX :
-            // maximal jet pT
-            mu[i] = ptmax;
-            break;
-         case PTJET :
-            // jet pT
-            mu[i] = pj[k].perp();
-            break;
-         default :
-            say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
-            say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
-            say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
-            exit(1);
-         }
+      // --- store result in key-value maps with ObsBin number for jet k as key
+      if ( (! lptmax) && imuscl < 0 ) {
+         say::error["ScenarioCode"] << "No scale-like observable selected, aborted!" << endl;
+         say::error["ScenarioCode"] << "imuscl = " << imuscl << endl;
+         say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
+         exit(1);
+      }
+      int ikey = ftable->GetObsBinNumber( vobs );
+      count[ikey]  += 1;
+      acount[ikey] += 1;
+      value[ikey]   = vobs;
+      if ( imuscl > -1 ) {
+         scale[ikey]  += vobs[imuscl];
       }
 
       // --- give some debug output before final selection
       if ( say::debug.GetSpeak() ) {
-         say::debug["ScenarioCode"]  << "---------------- Before final selection ----------------" << endl;
+         say::debug["ScenarioCode"]  << "---------------- Result of first jet loop ----------------" << endl;
          for ( int i = 0; i<NDim; i++ ) {
             say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs[i] << ", obsmax = " << obsmax[i] << endl;
          }
       }
    }
-   list<int> iObsBins(iobs.begin(), iobs.end());
 
-   vector< vector<double> > vobs2;
-   vector<int> iobs2;
-   // 2nd loop over jets l
+   // 2nd jet loop l
    for (unsigned int l = 1; l <= njet2; l++) {
-
-      // derive bin numbers of jets in second loop
+      vector<double> vobs;
+      // --- calculate observable of nth dimension
       for ( int i = 0; i<NDim; i++ ) {
          switch(obsdef[i]) {
          case PTJETGEV :
             // jet pT
             obs2[i] = pj2[l].perp();
-            vobs2[l].push_back(obs2[i]);
             break;
          case YJET :
             // jet rapidity
             obs2[i] = abs(pj2[l].rapidity());
-            vobs2[l].push_back(obs2[i]);
             break;
          case ETAJET :
             // jet pseudorapidity
             obs2[i] = abs(pj2[l].prapidity());
-            vobs2[l].push_back(obs2[i]);
             break;
          case PHIJET :
             // jet azimuthal angle
             obs2[i] = atan2(pj2[l].Y(), pj2[l].X());
-            vobs2[l].push_back(obs2[i]);
             break;
          default :
             say::error["ScenarioCode"] << "Observable not yet implemented, aborted!" << endl;
@@ -659,37 +647,60 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             say::error["ScenarioCode"] << "Please complement this scenario to include the requested observable." << endl;
             exit(1);
          }
+         vobs.push_back(obs2[i]);
       }
-      // --- get ObsBin number for jet l
-      iobs2.push_back(ftable->GetObsBinNumber( vobs[l] ));
+      // --- store result in key-value maps with ObsBin number for jet l as key
+      int ikey = ftable->GetObsBinNumber( vobs );
+      count[ikey]  -= 1;
+      acount[ikey] += 1;
+      value[ikey]   = vobs;
+      if ( imuscl > -1 ) {
+         scale[ikey]  += vobs[imuscl];
+      }
+
+      // --- give some debug output before final selection
+      if ( say::debug.GetSpeak() ) {
+         say::debug["ScenarioCode"]  << "---------------- Result of second jet loop ----------------" << endl;
+         for ( int i = 0; i<NDim; i++ ) {
+            say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs[i] << ", obsmax = " << obsmax[i] << endl;
+         }
+      }
    }
-   copy( iobs2.begin(), iobs2.end(), std::back_inserter( iObsBins ) );
-   iObsBins.sort();
-   iObsBins.unique();
 
-
-
-
-
-
-         // // cuts on jet-pair quantities
-         // if ( ptnbr < ptnjmin || djlk < djlkmin || djlkmax < djlk ) {
-
-         //    // --- jet pair not close enough --> rejected
-         //    if ( say::debug.GetSpeak() ) {
-         //       say::debug["ScenarioCode"]  << "----------------- Jet pair rejected! ------------------" << endl;
-         //    }
-         //    continue;
-         // }
-
+   // Fill difference loop
+   for ( const auto &iPair : count ) {
+      if ( iPair.second != 0 ) {
+         for ( unsigned int i = 0; i < value[iPair.first].size(); i++ ) {
+            obs[i] = value[iPair.first][i];
+         }
          // cuts on observable limits
          if ( obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
               (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
               (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
 
-            // --- jet pair & observable accepted
+            // --- jet diff observable accepted
             if ( say::debug.GetSpeak() ) {
                say::debug["ScenarioCode"]  << "----------------- Event/jet/jet pair accepted! ------------------" << endl;
+            }
+
+            // --- set the renormalization and factorization scales
+            // --- calculate the requested scales
+            for ( unsigned int i = 0; i < 2; i++ ) {
+               switch(mudef[i]) {
+               case PTMAX :
+                  // maximal jet pT
+                  mu[i] = ptmax;
+                  break;
+               case PTJET :
+                  // jet pT (in fact, average of all jets in same pT bin)
+                  mu[i] = scale[iPair.first]/acount[iPair.first];
+                  break;
+               default :
+                  say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;
+                  say::error["ScenarioCode"] << "ScaleLabel[" << i << "] = " << ScaleLabel[i] << endl;
+                  say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
+                  exit(1);
+               }
             }
 
             static vector<double> scalevars;
@@ -710,16 +721,21 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
                say::error["ScenarioCode"] << "Less than 1D(?!) or more than 3D binning not implemented here, aborted!" << endl;
                say::error["ScenarioCode"] << "DifferentialDimension NDim = " << NDim << endl;
             }
-            for ( int i = 0; i<NDim; i++ ) {
-               scen.SetObservableDimI( obs[i], i );
-            }
+            // for ( int i = 0; i<NDim; i++ ) {
+            //    scen.SetObservableDimI( obs[i], i );
+            // }
 
+            // for this type of scenario can set directly the known observable bin iPair.first
+            scen.SetObsBin(iPair.first);
             scen.SetObsScale1( mu[0] );   // must be consistent with 'mu' from contribs
+
+            // but must communicate additional potentially negative weight factor iPair.second
+            // this factor is the difference in occurrences of jet algo 1 jets vs. jet algo 2 jets
             if (lFlexibleScaleTable) {
                scen.SetObsScale2( mu[1] );
-               ftable->FillAllSubprocesses(contribsflex,scen);
+               ftable->FillAllSubprocesses(contribsflex,scen,(double)iPair.second);
             } else {
-               ftable->FillAllSubprocesses(contribsfix,scen);
+               ftable->FillAllSubprocesses(contribsfix,scen,(double)iPair.second);
             }
          } else {
             // --- jet-pair observable rejected
@@ -727,8 +743,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
                say::debug["ScenarioCode"]  << "----------------- Jet-pair observable rejected! ------------------" << endl;
             }
          }
-      } // end of pair loop
-   } // end of jet loop
+      } // block zero difference
+   } // end of fill loop
    say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
 }
 
@@ -748,7 +764,7 @@ void inputfunc(unsigned int& nj, unsigned int& nu, unsigned int& nd) {
       cout << " # INIT:  [inputfunc] ---------- initializing ... ----------" << endl;
       // --- read in steering and create fastNLO table accordingly
       // --- ftable is a global constant
-      ftable = new fastNLOCreate("InclusiveNJetPairs.str",UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC());
+      ftable = new fastNLOCreate(UsefulNlojetTools::GenConsts(),UsefulNlojetTools::ProcConsts_HHC(),"InclusiveNJetDiffs.str");
       if ( ftable->TestParameterInSteering("LeadingOrder") ) {
          ftable->GetParameterFromSteering("LeadingOrder",ILOord);
       } else {
