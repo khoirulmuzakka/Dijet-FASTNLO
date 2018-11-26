@@ -28,6 +28,9 @@
 */
 // ___________________________________________________________________________________________________
 
+// This include must come first to enable conditional compilation e.g. using HAVE_LIBZ!
+#include <config.h>
+
 #include <algorithm>
 #include <cfloat>
 #include <string>
@@ -277,15 +280,15 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
    //!
    //! Constructor of fastNLOCreate
    //!
-   //! Set required parameters through GeneratorConstants, ProcessConstants, and steering file.
+   //! Set required parameters through GeneratorConstants and ProcessConstants plus steering file.
    //!
-   //! Existence of steering file is mandatory; only ScenarioConstants are set from steering.
+   //! Existence of steering file is mandatory.
    //! The warmup filename is either read from steering or set via heuristic guessing.
    //! If the warmup file doesn't exist, a warmup run is initiated.
    //!
    //!
    logger.SetClassName("fastNLOCreate");
-   logger.debug["fastNLOCreate"]<<"Create table from GenConsts, ProcConsts, and steering file"<<endl;
+   logger.debug["fastNLOCreate"]<<"Create table from GenConsts and ProcConsts plus steering file"<<endl;
    logger.debug["fastNLOCreate"]<<"The steering file from function call is: " << steerfile << endl;
 
    //! Initialise constants from defaults
@@ -313,9 +316,15 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
       //! The steeringNameSpace is set automatically to steerfile without extension
       ReadSteering(steerfile);
    }
-   //! Update scenario constants from steering namespace
+   //! Update generator constants from steering namespace
+   SetGenConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "Update GenConsts from steering" << endl;
+   //! Update process constants from steering namespace
+   SetProcConstsFromSteering();
+   logger.debug["fastNLOCreate"] << "Update ProcConsts from steering" << endl;
+   //! Set scenario constants from steering namespace
    SetScenConstsFromSteering();
-   logger.debug["fastNLOCreate"] << "SetScenConsts from warmup and steering" << endl;
+   logger.debug["fastNLOCreate"] << "SetScenConsts from steering" << endl;
    if (read_steer::getVerbosity() < 0) {
       PrintTableConsts();
    }
@@ -737,7 +746,7 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(GeneratorReferences,fSteerfile))         fGenConsts.References = STRING_ARR_NS(GeneratorReferences,fSteerfile);
    if (EXIST_NS(ProcessReferences,fSteerfile))           fProcConsts.References = STRING_ARR_NS(ProcessReferences,fSteerfile);
    if (EXIST_NS(ProcessName,fSteerfile))                 fProcConsts.Name = STRING_NS(ProcessName,fSteerfile);
-   
+
 
 }
 
@@ -980,20 +989,26 @@ void fastNLOCreate::Instantiate() {
    INormFlag    = 0;
 
    string filename = fScenConsts.OutputFilename;
-   if (filename.find(".gz") != string::npos && fScenConsts.OutputCompression) 
-      logger.info["Instantiate"]<<"zlib compression enabled."<<endl;
-//#ifdef HAVE_LIBZ
-   else if (filename.find(".gz") == string::npos && fScenConsts.OutputCompression) {
-      logger.info["Instantiate"]<<"zlib compression enabled. Adding .gz to filename."<<endl;
+
+   if (filename.find(".gz") != string::npos && fScenConsts.OutputCompression) {
+      logger.info["Instantiate"]<<"zlib compression requested."<<endl;
+   } else if (filename.find(".gz") == string::npos && fScenConsts.OutputCompression) {
+      logger.info["Instantiate"]<<"zlib compression requested. Adding .gz to filename."<<endl;
       filename += ".gz";
+   } else if (filename.find(".gz") == string::npos && !fScenConsts.OutputCompression) {
+      logger.info["Instantiate"]<<"No zlib compression requested. Writing uncompressed grids."<<endl;
+   } else {
+      logger.error["Instantiate"]<<"Inconsistent choice of uncompressed grid with filename ending in .gz, please fix. Exiting."<<endl;
+      exit(1);
    }
-//#endif
-   else if (filename.find(".gz") != string::npos && !fScenConsts.OutputCompression) {
-      logger.warn["Instantiate"]<<".gz format requested, but zlib compression disabled."<<endl;
+#ifndef HAVE_LIBZ
+   if (fScenConsts.OutputCompression) {
+      logger.error["Instantiate"]<<"zlib compression requested, but zlib not found!"<<endl;
+      logger.error["Instantiate"]<<"Please recompile with zlib support or write uncompressed grids. Exiting."<<endl;
+      exit(1);
    }
-   else
-      logger.info["Instantiate"]<<"zlib compression disabled."<<endl;;
-  
+#endif /* HAVE_LIBZ */
+
    SetFilename(filename);
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
@@ -2393,7 +2408,7 @@ int fastNLOCreate::GetBin() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events, const fnloScenario& scen) {
+void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events, const fnloScenario& scen, const double wgtfac ) {
    //! fill all subprocessess for all scale variations (into a fixed-scale table)
    //! events is expected to be of the form:
    //!   events[nscalevar][nsubproc]
@@ -2409,10 +2424,8 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       if (!CheckWeightIsFinite()) return;
 
       const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
-      if (ObsBin < 0) return;
-      if (ObsBin >= (int)GetNObsBin()) return;
+      if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
       fStats._nEvPS++;
-
 
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
       // do interpolation
@@ -2436,7 +2449,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
          for (unsigned int m1 = 0 ; m1<nmu.size() ; m1++) {
             fastNLO::v2d& stm1 = st[is][nmu[m1].first];
             for (unsigned int p = 0 ; p<events[is].size() ; p++) {
-               double wgt = events[is][p]._w * nmu[m1].second / BinSize[ObsBin];
+               double wgt = wgtfac * events[is][p]._w * nmu[m1].second / BinSize[ObsBin];
                // .......................................................................................
                for (unsigned int x1 = 0 ; x1<nxlo.size() ; x1++) {
                   for (unsigned int x2 = 0 ; x2<nxup.size() ; x2++) {
@@ -2466,7 +2479,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       }
    } else {
       for (unsigned int is = 0 ; is<events.size() ; is++) {   // all scalevars
-         FillAllSubprocesses(events[is], scen, is);
+         FillAllSubprocesses(events[is], scen, is, wgtfac);
       }
    }
 }
@@ -2474,7 +2487,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar) {
+void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const fnloScenario& scen, int scalevar, const double wgtfac) {
    //! fill a list of subprocesses into the fastNLO table
 
    if ((int)events.size() != GetNSubprocesses()) {
@@ -2482,17 +2495,17 @@ void fastNLOCreate::FillAllSubprocesses(const vector<fnloEvent>& events, const f
       exit(1);
    }
    for (unsigned int p = 0 ; p<events.size() ; p++) {
-      FillOneSubprocess(events[p],scen,scalevar);
+      FillOneSubprocess(events[p],scen,scalevar,wgtfac);
    }
 }
 
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar) {
+void fastNLOCreate::FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar, const double wgtfac) {
    fEvent = event;
    fScenario = scen;
-   Fill(scalevar);
+   Fill(scalevar,wgtfac);
 }
 
 // ___________________________________________________________________________________________________
@@ -2513,57 +2526,57 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
    }
 
    fScenario._iOB = GetBin(); // we can calculate the bin number right now.
-   if ( fScenario._iOB < 0 ) return; // nothing to do. 
+   if ( fScenario._iOB < 0 ) return; // nothing to do.
    //for ( auto& cachelem : fWeightCache ) {
 
    if ( fCacheType==2 && fWeightCacheBinProc.empty() ) {
       fWeightCacheBinProc.resize(GetNObsBin());
       for ( auto& cc : fWeightCacheBinProc ) {
-	 cc.resize(GetNSubprocesses());
-	 for ( auto& bb : cc ) {
-	    bb.reserve(int(fCacheMax*0.5)); // *0.7 because most of the bins will not receive the max limit
-	 }
+         cc.resize(GetNSubprocesses());
+         for ( auto& bb : cc ) {
+            bb.reserve(int(fCacheMax*0.5)); // *0.7 because most of the bins will not receive the max limit
+         }
       }
    }
 
    static const double epscomp = 1.e-10;
    if ( fCacheType==1 ) {
       for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheComp) ; ii-- ) {
-	 auto& cachelem = fWeightCache[ii];
-	 if ( cachelem.second._p  != fEvent._p)       continue;
-	 if ( fScenario._iOB != cachelem.first._iOB)  continue;
-	 //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
-	 // if ( fWeightCache[ii].second._x1  == fEvent._x1  ) continue;
-	 // if ( fWeightCache[ii].second._x2  == fEvent._x2  ) continue;
-	 if ( fabs(cachelem.second._x1  - fEvent._x1     ) >     (cachelem.second._x1 ) * epscomp  ) continue;
-	 if ( fabs(cachelem.second._x2  - fEvent._x2     ) >     (cachelem.second._x2 ) * epscomp  ) continue;
-	 if ( fabs(cachelem.first._m1   - fScenario._m1  ) >     (cachelem.first._m1  ) * epscomp  ) continue;
-	 if ( fabs(cachelem.first._m2   - fScenario._m2  ) > fabs(cachelem.first._m2  ) * epscomp  ) continue;
+         auto& cachelem = fWeightCache[ii];
+         if ( cachelem.second._p  != fEvent._p)       continue;
+         if ( fScenario._iOB != cachelem.first._iOB)  continue;
+         //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
+         // if ( fWeightCache[ii].second._x1  == fEvent._x1  ) continue;
+         // if ( fWeightCache[ii].second._x2  == fEvent._x2  ) continue;
+         if ( fabs(cachelem.second._x1  - fEvent._x1     ) >     (cachelem.second._x1 ) * epscomp  ) continue;
+         if ( fabs(cachelem.second._x2  - fEvent._x2     ) >     (cachelem.second._x2 ) * epscomp  ) continue;
+         if ( fabs(cachelem.first._m1   - fScenario._m1  ) >     (cachelem.first._m1  ) * epscomp  ) continue;
+         if ( fabs(cachelem.first._m2   - fScenario._m2  ) > fabs(cachelem.first._m2  ) * epscomp  ) continue;
 
-	 cachelem.second._w   += fEvent._w;
-	 cachelem.second._wf  += fEvent._wf;
-	 cachelem.second._wr  += fEvent._wr;
-	 cachelem.second._wrr += fEvent._wrr;
-	 cachelem.second._wff += fEvent._wff;
-	 cachelem.second._wrf += fEvent._wrf;
-	 return; // done !
+         cachelem.second._w   += fEvent._w;
+         cachelem.second._wf  += fEvent._wf;
+         cachelem.second._wr  += fEvent._wr;
+         cachelem.second._wrr += fEvent._wrr;
+         cachelem.second._wff += fEvent._wff;
+         cachelem.second._wrf += fEvent._wrf;
+         return; // done !
       }
       fWeightCache.push_back(make_pair(fScenario,fEvent));
    }
    else if ( fCacheType==2 ) {
       auto& cachelem = fWeightCacheBinProc[fScenario._iOB][fEvent._p];
       for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheComp) ; ii-- ) {
-	 if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
-	 if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
-	 if ( fabs(cachelem[ii].first._m1   - fScenario._m1  ) >     (cachelem[ii].first._m1  ) * epscomp  ) continue;
-	 if ( fabs(cachelem[ii].first._m2   - fScenario._m2  ) > fabs(cachelem[ii].first._m2  ) * epscomp  ) continue;
-	 cachelem[ii].second._w   += fEvent._w;
-	 cachelem[ii].second._wf  += fEvent._wf;
-	 cachelem[ii].second._wr  += fEvent._wr;
-	 cachelem[ii].second._wrr += fEvent._wrr;
-	 cachelem[ii].second._wff += fEvent._wff;
-	 cachelem[ii].second._wrf += fEvent._wrf;
-	 return; // done !
+         if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
+         if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
+         if ( fabs(cachelem[ii].first._m1   - fScenario._m1  ) >     (cachelem[ii].first._m1  ) * epscomp  ) continue;
+         if ( fabs(cachelem[ii].first._m2   - fScenario._m2  ) > fabs(cachelem[ii].first._m2  ) * epscomp  ) continue;
+         cachelem[ii].second._w   += fEvent._w;
+         cachelem[ii].second._wf  += fEvent._wf;
+         cachelem[ii].second._wr  += fEvent._wr;
+         cachelem[ii].second._wrr += fEvent._wrr;
+         cachelem[ii].second._wff += fEvent._wff;
+         cachelem[ii].second._wrf += fEvent._wrf;
+         return; // done !
       }
       cachelem.push_back(make_pair(fScenario,fEvent));
    }
@@ -2587,7 +2600,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
    //          &&  fWeightCache[iev].second._x1  == fEvent._x1
    //          &&  fWeightCache[iev].second._x2  == fEvent._x2) {
    //       // cout<<"Found cached PS point !!"<<endl;
-   // 	 //cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
+   //    //cout<<"cache_w: "<<fWeightCache[iev].second._w<<"\tevent_w:" <<fEvent._w<<"\t bin: "<<fScenario._iOB<<endl;
    //       fWeightCache[iev].second._w  += fEvent._w;
    //       fWeightCache[iev].second._wf += fEvent._wf;
    //       fWeightCache[iev].second._wr += fEvent._wr;
@@ -2614,8 +2627,8 @@ void fastNLOCreate::FlushCache() {
    const bool OrderedFill = false;
    if ( OrderedFill ) {
       if ( fCacheType!=1 ) {
-	 cout<<"ERROR. OrderedFill() only implemented for cache-type 1."<<endl;
-	 exit(3);
+         cout<<"ERROR. OrderedFill() only implemented for cache-type 1."<<endl;
+         exit(3);
       }
       // fScenario:
       //    std::map<int,double> _o;
@@ -2623,87 +2636,87 @@ void fastNLOCreate::FlushCache() {
       //    int _iOB;
       // fEvent:
       //    double _x1, _x2;
-      //    double _sig;    
+      //    double _sig;
       //    double _w, _wf, _wr, _wrr, _wff, _wrf;
       //    int _p;
       //    long long int _n;
       //const double epsfill = 1.e-14;
       for ( int iwrf = 0 ; iwrf<6 ; iwrf++ ) {
-	 fEvent.Reset();
-	 for ( fScenario._iOB = 0 ; fScenario._iOB<(int)GetNObsBin() ; fScenario._iOB++ ) { // ordered fill by iobs
-	    for ( const auto& cachelem : fWeightCache ) {
-	       if ( fScenario._iOB != cachelem.first._iOB ) continue;
-	       switch (iwrf) {
-	       case 0:
-		  //if ( fabs(cachelem.second._w) < epsfill ) continue;
-		  if ( cachelem.second._w == 0 ) continue;
-		  else fEvent._w   = cachelem.second._w;
-		  break;
-	       case 1:
-		  //if ( fabs(cachelem.second._wf) < epsfill ) continue;
-		  if ( cachelem.second._wf == 0 ) continue;
-		  else fEvent._wf  = cachelem.second._wf;
-		  break;
-	       case 2:
-		  //if ( fabs(cachelem.second._wr) < epsfill ) continue;
-		  if ( cachelem.second._wr == 0 ) continue;
-		  else fEvent._wr  = cachelem.second._wr;
-		  break;
-	       case 3:
-		  //if ( fabs(cachelem.second._wrr) < epsfill ) continue;
-		  if ( cachelem.second._wrr == 0 ) continue;
-		  else fEvent._wrr = cachelem.second._wrr;
-		  break;
-	       case 4:
-		  //if ( fabs(cachelem.second._wff) < epsfill ) continue;
-		  if ( cachelem.second._wff == 0 ) continue;
-		  else fEvent._wff = cachelem.second._wff;
-		  break;
-	       case 5:
-		  //if ( fabs(cachelem.second._wrf) < epsfill ) continue;
-		  if ( cachelem.second._wrf == 0 ) continue;
-		  else fEvent._wrf = cachelem.second._wrf;
-		  break;
-	       default:
-		  cout<<"error"<<endl;
-	       }
+         fEvent.Reset();
+         for ( fScenario._iOB = 0 ; fScenario._iOB<(int)GetNObsBin() ; fScenario._iOB++ ) { // ordered fill by iobs
+            for ( const auto& cachelem : fWeightCache ) {
+               if ( fScenario._iOB != cachelem.first._iOB ) continue;
+               switch (iwrf) {
+               case 0:
+                  //if ( fabs(cachelem.second._w) < epsfill ) continue;
+                  if ( cachelem.second._w == 0 ) continue;
+                  else fEvent._w   = cachelem.second._w;
+                  break;
+               case 1:
+                  //if ( fabs(cachelem.second._wf) < epsfill ) continue;
+                  if ( cachelem.second._wf == 0 ) continue;
+                  else fEvent._wf  = cachelem.second._wf;
+                  break;
+               case 2:
+                  //if ( fabs(cachelem.second._wr) < epsfill ) continue;
+                  if ( cachelem.second._wr == 0 ) continue;
+                  else fEvent._wr  = cachelem.second._wr;
+                  break;
+               case 3:
+                  //if ( fabs(cachelem.second._wrr) < epsfill ) continue;
+                  if ( cachelem.second._wrr == 0 ) continue;
+                  else fEvent._wrr = cachelem.second._wrr;
+                  break;
+               case 4:
+                  //if ( fabs(cachelem.second._wff) < epsfill ) continue;
+                  if ( cachelem.second._wff == 0 ) continue;
+                  else fEvent._wff = cachelem.second._wff;
+                  break;
+               case 5:
+                  //if ( fabs(cachelem.second._wrf) < epsfill ) continue;
+                  if ( cachelem.second._wrf == 0 ) continue;
+                  else fEvent._wrf = cachelem.second._wrf;
+                  break;
+               default:
+                  cout<<"error"<<endl;
+               }
 
-	       fScenario._m1  = cachelem.first._m1;
-	       fScenario._m2  = cachelem.first._m2;
-	       //fScenario._iOB = cachelem.first._iOB;
-	       //fEvent = cachelem.second;
-	       fEvent._x1   = cachelem.second._x1;
-	       fEvent._x2   = cachelem.second._x2;
-	       fEvent._p    = cachelem.second._p;
-	       fEvent._sig  = cachelem.second._sig;
-	       fEvent._n    = cachelem.second._n;
-	       FillContribution(0);
-	    }
-	 }
+               fScenario._m1  = cachelem.first._m1;
+               fScenario._m2  = cachelem.first._m2;
+               //fScenario._iOB = cachelem.first._iOB;
+               //fEvent = cachelem.second;
+               fEvent._x1   = cachelem.second._x1;
+               fEvent._x2   = cachelem.second._x2;
+               fEvent._p    = cachelem.second._p;
+               fEvent._sig  = cachelem.second._sig;
+               fEvent._n    = cachelem.second._n;
+               FillContribution(0);
+            }
+         }
       }
-   }      
+   }
    else {
       if ( fCacheType==1 ) {
-	 for ( const auto& cachelem : fWeightCache ) {
-	    fScenario = cachelem.first;
-	    fEvent = cachelem.second;
-	    //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
-	    FillContribution(0); // todo! not working if scalevar is != 0
-	 }
+         for ( const auto& cachelem : fWeightCache ) {
+            fScenario = cachelem.first;
+            fEvent = cachelem.second;
+            //cout<<"Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<endl;
+            FillContribution(0); // todo! not working if scalevar is != 0
+         }
       }
       else if (fCacheType==2) {
-	 for ( const auto& bin : fWeightCacheBinProc ) {
-	    for ( const auto& proc : bin ) {
-	       for ( const auto& elem : proc ) {
-		  fScenario = elem.first;
-		  fEvent = elem.second;
-		  FillContribution(0); // todo! not working if scalevar is != 0                                                                                  
-	       }
-	    }
-	 }
+         for ( const auto& bin : fWeightCacheBinProc ) {
+            for ( const auto& proc : bin ) {
+               for ( const auto& elem : proc ) {
+                  fScenario = elem.first;
+                  fEvent = elem.second;
+                  FillContribution(0); // todo! not working if scalevar is != 0
+               }
+            }
+         }
       }
       else {
-	 logger.error["FlushCache()"]<<"fCacheType = "<<fCacheType<<endl;
+         logger.error["FlushCache()"]<<"fCacheType = "<<fCacheType<<endl;
       }
    }
 
@@ -2715,7 +2728,7 @@ void fastNLOCreate::FlushCache() {
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::Fill(int scalevar) {
+void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
    //!
    //! Fill values, which are stored in 'Event' and 'Scenario' into fastNLO table.
    //!
@@ -2724,9 +2737,8 @@ void fastNLOCreate::Fill(int scalevar) {
    // --- statistics and weights**2
    fStats._nProc++; //keep statistics
    int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
-   if (ObsBin < 0) return;
-   //int ObsBin = GetBin();
-   //fScenario._iOB = ObsBin;
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
    if (scalevar==0) {
       fastNLOCoeffAddBase* c = GetTheCoeffTable();
       int p = fEvent._p;
@@ -2801,8 +2813,7 @@ void fastNLOCreate::FillContribution(int scalevar) {
    int p = fEvent._p;
 
    // --- sanity
-   if (ObsBin < 0) return;
-   if (ObsBin >= (int)GetNObsBin()) return;
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
    if (p<0 || p > c->GetNSubproc()) {
       logger.error["FillContribution"]<<"Unknown process Id p = "<<p<<endl;
       exit(1);
@@ -2947,7 +2958,7 @@ void fastNLOCreate::FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin) 
          for (unsigned int m1 = 0 ; m1<nmu1.size() ; m1++) {
             for (unsigned int mu2 = 0 ; mu2<nmu2.size() ; mu2++) {
                double wfnlo = nxlo[x1].second * nxup[x2].second * nmu1[m1].second * nmu2[mu2].second / BinSize[ObsBin];
-	       if ( wfnlo == 0 ) continue; 
+               if ( wfnlo == 0 ) continue;
                if (! std::isfinite(wfnlo)) {
                   logger.error["FillContributionFlexHHC"]<<"Weight wfnlo is not finite, wfnlo = " << wfnlo << "!"<<endl;
                   logger.error["FillContributionFlexHHC"]<<"This should have been captured before, aborting ..."<<endl;
@@ -3504,7 +3515,7 @@ void fastNLOCreate::UpdateWarmupArrays() {
    if (fWx.empty()) InitWarmupArrays();
 
    const int ObsBin = GetBin();
-   if (ObsBin < 0) return;
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
    logger.debug["UpdateWarmupArrays"]<<"ObsBin="<<ObsBin<<"\tmu1="<<fScenario._m1<<"\tmu2="<<fScenario._m2<<"\tx1="<<fEvent._x1<<"\tx2="<<fEvent._x2<<endl;
 
    fWMu1[ObsBin].first       = std::min(fScenario._m1,fWMu1[ObsBin].first) ;
@@ -3574,7 +3585,7 @@ void fastNLOCreate::WriteTable() {
       if (fWx.empty()) {
          logger.error["WriteTable"]<<"Warmup values seem not to be initialized correctly. Maybe forgot to call 'Fill()'?"<<endl;
          logger.error["WriteTable"]<<"Not writing warmup file and continuing..."<<endl;
-	 return ;
+         return ;
          //exit(1);
       }
       // round warmup values and try to guess bin boundaries
@@ -3730,7 +3741,7 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
          // --- write x-values
          sprintf(buf,"   %4d    %9.1e  %9.2e",   i, fWxRnd[i].first, fWxRnd[i].second);
 
-	 // --- write mu1
+         // --- write mu1
          if (ident1 > 0) {
             // mu-value is identical with binning
             // -> write out many digits
@@ -3742,28 +3753,28 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             // scale values are floating points.
             // -> round them up/down a bit
             // extent range by 2%
-	   if (ident1 < 0 ) 
-	      fWMu1Rnd[i].first  = fWMu1[i].first;
-	   else if ( fabs(remainder(fWMu1[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
-	     fWMu1Rnd[i].first  = fWMu1[i].first;
-	   else
-	      fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
-	   
+           if (ident1 < 0 )
+              fWMu1Rnd[i].first  = fWMu1[i].first;
+           else if ( fabs(remainder(fWMu1[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
+             fWMu1Rnd[i].first  = fWMu1[i].first;
+           else
+              fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
 
-	   fWMu1Rnd[i].second = fWMu1[i].second;
-	   if ( fabs(remainder(fWMu1[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
-	      fWMu1Rnd[i].second += 0.02*fabs(fWMu1[i].second);
-	   
 
-	   RoundValues(fWMu1Rnd,i,fWarmupNDigitMu1 ); // digit here should be identical to output in outwarmup
-	   // if values are very close to an integer, it is likely that this is by purpose
-	   if ( ident1==0 && fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
-	     fWMu1Rnd[i].first = round(fWMu1[i].first);
-	   if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
-		fWMu1Rnd[i].second = round(fWMu1[i].second);
-	   
-	   string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
-	   sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
+           fWMu1Rnd[i].second = fWMu1[i].second;
+           if ( fabs(remainder(fWMu1[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
+              fWMu1Rnd[i].second += 0.02*fabs(fWMu1[i].second);
+
+
+           RoundValues(fWMu1Rnd,i,fWarmupNDigitMu1 ); // digit here should be identical to output in outwarmup
+           // if values are very close to an integer, it is likely that this is by purpose
+           if ( ident1==0 && fWMu1[i].first >= 1 && fabs(fWMu1[i].first - round(fWMu1[i].first)) < 1e-3)
+             fWMu1Rnd[i].first = round(fWMu1[i].first);
+           if ( fWMu1[i].second >= 1 && fabs(fWMu1[i].second - round(fWMu1[i].second)) < 1e-3)
+                fWMu1Rnd[i].second = round(fWMu1[i].second);
+
+           string format = "  %14."+to_string(fWarmupNDigitMu1)+"f  %14."+to_string(fWarmupNDigitMu1)+"f";
+           sprintf(buf2,format.c_str(),fWMu1Rnd[i].first,fWMu1Rnd[i].second);
          }
 
          // --- write mu2
@@ -3777,21 +3788,21 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
          } else {
             // scale values are floating points.
             // -> round them up/down a bit
-            
-	    if (ident2 < 0 ) 
-	      fWMu2Rnd[i].first = fWMu2[i].first; // use bin boundary
-	    else if ( fabs(remainder(fWMu2[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
-	       fWMu2Rnd[i].first  = fWMu2[i].first;
-	    else 
-	      fWMu2Rnd[i].first  = fWMu2[i].first - 0.02*fabs(fWMu2[i].first);	   
 
-	   fWMu2Rnd[i].second = fWMu2[i].second;
-	   if ( fabs(remainder(fWMu2[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
-	      fWMu2Rnd[i].second += 0.02*fabs(fWMu2[i].second);
+            if (ident2 < 0 )
+              fWMu2Rnd[i].first = fWMu2[i].first; // use bin boundary
+            else if ( fabs(remainder(fWMu2[i].first,  0.1 )) <  1e-3 ) // if value is pretty close to mod(0.1)
+               fWMu2Rnd[i].first  = fWMu2[i].first;
+            else
+              fWMu2Rnd[i].first  = fWMu2[i].first - 0.02*fabs(fWMu2[i].first);
 
-	    
-	    RoundValues(fWMu2Rnd,i,fWarmupNDigitMu2 ); // digit here should be identical to output in outwarmup
-	    
+           fWMu2Rnd[i].second = fWMu2[i].second;
+           if ( fabs(remainder(fWMu2[i].second,  0.1 )) >  1e-3 ) // if value is not close to mod(0.1)
+              fWMu2Rnd[i].second += 0.02*fabs(fWMu2[i].second);
+
+
+            RoundValues(fWMu2Rnd,i,fWarmupNDigitMu2 ); // digit here should be identical to output in outwarmup
+
 
             // if values are very close to an integer, it is likely that this is by purpose
             if (ident2==0 && fWMu2[i].first >= 1 && fabs(fWMu2[i].first - round(fWMu2[i].first)) < 1e-3)
@@ -3855,13 +3866,13 @@ void fastNLOCreate::OutWarmup(ostream& strm) {
             // mu-value is a fixed number
             sprintf(buf2,"  %14.8f  %14.8f",fWMu1[i].first,fWMu1[i].first);
          } else {
-	    // scale values are floating points.
-	    // -> round them up/down a bit
+            // scale values are floating points.
+            // -> round them up/down a bit
             // extent range by 2%
-	    if (ident1 < 0 ) 
-	      fWMu1Rnd[i].first  = fWMu1[i].first;
-	    else
-	      fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
+            if (ident1 < 0 )
+              fWMu1Rnd[i].first  = fWMu1[i].first;
+            else
+              fWMu1Rnd[i].first  = fWMu1[i].first - 0.02*fabs(fWMu1[i].first);
             fWMu1Rnd[i].second = fWMu1[i].second + 0.02*fabs(fWMu1[i].second);
             RoundValues(fWMu1Rnd,i,fWarmupNDigitMu1); // digit here should be identical to output in outwarmup
 
@@ -4019,10 +4030,10 @@ void fastNLOCreate::RoundValues(vector<pair<double,double> >& wrmmu, int bini, i
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
       if ( bini!=-1 && int(i)!=bini )  continue;
       if (wrmmu[i].second!=0 // upper bound is non-zero
-	  && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) // upper and lower bound are different
+          && fabs(wrmmu[i].first/wrmmu[i].second-1) > 1.e-4) // upper and lower bound are different
       {
-	 if ( fabs(remainder(wrmmu[i].first,  0.1 )) >  1e-6 )  wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
-	 if ( fabs(remainder(wrmmu[i].second, 0.1 )) >  1e-6 )  wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
+         if ( fabs(remainder(wrmmu[i].first,  0.1 )) >  1e-6 )  wrmmu[i].first  -= pow(10,-1*nthdigit-1)*5;
+         if ( fabs(remainder(wrmmu[i].second, 0.1 )) >  1e-6 )  wrmmu[i].second += pow(10,-1*nthdigit-1)*5;
       }
    }
    /*
@@ -4156,12 +4167,12 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
    int nbinlo0=0,nbinhi0=0;
    int neqlo=0, neqhi=0;
    for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-     if ( fabs(wrmmu[i].first - 1.)  < bclose ) nbinlo1++; 
-     if ( fabs(1. - wrmmu[i].second) < bclose ) nbinhi1++; 
-     if ( fabs(wrmmu[i].first)  < bclose ) nbinlo0++; 
-     if ( fabs(wrmmu[i].second) < bclose ) nbinhi0++; 
-     if ( fabs(wrmmu[i].first  / wrmmu[0].first - 1.)  < bclose ) neqlo++; 
-     if ( fabs(wrmmu[i].second / wrmmu[0].second - 1.) < bclose ) neqhi++; 
+     if ( fabs(wrmmu[i].first - 1.)  < bclose ) nbinlo1++;
+     if ( fabs(1. - wrmmu[i].second) < bclose ) nbinhi1++;
+     if ( fabs(wrmmu[i].first)  < bclose ) nbinlo0++;
+     if ( fabs(wrmmu[i].second) < bclose ) nbinhi0++;
+     if ( fabs(wrmmu[i].first  / wrmmu[0].first - 1.)  < bclose ) neqlo++;
+     if ( fabs(wrmmu[i].second / wrmmu[0].second - 1.) < bclose ) neqhi++;
    }
    // only lower bound!
    // 1
@@ -4190,11 +4201,11 @@ int fastNLOCreate::CheckWarmupValuesIdenticalWithBinGrid(vector<pair<double,doub
        <<"Found that "<<(neqlo/(int)GetNObsBin()*100)<<"% of the lower boundary warmup values are (almost) equivalent."
        <<"Using value of first bin as lower value warm-up values."<<endl;
      double minlo = wrmmu[0].first;
-     for (unsigned int i = 1 ; i < GetNObsBin() ; i ++) 
-	if ( wrmmu[i].first <  minlo ) 
-	   minlo = wrmmu[i].first;
+     for (unsigned int i = 1 ; i < GetNObsBin() ; i ++)
+        if ( wrmmu[i].first <  minlo )
+           minlo = wrmmu[i].first;
      for (unsigned int i = 0 ; i < GetNObsBin() ; i ++) {
-	wrmmu[i].first = minlo;//wrmmu[0].first;
+        wrmmu[i].first = minlo;//wrmmu[0].first;
      }
      return (neqlo) * -1;
    }
@@ -4510,25 +4521,25 @@ void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
    //! CacheComp:  Number of entries to be compared to the new weight.
    //!             In case all are (almost) equivalent: the weights are merged prior to filling.
    if ( MaxCache <= 0 ) fCacheType=0;
-   if ( fCacheType==0 ) 
+   if ( fCacheType==0 )
       logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
    if (fCacheType == 0 ) CacheComp=0;
    if ( CacheComp > MaxCache ) {
       logger.warn["SetCacheSize"]<<"Warning. CacheComp cannot be larger than MaxCache."<<endl;
       CacheComp=MaxCache;
    }
-   fCacheMax  = MaxCache; 
-   fCacheComp = CacheComp; 
+   fCacheMax  = MaxCache;
+   fCacheComp = CacheComp;
    fCacheType = CacheType;
    // some messages
    if ( fCacheType!=0 )
       logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheComp="<<CacheComp<<endl;
-   if ( fCacheMax > 10000 && fCacheType==2 ) 
+   if ( fCacheMax > 10000 && fCacheType==2 )
       logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType="<<fCacheType<<", CacheSize="<<fCacheMax<<")"<<endl;
-   if ( fCacheComp > 200 ) 
+   if ( fCacheComp > 200 )
       logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large. This may slow down the execution."<<endl;
 
-}   
+}
 
 
 // ___________________________________________________________________________________________________
