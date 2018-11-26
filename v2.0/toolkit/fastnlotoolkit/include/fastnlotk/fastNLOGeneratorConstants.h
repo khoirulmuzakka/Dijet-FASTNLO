@@ -1,3 +1,6 @@
+// This include must come first to enable conditional compilation e.g. using HAVE_LIBZ!
+#include <config.h>
+
 #ifndef __fnlogeneratorconstants__
 #define __fnlogeneratorconstants__
 
@@ -149,7 +152,7 @@ namespace fastNLO {
       }
       void SetDefaults() {
          PublicationUnits=12;
-	 InclusiveJets=false;
+         InclusiveJets=false;
          ScenarioName="Undefined";
          ScenarioDescription.clear();
          BinSizeFactor=1.;
@@ -164,9 +167,9 @@ namespace fastNLO {
 #else
          OutputCompression=false;
 #endif /* HAVE_LIBZ */
-	 CacheType =  2;
-	 CacheMax  = 20;
-	 CacheComp =  2;
+         CacheType =  2;
+         CacheMax  = 20;
+         CacheComp =  2;
          OutputPrecision=8;
          FlexibleScaleTable=false;
          ScaleVariationFactors.clear();

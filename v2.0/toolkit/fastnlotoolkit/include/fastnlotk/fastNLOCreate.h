@@ -97,10 +97,10 @@ public:
    //       furthermore all vectors have to be 'resized'
    //void SetBinGrid(std::vector < std::vector <std::pair<double,double> > > BinGrid, std::vector <int> IDiffBin, std::vector <std::string> DimLabel, std::vector <double> BinSize = std::vector <double>() );
 
-   void Fill(int scalevar=0);                                                                   //!< fill event quantities in fastNLO table. Call it for every subprocess.
-   void FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar=0);    //!< same function as 'Fill()', but uses content of member fScenario and fEvent
-   void FillAllSubprocesses(const std::vector<fnloEvent>& events, const fnloScenario& scen, int scalevar=0); //!< Fill a selection (std::vector) of events/processes/channels, which all have the identic scenario
-   void FillAllSubprocesses(const std::vector<std::vector<fnloEvent> >& events, const fnloScenario& scen);        //!< Fill a list of subprocesses for various scale-variations into a fixed-scale table
+   void Fill(int scalevar=0, const double wgtfac=1.0);                                          //!< fill event quantities in fastNLO table. Call it for every subprocess.
+   void FillOneSubprocess(const fnloEvent& event, const fnloScenario& scen, int scalevar=0, const double wgtfac=1.0); //!< same function as 'Fill()', but uses content of member fScenario and fEvent
+   void FillAllSubprocesses(const std::vector<fnloEvent>& events, const fnloScenario& scen, int scalevar=0, const double wgtfac=1.0); //!< Fill a selection (std::vector) of events/processes/channels, which all have the identic scenario
+   void FillAllSubprocesses(const std::vector<std::vector<fnloEvent> >& events, const fnloScenario& scen, const double wgtfac=1.0);        //!< Fill a list of subprocesses for various scale-variations into a fixed-scale table
    int GetNSubprocesses() const { return GetTheCoeffTable()->GetNSubproc();}                    //!< The number of subprocesses (channels)
    const std::vector<double>& GetScaleVariations() const { return fScaleFac; }                       //!< Get list of scale variations
    int GetScaleVarMax() const { return fScaleFac.size(); }                                //!< Get no. of scale variations
@@ -250,7 +250,7 @@ protected:
    int fCacheComp = 5;                                                                                        //!< maximum number of entries in weight cahce
    int fCacheType = 2;                                                                                        //!< maximum number of entries in weight cahce
    std::vector<std::pair<fnloScenario,fnloEvent> > fWeightCache;                                          //!< cache for fill-weights
-   std::vector<std::vector<std::vector<std::pair<fnloScenario,fnloEvent> > > > fWeightCacheBinProc;       //!< alternative cache for fill-weights 
+   std::vector<std::vector<std::vector<std::pair<fnloScenario,fnloEvent> > > > fWeightCacheBinProc;       //!< alternative cache for fill-weights
    void FillWeightCache(int scalevar);                                                                    //!< Fill weight into cache, merge weights for identical phase space points
    void FlushCache();                                                                                     //!< Fill weights from cache into table
 
