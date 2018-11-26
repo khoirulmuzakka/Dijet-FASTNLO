@@ -21,6 +21,7 @@ AM_INIT_AUTOMAKE([1.13 tar-ustar -Wall -Wno-override])
 LT_PREREQ([2.4])
 #LT_INIT([dlopen])
 #
+# ATTENTION: For conditional compilation etc ...
 # AC_DEFINE preprocessor definitions are written to config.h
 # which must be included first into all respective source files
 AC_CONFIG_SRCDIR([config.h.in])
@@ -59,10 +60,9 @@ AC_CHECK_LIB([g2c], [getenv_])
 #AC_CHECK_LIB([gfortranbegin], [fmain])
 #AC_CHECK_LIB([lhpdf_cteq6], [cteq6])
 # Check twice, first to define ZLIBTEST, and second to perform default action and AC_DEFINE HAVE_LIBZ
-AX_CHECK_ZLIB([ZLIBTEST=true], ZLIBTEST="")
-AX_CHECK_ZLIB()
-AC_MSG_NOTICE([ZLIBTEST is set to $ZLIBTEST])
-AM_CONDITIONAL(HAVE_LIBZ, test "x$ZLIBTEST" != "x")
+#AX_CHECK_ZLIB([ZLIBTEST=true], ZLIBTEST="")
+AX_CHECK_ZLIB
+AM_CONDITIONAL([HAVE_LIBZ],[test "x$HAVE_LIBZ" == "xtrue"])
 
 # Checks for header files.
 
@@ -592,6 +592,29 @@ fi
 AC_MSG_NOTICE([******************************************])
 AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes"])
 
+# Fortran extension
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([Checking whether Fortran extension is requested ...])
+AC_MSG_NOTICE([******************************************])
+
+AC_ARG_ENABLE([fortranext],
+        [AC_HELP_STRING([--enable-fortranext],
+        [Optionally compile basic example for bi-directional interface between Fortran analysis and C++ library. Default is no.])],
+        [],
+        [enable_fortranext="no"])
+# Basic Fortran check
+if test "x$enable_fortranext" = "xyes"; then
+   AC_PROG_FC
+fi
+AC_MSG_NOTICE([******************************************])
+if test "x$enable_fortranext" = "xyes"; then
+   AC_MSG_NOTICE([All Fortran checks successful. Requested Fortran extension will be built.])
+else
+   AC_MSG_NOTICE([No Fortran extension requested. Continue without fortranext.])
+fi
+AC_MSG_NOTICE([******************************************])
+AM_CONDITIONAL(ENABLE_FORTRANEXT, [test "x$enable_fortranext" = "xyes"])
+
 # Add subversion-like git revision number
 GITREV=`git describe`
 echo $GITREV>$srcdir/GITREV
@@ -601,17 +624,17 @@ AC_SUBST(GITREV)
 if test "x$DOXYGEN" != "x"; then
    DX_INIT_DOXYGEN($PROJECT, doxygen.cfg, doc/doxygen)
 fi
-AM_CONDITIONAL(DX_COND_doc, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_dot, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_man, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_rtf, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_html, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_chm, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_chi, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_xml, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_doc,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_dot,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_man,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_rtf,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_html,  [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_chm,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_chi,   [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_xml,   [test "x$DOXYGEN" != "x"])
 AM_CONDITIONAL(DX_COND_latex, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_ps, [test "x$DOXYGEN" != "x"])
-AM_CONDITIONAL(DX_COND_pdf, [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_ps,    [test "x$DOXYGEN" != "x"])
+AM_CONDITIONAL(DX_COND_pdf,   [test "x$DOXYGEN" != "x"])
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])

@@ -9,6 +9,8 @@
 # Use GNU standards
 AUTOMAKE_OPTIONS = gnu
 
+if ENABLE_FORTRANEXT
+
 #
 # Targets
 #
@@ -35,6 +37,8 @@ fnlo_tk_fortex_CPPFLAGS = $(my_include_dirs) -I${includedir}
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
 fnlo_tk_fortex_LDFLAGS =  -lgfortran $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+
+endif
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:
