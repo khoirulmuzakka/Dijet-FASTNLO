@@ -90,7 +90,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
                                  (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], alpha=0.50)
                 ax2.set_ylabel('rel. scale unc')
 
-        ax2.axhline(y=1, xmin=xmin, xmax=xmax, color='k', linestyle='dotted')
+        ax2.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted', linewidth=1.6, alpha=0.2)
         fig.tight_layout()
 
         if given_filename is not None:
