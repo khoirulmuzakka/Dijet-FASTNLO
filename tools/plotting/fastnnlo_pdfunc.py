@@ -114,7 +114,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 
 			ax2.set_ylabel('rel. pdf_unc')
 			ax2.text(0.02, 0.92, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax2.transAxes)
-			ax2.axhline(y=1, xmin=0, xmax=xmax, linewidth=0.4, color='k', linestyle='dotted')
+			ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
 			fig.tight_layout()
 
@@ -169,7 +169,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 				ax.text(0.02, 0.12, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
 				ax.text(0.02, 0.06, 'Order: %s'%_order_to_text[order_index], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
 
-				ax.axhline(y=1, xmin=0, xmax=xmax, linewidth=0.4, color='k', linestyle='dotted')
+				ax.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 				
 				order_index += 1
 				ax.legend()
@@ -181,16 +181,17 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 						color=_order_color[order_item], label=order_item)
 
 				ax3.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :], 
-					(xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-					hatch=_order_hatch[order_item], alpha=0.46)
+						(xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item], 
+						alpha=0.46)#, hatch=_order_hatch[order_item])
 				
 				order_index += 1
 			ax3.set_title('%s'%pdfsets[0])	
 			ax3.set_xlabel('%s'%xlabel)
 			ax3.set_ylabel('rel. pdf_unc')
-			ax3.axhline(y=1, xmin=0, xmax=xmax, linewidth=0.4, color='k', linestyle='dotted')
-			ax3.text(0.02, 0.10, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
-			ax3.text(0.02, 0.04, 'PDF Set: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
+			ax3.set_ylim([0.82, None]) #to avoid problems with text
+			ax3.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
+			ax3.text(0.02, 0.08, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
+			ax3.text(0.02, 0.02, 'PDF Set: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
 			ax3.legend()
 
 			fig2.suptitle('%s'%tablename, fontsize=16)
@@ -250,15 +251,15 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 					color=_order_color[order_item], label=order_item)
 			# devide xs fo each order by xs of first given order! (--> ratio)
 			ax2.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :], 
-					(xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-					hatch=_order_hatch[order_item], alpha=0.46)
+					(xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item], 
+					alpha=0.46)#, hatch=_order_hatch[order_item])
 		
 			order_index += 1
 			ordernames += '_%s' %order_item
 		
 		ax2.set_ylabel('rel. pdf_unc')
-		ax2.text(0.02, 0.04, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax2.transAxes)
-		ax2.axhline(y=1, xmin=0, xmax=xmax, linewidth=0.4, color='k', linestyle='dotted')
+		ax2.text(0.02, 0.86, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax2.transAxes)
+		ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
 		fig.tight_layout()
 
@@ -276,12 +277,13 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 ######################################################################################################################################
 
 def main():
+	#np.seterr(over='raise') #for debugging
 	start_time = timeit.default_timer() #just for measuring wall clock time - not necessary
 	# Input and Options
 	parser = argparse.ArgumentParser(epilog='')
 	
 	parser.add_argument('table', type=str, help='fastNLO table that shall be evaluated.') #table is always required.
-	parser.add_argument('-p', '--pdfset', default='CT14nlo', type=str, nargs='*',  
+	parser.add_argument('-p', '--pdfset', default=['CT14nlo'], type=str, nargs='*',  
 				help='PDFset(s) to evaluate fastNLO table.')
 	parser.add_argument('-m', '--member', default=0, type=int,
 				help='Member of PDFset, default is 0.')
@@ -434,7 +436,7 @@ def main():
 			####rel_pdf_unc_item[2,:]=(-1)*rel_pdf_unc_item[2,:] 	#####only for testing
 			rel_unc_list_tmp.append(rel_pdf_unc_item)
 			if verb:
-				print '[fastnnlo_pdfunc]: Cross section in %s: \n'%n, np.array(xs_list_tmp)[_text_to_order[n]], '\n'
+				print '[fastnnlo_pdfunc]: Cross section in %s: \n'%n, np.array(xs_list_tmp)[-1], '\n' #print most recent xs
 				print '[fastnnlo_pdfunc]: Relative PDF uncertainty in %s: \n'%n 
 				print rel_pdf_unc_item, '\n' #has 3 entries: central value (xs), unc_high, unc_low
 				print '-----------------------------------------------------------------------------------------------'
