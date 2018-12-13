@@ -579,7 +579,7 @@ if ( $withroot > 1 ) then
    endif
    if ( ! -e ${arc}_installed  ) then
       cd ${arc}
-      ./configure --prefix=${base}/${local} --etcdir=${base}/${local}/etc ${pythonopt} --enable-minuit2
+      ./configure --prefix=${base}/${local} --etcdir=${base}/${local}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
       make -j${cores} install
       cd ..
       touch ${arc}_installed
