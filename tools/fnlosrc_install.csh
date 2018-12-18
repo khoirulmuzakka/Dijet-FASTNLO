@@ -3,14 +3,13 @@
 # FULL INSTALL, KR 18.08.2017
 #
 # Depending on the purpose of an installation, up to two fastNLO packages are
-# necessary:
+# necessary plus additional nnlo-bridge and theory code packages.
 #
-# 1) The fastNLO Toolkit
-#       fastnlo_toolkit-v.v.vpre-rrrr.tar.gz
-#    for the evaluation of any fastNLO table
-# 2) The fastNLO Interface to NLOJet++
-#       fastnlo_interface_nlojet-v.v.vpre-rrrr.tar.gz
-#    for the creation of LO or NLO fastNLO tables with NLOJet++
+# 1) The fastNLO Toolkit for the evaluation of any fastNLO table
+# 2) The fastNLO Interface to NLOJet++ for the creation of LO or NLO
+#    fastNLO tables with NLOJet++
+# 3) The nnlo-bridge common interface with APPLgrid to NNLOJET
+#    for the creation of LO, NLO, or NNLO APPLgrid/fastNLO grids
 #
 # Further programs with other processes up to NNLO have been linked to fastNLO.
 # The corresponding tables can be evaluated with this Toolkit. Their creation
@@ -54,7 +53,7 @@
 #
 #    Most problems encountered here are NOT because of fastNLO itself, but
 #    because of requirements of other packages! For example, fastNLO itself
-#    never needed Boost ...
+#    never needed Boost or ROOT ...
 #    ==> Possible solutions:
 #        a) Use your system tools to install and configure the required packages.
 #        b) Use environment modules available on your system to activate
@@ -72,9 +71,9 @@
 #
 #        Then read on for recommended install options. For these we assume
 #        that all 'local' packages of this step are unpacked and built in
-#        ${base}/${local}/src
+#        ${base}/src
 #        and that the common install directory will be
-#        ${base}/${local}
+#        ${base}
 #        Do NOT install a source package into the directory, where it is built,
 #        i.e. src in this case. This violates principles of system building.
 #        Otherwise, any local directory with sufficient space is perfectly acceptable.
@@ -87,15 +86,22 @@
 #==============================================================================
 # IMPORTANT REMARKS: Read before installing.
 #
-# 0. Three commandline arguments are supported:
-#     - The usage is: $0 ${base} ${local} [path to cvmfs software]
-#     - 1st argument (mandatory): Base dir for installation
-#     - 2nd argument (mandatory): Subdir in base dir for this installation
-#     - 3rd argument [optional]: Path to newer gcc in cvmfs software distribution
+# 0. If no argument is given, the supported command line arguments are printed out,
+#    see also below.
 #
+# 1. The install directory assumed here is ${base} with binaries to be
+#    installed in ${base}/bin. Make sure that right from the start
+#    - ${base}/bin is in the search path to find commands like "toolname"-config,
+#    - the right version of "toolname"-config is used, either the desired system one or
+#      the one from ${base}/bin.
+#    Usually, this is set up via defining the PATH environment variable appropriately.
+#
+# 2. If the system compiler is not recent enough, is not C++11 compatible, or
+#    otherwise incompatible with the selected packages, another GCC compiler
+#    collection from /cvmfs can be used:
 #       In case of CMS e.g. "/cvmfs/cms.cern.ch/slc6_amd64_gcc481" can be used with
 #          source ${MYCVMFS}/external/gcc/4.8.1/etc/profile.d/init.csh
-#       later on.
+#
 #       The LCG versions like in "/cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8.4"
 #       have not been tested. They would require e.g.
 #          source ${MYCVMFS}/x86_64-cc7/setup.csh
@@ -103,14 +109,7 @@
 #       because these variables should be left for the end user to modify as is done
 #       in some command lines here. Beware, since this might lead to conflicts!
 #
-# 1. The install directory assumed here is ${base}/${local} with binaries to be
-#    installed in ${base}/${local}/bin. Make sure that right from the start
-#    - ${base}/${local}/bin is in the search path to find commands like "toolname"-config,
-#    - the right version of "toolname"-config is used, either the desired system one or
-#      the one from ${base}/${local}/bin.
-#    Usually, this is set up via defining the PATH environment variable appropriately.
-#
-# 2. If you want to install BlackHat 0.9.9 for use within Sherpa-->MCGrid-->fastNLO:
+# 3. If you want to install BlackHat 0.9.9 for use within Sherpa-->MCGrid-->fastNLO:
 #    - Compilation with gcc-4.8.x or newer gives compile errors -->
 #      you must use the patched version blackhat-0.9.9-patched.tar.gz you should have
 #      received together with this script.
@@ -121,12 +120,12 @@
 #      If you DO use the Intel compiler, then the file qd_real.cpp has to be
 #      made with "make CXXFLAGS=-O1" to avoid infinite loops.
 #
-# 3. If you want to install OpenLoops 1.3.1 for use within Sherpa-->MCGrid-->fastNLO:
+# 4. If you want to install OpenLoops 1.3.1 for use within Sherpa-->MCGrid-->fastNLO:
 #    - The use of OpenLoops is currently tested and the package is installed.
 #      By default only the ppjj process is downloaded, see below.
 #      ATTENTION: You need to be online to download and install processes!
 #
-# 4. If you switch to a newer compiler via the "module" command,
+# 5. If you switch to a newer compiler via the "module" command,
 #    "module load compiler/gnu/4.8"
 #    and you still use Boost-dependent packages it might be necessary to
 #    also activate a newer boost library (>= 1.48.0) used e.g. by older LHAPDF (< 6.2.0),
@@ -136,7 +135,7 @@
 #    paths with CPPFLAGS="-I${INCLUDE}" or more explicitly
 #    by CPPFLAGS="-I/add/include/path1 -I/add/include/path2".
 #
-# 5. SHERPA can be used with MPI for parallel processing if desired. In that case,
+# 6. SHERPA can be used with MPI for parallel processing if desired. In that case,
 #    the proper MPICH or OpenMPI software needs to be installed or activated, e.g.
 #    via "module load mpi/openmpi/version". In that case set below withmpi to "1".
 #    Please note that by default CXX support is not available in standard
@@ -149,21 +148,25 @@
 if ( $#argv < 2 ) then
    echo ""
    echo "#=============================================================================="
-   echo "Usage: $0 basedir subdir [path to cvmfs software]"
-   echo " 1st argument: Base dir for installations, absolute path to e.g. $HOME"
-   echo " 2nd argument: Subdir in base dir for this installation, relative path to e.g. local"
-   echo " 3rd optional argument: Path to newer gcc in cvmfs software distribution,"
-   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481"
+   echo "Usage: $0 basedir [optional_argument_2] [optional_argument_3] ..."
+   echo " 1st argument: Base dir for installations, absolute path to e.g. ${HOME}/local"
+   echo " 2nd optional argument: Base path to additional software to be taken from cvmfs,"
+   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481."
+   echo "                        Set to _ to skip this setting."
+   echo " 3rd optional argument: Sub path to GCC setup script in cvmfs software distribution."
    echo "                        The minimally required version is gcc 4.8.1!"
+   echo "                        e.g. external/gcc/4.8.1/etc/profile.d/init.csh."
    echo "                        Set to _ to skip this setting."
    echo " 4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
    echo " 5th optional argument: Include grid creation with NNLOJET? def.=0"
    echo " 6th optional argument: Include optional packages for grid evaluation? def.=0"
    echo " 7th optional argument: Include optional python extensions to packages? def.=0"
-   echo " 8th optional argument: Include ROOT 5 (gcc<v5) or 6? def.=0, alt.=[5,6]"
-   echo " 9th optional argument: Include LHAPDF6 from CVMFS, def.=0"
-   echo "                        If yes, please check also that LHAPDF can be found in:"
-   echo '                        $MYCVMFS/external/lhapdf'
+   echo " 8th optional argument: Include ROOT 5 (gcc<v5) or 6 (def.=0, alt.=[5,6] or"
+   echo "                        give path to desired bin/root-config in cvmfs,"
+   echo "                        e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt"
+   echo " 9th optional argument: Include LHAPDF6 from CVMFS (def.=0, or "
+   echo "                        give path to desired bin/lhapdf-config in cvmfs"
+   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481/external/lhapdf6/6.1.5"
    echo "10th optional argument: No. of cores to be used, def.=8"
    echo "11th optional argument: Activate multithread integrations for NNLOJET standalone installation, def. = 0"
    echo "#=============================================================================="
@@ -178,23 +181,28 @@ echo "#=========================================================================
 echo "# Installation settings:"
 echo "#=============================================================================="
 set base=$1
-set local=$2
 set srcdir=$cwd
 set tab = "`printf '\t'`"
-echo "Installation location: $tab $1/$2"
+echo "Installation location: $tab $1"
 #==============================================================================
 # Define scope of installation
 #==============================================================================
-# Use CVMFS software repository for newer gcc if necessary
-if ( $#argv > 2 && $3 != "_" ) then
-   setenv MYCVMFS $3
+# Use CVMFS software repository?
+if ( $#argv > 1 && $2 != "_" ) then
+   setenv MYCVMFS $2
    echo "MYCVMFS is set to: $tab $MYCVMFS"
 else
    if ( $?MYCVMFS ) then
       unsetenv MYCVMFS
    endif
-   echo "MYCVMFS is not defined"
+   echo "MYCVMFS is undefined: $tab $2"
 endif
+# gcc from CMVFS (e.g. external/gcc/4.8.1/etc/profile.d/init.csh)?
+set gccsetup="_"
+if ( $#argv > 2 ) then
+   set gccsetup=$3
+endif
+echo "gcc setup: $tab$tab $gccsetup"
 # With interface to Sherpa via MCGrid?
 set withsherpa=0
 if ( $#argv > 3 ) then
@@ -230,33 +238,44 @@ echo "Python support: $tab $withpython"
 # Note: ROOT is quite useful for evaluating or preparing results, but
 #       not required for mass production on compute clusters.
 # BUT:  APPLgrid requires ROOT!
+# Dare to try ROOT from cvmfs, e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt ?
+set rootbasepath="${base}"
+set rootbinpath="${base}/bin"
 set withroot=0
-if ( $#argv > 7 ) then
+set withcvmfsroot=0
+if ( $#argv > 7 && $8 != "_") then
    set withroot=$8
+   if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
+      set withcvmfsroot=$withroot
+   endif
 endif
 echo "ROOT support: $tab$tab $withroot"
 # Use CVMFS software repository also for LHAPDF if requested
-# Do NOT use 6.2.1. This CVMFS installation is SHIT and does not find the PDF sets!
-set lhapdfbasepath=${base}/${local}
-set lhapdfdatapath=${base}/${local}
+# Do NOT use 6.2.1. This CVMFS installation is buggy and does not find the PDF sets!
+# Dare to try LHAPDF from cvmfs, e.g. external/lhapdf6/6.1.5/bin?
+set lhapdfbasepath="${base}"
+set lhapdfbinpath="${base}/bin"
+#set lhapdfdatapath="${base}"
 set withcvmfslhapdf=0
-if ( $#argv > 8 ) then
+if ( $#argv > 8 && $9 != "_" ) then
    set withcvmfslhapdf=$9
 endif
-if ( $withcvmfslhapdf ) then
-   if ( $?CVMFS ) then
-# BUT version 6.1.6 still uses BOOST, uaargh!
+echo "LHAPDF from CVMFS: $tab $withcvmfslhapdf"
+# Do we have paths in cvmfs?
+if ( $withcvmfsroot != "0" ) then
+   set rootbasepath="${withcvmfsroot}"
+   set rootbinpath="${rootbasepath}/bin"
+endif
+# BUT LHAPDF version 6.1.6 still uses BOOST, uaargh!
 #        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
 # AND version 6.2.1 does not find its PDF sets, uaargh!
-      set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.2.1
-      set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
-   else
-      echo "ERROR: LHAPDF from CVMFS requested, but no CVMFS path set! Aborted."
-      exit 1
-   endif
+if ( $withcvmfslhapdf != "0" ) then
+   set lhapdfbasepath="${withcvmfslhapdf}"
+   set lhapdfbinpath="${lhapdfbasepath}/bin"
+#   set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
 endif
-echo "LHAPDF from CVMFS: $tab $withcvmfslhapdf"
+
 # Default is with OpenMPI if either NNLOJET or Sherpa are requested
 set withmpi=0
 set withmpiinstall=0
@@ -266,7 +285,7 @@ if ( $withsherpa || $withnnlojet ) then
    set withmpiinstall=1 # def.=1
    # If not in the search path, set MPI_HOME to specify where i.a. bin/mpicxx is found.
    set mpihome=""
-   # set mpihome=${base}/${local} # If not already in search path as recommended
+   # set mpihome=${base} # If not already in search path as recommended
 endif
 
 # Number of cores to be used
@@ -327,12 +346,14 @@ if ( $withpython ) then
 endif
 # Use Root options/extensions?
 set rootopt="--without-root"
+set rootoptpath="--without-root"
 set rootenable="--disable-root"
 set rootenablepath="--disable-root"
-if ( $withroot > 1 ) then
+if ( $withroot != "0" ) then
    set rootopt="--with-root"
+   set rootoptpath="--with-root=${base}"
    set rootenable="--enable-root"
-   set rootenablepath="--enable-root=${base}/${local}"
+   set rootenablepath="--enable-root=${base}"
 endif
 # Use Sherpa with MPI
 # Attention! Buggy configure.ac in Sherpa:
@@ -355,39 +376,33 @@ endif
 echo '#\!/bin/csh -f'  >! fnlosrc_source.csh
 echo '#\!/bin/bash -f' >! fnlosrc_source.sh
 if ( $?PATH ) then
-   setenv PATH ${base}/${local}/bin:${PATH}
-   echo 'setenv PATH '"${base}/${local}/bin:"'${PATH}' >> fnlosrc_source.csh
-   echo 'export PATH='"${base}/${local}/bin:"'${PATH}' >> fnlosrc_source.sh
+   setenv PATH ${base}/bin:${PATH}
+   echo 'setenv PATH '"${base}/bin:"'${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH='"${base}/bin:"'${PATH}' >> fnlosrc_source.sh
 else
-   setenv PATH ${base}/${local}/bin
-   echo 'setenv PATH '"${base}/${local}/bin" >> fnlosrc_source.csh
-   echo 'export PATH='"${base}/${local}/bin" >> fnlosrc_source.sh
+   setenv PATH ${base}/bin
+   echo 'setenv PATH '"${base}/bin" >> fnlosrc_source.csh
+   echo 'export PATH='"${base}/bin" >> fnlosrc_source.sh
 endif
 # $PATH set from now on ...
 #
-# If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
-if ( $withcvmfslhapdf ) then
-   setenv PATH ${lhapdfbasepath}/bin:${PATH}
-   echo 'setenv PATH '"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.csh
-   echo 'export PATH='"${lhapdfbasepath}/bin:"'${PATH}' >> fnlosrc_source.sh
+# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
+if ( $withcvmfsroot != "0" ) then
+   set rootoptpath="--with-root=${rootbasepath}"
+   set rootenablepath="--enable-root=${rootbasepath}"
+   setenv PATH ${rootbinpath}:${PATH}
+   echo 'setenv PATH '"${rootbinpath}:"'${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH='"${rootbinpath}:"'${PATH}' >> fnlosrc_source.sh
 endif
-# If $MYCVMFS is set, one could also use the ROOT installation from CVMFS, BUT
-# because of frequent issues with preinstalled ROOT versions we will either install
-# our own version below, if desired, or nothing at all, see command line options.
-# In particular for producing fastNLO grids on compute clusters ROOT is not required at all!
-# APPLgrid needs ROOT though, but is not installed currently.
-#  (Uncomment to try using ROOT installation from CVMFS)
-#if ( ($withroot > 1) && $?MYCVMFS ) then
-#   setenv ROOTBINPATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin
-#   setenv PATH ${ROOTBINPATH}:${PATH}
-#   echo 'setenv ROOTBINPATH '"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin"'' >> fnlosrc_source.csh
-#   echo 'export ROOTBINPATH='"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/bin"'' >> fnlosrc_source.sh
-#   echo 'setenv PATH '"${ROOTBINPATH}:"'${PATH}' >> fnlosrc_source.csh
-#   echo 'export PATH='"${ROOTBINPATH}:"'${PATH}' >> fnlosrc_source.sh
-#endif
+# If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
+if ( $withcvmfslhapdf != "0" ) then
+   setenv PATH ${lhapdfbinpath}:${PATH}
+   echo 'setenv PATH '"${lhapdfbinpath}:"'${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH='"${lhapdfbinpath}:"'${PATH}' >> fnlosrc_source.sh
+endif
 # Just in case: NNLOJET executable
 if ( $withnnlojet ) then
-   setenv NNLOJET_BIN_PATH ${base}/${local}/src/NNLOJET_rev${revision}/driver
+   setenv NNLOJET_BIN_PATH ${base}/src/NNLOJET_rev${revision}/driver
    setenv PATH ${NNLOJET_BIN_PATH}:${PATH}
    echo 'setenv NNLOJET_BIN_PATH '"${NNLOJET_BIN_PATH}" >> fnlosrc_source.csh
    echo 'export NNLOJET_BIN_PATH='"${NNLOJET_BIN_PATH}" >> fnlosrc_source.sh
@@ -419,53 +434,47 @@ if ( $MYCPPFLAGS != "" ) then
 endif
 # Use modern gcc; gcc 4.4 from slc6 is too antique
 if ( $?MYCVMFS ) then
-   source ${MYCVMFS}/external/gcc/4.8.1/etc/profile.d/init.csh
-   echo 'source '"${MYCVMFS}"/external/gcc/4.8.1/etc/profile.d/init.csh'' >> fnlosrc_source.csh
-   echo 'source '"${MYCVMFS}"/external/gcc/4.8.1/etc/profile.d/init.sh'' >> fnlosrc_source.sh
+   source ${MYCVMFS}/${gccsetup}
+   echo 'source '"${MYCVMFS}/${gccsetup}"'' >> fnlosrc_source.csh
+   echo 'source '"${MYCVMFS}/${gccsetup}"'' >> fnlosrc_source.sh
    echo ""
    echo "ATTENTION: Environment has been complemented by source'ing"
-   echo "   ${MYCVMFS}/external/gcc/4.8.1/etc/profile.d/init.[c]sh!"
+   echo "   ${MYCVMFS}/${gccsetup}"
    echo ""
 endif
 #
 # LD_LIBRARY_PATH adaptation
 #
 if ( $?LD_LIBRARY_PATH ) then
-   setenv LD_LIBRARY_PATH ${base}/${local}/lib:${LD_LIBRARY_PATH}
-   echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-   echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+   setenv LD_LIBRARY_PATH ${base}/lib:${LD_LIBRARY_PATH}
+   echo 'setenv LD_LIBRARY_PATH '"${base}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+   echo 'export LD_LIBRARY_PATH='"${base}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 else
-   setenv LD_LIBRARY_PATH ${base}/${local}/lib
-   echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib" >> fnlosrc_source.csh
-   echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib" >> fnlosrc_source.sh
+   setenv LD_LIBRARY_PATH ${base}/lib
+   echo 'setenv LD_LIBRARY_PATH '"${base}/lib" >> fnlosrc_source.csh
+   echo 'export LD_LIBRARY_PATH='"${base}/lib" >> fnlosrc_source.sh
 endif
 # $LD_LIBRARY_PATH set from now on ...
 #
+if ( $withroot == 5 || $withroot == 6 ) then
+   setenv LD_LIBRARY_PATH ${base}/lib/root:${LD_LIBRARY_PATH}
+   echo 'setenv LD_LIBRARY_PATH '"${base}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+   echo 'export LD_LIBRARY_PATH='"${base}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+endif
+# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
+if ( $withcvmfsroot != "0" ) then
+    setenv LD_LIBRARY_PATH ${rootbasepath}/lib/root:${LD_LIBRARY_PATH}
+    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+endif
 # If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
-if ( $withcvmfslhapdf ) then
+if ( $withcvmfslhapdf != "0" ) then
    setenv LD_LIBRARY_PATH ${lhapdfbasepath}/lib:${LD_LIBRARY_PATH}
    echo 'setenv LD_LIBRARY_PATH '"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
    echo 'export LD_LIBRARY_PATH='"${lhapdfbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
-   setenv LHAPDF_DATA_PATH ${lhapdfdatapath}/share/LHAPDF
-   echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
-   echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
-endif
-# If $MYCVMFS is set, one could also use the ROOT installation from CVMFS, BUT
-# because of frequent issues with preinstalled ROOT versions we will either install
-# our own version below, if desired, or nothing at all, see command line options.
-# In particular for producing fastNLO grids on compute clusters ROOT is not required at all!
-# APPLgrid needs ROOT though, but is not installed currently.
-#  (Uncomment to try using ROOT installation from CVMFS)
-if ( $withroot > 1 ) then
-#  if ( $?MYCVMFS ) then
-#    setenv LD_LIBRARY_PATH ${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:${LD_LIBRARY_PATH}
-#    echo 'setenv LD_LIBRARY_PATH '"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-#    echo 'export LD_LIBRARY_PATH='"${MYCVMFS}/cms/cmssw/CMSSW_7_2_4/external/slc6_amd64_gcc481/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
-#  else
-   setenv LD_LIBRARY_PATH ${base}/${local}/lib/root:${LD_LIBRARY_PATH}
-   echo 'setenv LD_LIBRARY_PATH '"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-   echo 'export LD_LIBRARY_PATH='"${base}/${local}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
-#  endif
+#   setenv LHAPDF_DATA_PATH ${lhapdfdatapath}/share/LHAPDF
+#   echo 'setenv LHAPDF_DATA_PATH '"${LHAPDF_DATA_PATH}" >> fnlosrc_source.csh
+#   echo 'export LHAPDF_DATA_PATH='"${LHAPDF_DATA_PATH}" >> fnlosrc_source.sh
 endif
 echo ""
 echo "ATTENTION: LD_LIBRARY_PATH environment complemented!"
@@ -492,7 +501,7 @@ if ( ! $mpinnlo ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --enable-shared --enable-allplugins --prefix=${base}/${local} --bindir=${base}/${local}/bin
+      ./configure --enable-shared --enable-allplugins --prefix=${base} --bindir=${base}/bin
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -502,24 +511,24 @@ endif
 # LHAPDF (>= 6.2.0 is recommended):
 #
 #------------------------------------------------------------------------------
-if ( ! $withcvmfslhapdf ) then
+if ( $withcvmfslhapdf == "0" ) then
    set arc="LHAPDF-6.2.1"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} CPPFLAGS="${MYCPPFLAGS}" ${pythonopt}
+      ./configure --prefix=${base} CPPFLAGS="${MYCPPFLAGS}" ${pythonopt}
       make -j${cores} install
       cd ..
 # Download default PDF sets, only possible if installed with Python support!
       if ( $withpython ) then
 # Temporarily complement PYTHONPATH here
-         setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr '[:space:]' ':'`
+         setenv PYTHONPATHADD `find ${base}/lib* -name site-packages | tr '[:space:]' ':'`
          if ( $?PYTHONPATHORIG ) then
             setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
          else
             setenv PYTHONPATH ${PYTHONPATHADD}
          endif
-         ${base}/${local}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
+         ${base}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
       else
          echo ""
          echo "ATTENTION: LHAPDF has been installed without any PDF sets!"
@@ -538,7 +547,7 @@ if ( $withmpiinstall ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} --enable-mpi-cxx
+      ./configure --prefix=${base} --enable-mpi-cxx
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -559,31 +568,26 @@ endif
 # ==> This enables the option --with-root of the fastNLO_toolkit to produce
 #     ROOT histograms from the calculated cross sections and uncertainties
 #
-if ( $withroot > 1 ) then
-   if ( $withroot == 5 ) then
-#      set arc="root-5.34.25" # OK for gcc versions < 5
-      set arc="root-5.34.26" # Patched thanks to A. Wisecarver
-      if ( ! -e ${arc}_installed  ) then
-         tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
-         mv root ${arc}
-      endif
-   else if ( $withroot == 6 ) then
-      set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
-#      set arc="root-6.10.06" # Don't use this one! Buggy -lImt library dependence ...
-      if ( ! -e ${arc}_installed  ) then
-         tar xzf ${arc}.tar.gz
-      endif
-   else
-      echo "ERROR! Unknown ROOT version selected: $withroot"
-      exit 1
-   endif
+if ( $withroot == 5 ) then
+#   set arc="root-5.34.25" # OK for gcc versions < 5
+   set arc="root-5.34.26" # Patched thanks to A. Wisecarver
    if ( ! -e ${arc}_installed  ) then
-      cd ${arc}
-      ./configure --prefix=${base}/${local} --etcdir=${base}/${local}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
-      make -j${cores} install
-      cd ..
-      touch ${arc}_installed
+      tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
+      mv root ${arc}
    endif
+else if ( $withroot == 6 ) then
+   set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
+#   set arc="root-6.10.06" # Don't use this one! Buggy -lImt library dependence ...
+   if ( ! -e ${arc}_installed  ) then
+      tar xzf ${arc}.tar.gz
+   endif
+endif
+if ( ($withroot == 5 || $withroot == 6) && ! -e ${arc}_installed  ) then
+   cd ${arc}
+   ./configure --prefix=${base} --etcdir=${base}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
+   make -j${cores} install
+   cd ..
+   touch ${arc}_installed
 endif
 
 #
@@ -602,7 +606,7 @@ if ( $withoptional ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} --with-momentum=GEV --with-length=MM
+      ./configure --prefix=${base} --with-momentum=GEV --with-length=MM
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -616,7 +620,7 @@ if ( $withoptional ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} ${pyextopt} ${rootenable} CPPFLAGS="${MYCPPFLAGS}"
+      ./configure --prefix=${base} ${pyextopt} ${rootenable} CPPFLAGS="${MYCPPFLAGS}"
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -631,7 +635,7 @@ if ( $withoptional ) then
       tar xzf ${arc}.tar.gz
 #      tar xzf ${arc}-patched.tar.gz # 2.6.0 needs patch for nonunicode chars in two analysis.cc files
       cd ${arc}
-      ./configure --prefix=${base}/${local} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -650,7 +654,7 @@ if ( $withoptional ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}-patched.tar.gz # Need patched version on newer systems like Ubuntu 16.04
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -670,7 +674,7 @@ if ( $withoptional ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -694,11 +698,11 @@ if ( ! $mpinnlo ) then
       cd ${arc}
 # options depending on previous choices: --with-yoda --with-hoppet --with-qcdnum --with-root
 # option to use python interface to library: --enable-pyext
-#     ./configure --prefix=${base}/${local} --enable-pyext
+#     ./configure --prefix=${base} --enable-pyext
       if ( $withoptional ) then
-         ./configure --prefix=${base}/${local} --with-yoda --with-hoppet --with-qcdnum ${rootopt} ${pyextopt}
+         ./configure --prefix=${base} --with-yoda --with-hoppet --with-qcdnum ${rootoptpath} ${pyextopt}
       else
-        ./configure --prefix=${base}/${local} --with-yoda ${rootopt} ${pyextopt}
+        ./configure --prefix=${base} --with-yoda ${rootoptpath} ${pyextopt}
       endif
       make -j${cores} install
       cd ..
@@ -716,7 +720,7 @@ if ( ! $mpinnlo ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}-patched2.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -728,7 +732,7 @@ if ( ! $mpinnlo ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -745,12 +749,12 @@ if ( $withnnlojet ) then
 #------------------------------------------------------------------------------
 # APPLgrid requires ROOT!
 # APPLgrid also requires the static library libgfortran.a not present in numerous cases ...
-   if ( $withroot > 1 && ! $mpinnlo ) then
+   if ( $withroot != "0" && ! $mpinnlo ) then
       set arc="applgrid-1.5.6"
       if ( ! -e ${arc}_installed  ) then
          tar xzf ${arc}.tar.gz
          cd ${arc}
-         ./configure --prefix=${base}/${local}
+         ./configure --prefix=${base}
 # Attention: No concurrent compilation with -j here!
          make install
          cd ..
@@ -770,7 +774,7 @@ if ( $withnnlojet ) then
       if ( ! -e ${arc}_installed  ) then
          tar xzf ${arc}${rev}.tar.gz
          cd ${arc}
-         ./configure --prefix=${base}/${local}
+         ./configure --prefix=${base}
          make -j${cores} install
          cd ..
          touch ${arc}_installed
@@ -820,7 +824,7 @@ if ( $withsherpa ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} --enable-shared CXX=g++ CC=gcc FC=gfortran
+      ./configure --prefix=${base} --enable-shared CXX=g++ CC=gcc FC=gfortran
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -833,7 +837,7 @@ if ( $withsherpa ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}-patched.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
 ## Make without -j${cores} ... might be too heavy on some machines
 ##  make install
 # Switch off deprecated header warnings
@@ -849,7 +853,7 @@ if ( $withsherpa ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -889,7 +893,7 @@ if ( $withsherpa ) then
       tar xzf ${arc}-repacked.tar.gz
 #      tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base}/${local} --enable-lhapdf=${lhapdfbasepath} --enable-hepmc2=${base}/${local} --enable-rivet=${base}/${local} ${rootenablepath} --enable-openloops=${base}/${local}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}/${local}
+      ./configure --prefix=${base} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base} --enable-lhapdf=${lhapdfbasepath} --enable-hepmc2=${base} --enable-rivet=${base} ${rootenablepath} --enable-openloops=${base}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}
         make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -903,7 +907,7 @@ if ( $withsherpa ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}-patched2.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}/${local}
+      ./configure --prefix=${base}
       make -j${cores} install # CXXFLAGS=-fpermissive
       cd ..
       touch ${arc}_installed
@@ -911,18 +915,18 @@ if ( $withsherpa ) then
 #
 # Environment variables for Rivet with Sherpa/MCgrid/fastNLO
 #------------------------------------------------------------------------------
-   setenv RIVET_ANALYSIS_PATH ${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions
-   setenv RIVET_INFO_PATH ${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions
-   setenv RIVET_REF_PATH ${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions
-   setenv PKG_CONFIG_PATH ${base}/${local}/lib/pkgconfig
-   echo 'setenv RIVET_ANALYSIS_PATH '"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
-   echo 'setenv RIVET_INFO_PATH '"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
-   echo 'setenv RIVET_REF_PATH '"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
-   echo 'setenv PKG_CONFIG_PATH '"${base}/${local}/lib/pkgconfig" >> fnlosrc_source.csh
-   echo 'export RIVET_ANALYSIS_PATH='"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
-   echo 'export RIVET_INFO_PATH='"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
-   echo 'export RIVET_REF_PATH='"${base}/${local}/share/Rivet:${base}/${local}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
-   echo 'export PKG_CONFIG_PATH='"${base}/${local}/lib/pkgconfig" >> fnlosrc_source.sh
+   setenv RIVET_ANALYSIS_PATH ${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions
+   setenv RIVET_INFO_PATH ${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions
+   setenv RIVET_REF_PATH ${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions
+   setenv PKG_CONFIG_PATH ${base}/lib/pkgconfig
+   echo 'setenv RIVET_ANALYSIS_PATH '"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
+   echo 'setenv RIVET_INFO_PATH '"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
+   echo 'setenv RIVET_REF_PATH '"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.csh
+   echo 'setenv PKG_CONFIG_PATH '"${base}/lib/pkgconfig" >> fnlosrc_source.csh
+   echo 'export RIVET_ANALYSIS_PATH='"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
+   echo 'export RIVET_INFO_PATH='"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
+   echo 'export RIVET_REF_PATH='"${base}/share/Rivet:${base}/share/fastnlo_interface_nlojet/RivetAdditions" >> fnlosrc_source.sh
+   echo 'export PKG_CONFIG_PATH='"${base}/lib/pkgconfig" >> fnlosrc_source.sh
    echo ""
    echo "ATTENTION: Rivet environment has been adapted!"
    echo "   RIVET_ANALYSIS_PATH has been set to:"
@@ -936,19 +940,19 @@ if ( $withsherpa ) then
    echo ""
 #
 # Examples for MCGrid use with fastNLO:
-# Will be installed in ${base}/${local}/share/MCgrid2Examples-2.2.0
+# Will be installed in ${base}/share/MCgrid2Examples-2.2.0
 #------------------------------------------------------------------------------
    set arc="MCgrid2Examples-2.2.0"
    if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}.tar.gz -C ${base}/${local}/share
-      if ( ! -d ${base}/${local}/share/${arc} ) then
-         mv ${base}/${local}/share/examples ${base}/${local}/share/${arc}
+      tar xzf ${arc}.tar.gz -C ${base}/share
+      if ( ! -d ${base}/share/${arc} ) then
+         mv ${base}/share/examples ${base}/share/${arc}
       else
-         echo "Warning: Could not move ${base}/${local}/share/examples!"
-         echo "Directory ${base}/${local}/share/${arc} exists already."
+         echo "Warning: Could not move ${base}/share/examples!"
+         echo "Directory ${base}/share/${arc} exists already."
          echo "Testing already present MCgrid plugin CMS_2011_S9086218."
       endif
-      cd ${base}/${local}/share/${arc}/CMS_2011_S9086218
+      cd ${base}/share/${arc}/CMS_2011_S9086218
       make plugin-fastnlo install
       cd ${srcdir}
       touch ${arc}_installed
@@ -963,14 +967,14 @@ endif
 # ThePEG:
 #--------
 #autoreconf -i
-#./configure --prefix=${base}/${local} --with-fastjet=${base}/${local} --with-hepmc=${base}/${local} --with-lhapdf=${base}/${local} --with-rivet=${base}/${local}
+#./configure --prefix=${base} --with-fastjet=${base} --with-hepmc=${base} --with-lhapdf=${base} --with-rivet=${base}
 #make -j8
 #make check
 #make install
 #
 # NJet-matchbox:
 #---------------
-#./configure --prefix=${base}/${local} --enable-5jet
+#./configure --prefix=${base} --enable-5jet
 #make -j8
 #make check
 #make install
@@ -979,8 +983,8 @@ endif
 #-------------------
 #install gengetopt from distro
 #autoreconf -i
-#./configure --prefix=${base}/${local} --with-nlojet=${base}/${local} --with-njet=${base}/${local} --with-fastjet=${base}/${local}
-#./configure --prefix=${base}/${local} --with-fastjet=${base}/${local} --with-madgraph=${base}/${local}/MadGraph-matchbox --with-njet=${base}/${local}
+#./configure --prefix=${base} --with-nlojet=${base} --with-njet=${base} --with-fastjet=${base}
+#./configure --prefix=${base} --with-fastjet=${base} --with-madgraph=${base}/MadGraph-matchbox --with-njet=${base}
 #make -j8
 #make check
 #make install
@@ -1002,7 +1006,7 @@ endif
 # if ( ! -e ${arc}_installed  ) then
 #   tar xzf ${arc}.tar.gz
 #   cd ${arc}
-#   ./configure --prefix=${base}/${local} --enable-pyext --with-hoppet --with-qcdnum
+#   ./configure --prefix=${base} --enable-pyext --with-hoppet --with-qcdnum
 #   make -j4 install
 #   cd ..
 #   touch ${arc}_installed
@@ -1019,7 +1023,7 @@ endif
 # if ( ! -e ${arc}_installed  ) then
 #   tar xzf ${arc}.tar.gz
 #   cd ${arc}
-#   ./configure --prefix=${base}/${local}
+#   ./configure --prefix=${base}
 #   make -j4 install
 #   cd ..
 #   touch ${arc}_installed
@@ -1029,7 +1033,7 @@ endif
 # PYTHONPATH adaptation
 #
 if ( $withpython ) then
-   setenv PYTHONPATHADD `find ${base}/${local}/lib* -name site-packages | tr '[:space:]' ':'`
+   setenv PYTHONPATHADD `find ${base}/lib* -name site-packages | tr '[:space:]' ':'`
    if ( $?PYTHONPATHORIG ) then
    setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
    echo 'setenv PYTHONPATH '"${PYTHONPATHADD}:"'${PYTHONPATH}' >> fnlosrc_source.csh
