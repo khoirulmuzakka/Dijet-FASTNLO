@@ -33,8 +33,10 @@ libfastnlotoolkit_la_SOURCES = speaker.cc fastNLOTools.cc fastNLOInterpolBase.cc
 #
 # Preprocessor flags
 #
+AM_CPPFLAGS =
+# If you still use LHAPDF versions needing Boost, i.e. < 6.2.x, you might want to use the AM_CPPFLAGS
 # All targets, -fext-numeric-literals needed for conflict with Boost which ships with LHAPDF
-AM_CPPFLAGS = -fext-numeric-literals
+# AM_CPPFLAGS = -fext-numeric-literals
 # Add temporarily ... should really not be necessary
 # AM_CPPFLAGS = -fext-numeric-literals -std=c++11 -lstdc++
 # Individual targets

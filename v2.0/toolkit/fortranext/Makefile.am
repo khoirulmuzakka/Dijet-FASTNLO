@@ -35,8 +35,12 @@ fnlo_tk_fortex_CPPFLAGS = $(my_include_dirs) -I${includedir}
 # Linker flags
 #
 # Require lhapdf, use lhapdf-config if possible
+# The following construct is required to make things work on Mac
+FRTLIB   = $(shell gfortran -print-file-name=libgfortran.a)
+FRTLLIB  = -L$(subst /libgfortran.a, ,$(FRTLIB) ) -lgfortran
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
-fnlo_tk_fortex_LDFLAGS =  -lgfortran $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_fortex_LDFLAGS = $(FRTLLIB) $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+#fnlo_tk_fortex_LDFLAGS =  -lgfortran $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 
 endif
 
