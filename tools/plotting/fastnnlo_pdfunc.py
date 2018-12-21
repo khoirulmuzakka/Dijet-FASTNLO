@@ -101,7 +101,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 			color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
 			for p in range(0, len(pdfsets)): #for pdf in pdfsets
 				c = next(color)
-				# devide xs for each PDF by first given PDF (xs)
+				# divide xs for each PDF by first given PDF (xs)
 				ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=4, ls='dashed', linewidth=0.2, 
 						color=c, label=pdfsets[p])
 				
@@ -249,7 +249,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 		for order_item in order_list:
 			ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=4, ls='dashed', linewidth=0.2, 
 					color=_order_color[order_item], label=order_item)
-			# devide xs fo each order by xs of first given order! (--> ratio)
+			# divide xs fo each order by xs of first given order! (--> ratio)
 			ax2.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :], 
 					(xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item], 
 					alpha=0.46)#, hatch=_order_hatch[order_item])
