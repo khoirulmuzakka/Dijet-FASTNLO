@@ -153,6 +153,7 @@ private:
    double djlkmin;            // Minimal distance of neighbouring jet (default is 0)
    double djlkmax;            // Maximal distance of neighbouring jet (default is +DBL_MAX)
    bool ldphi;                // Switch to use jet distance dphi/true or dR/false (default is true)
+   bool lunique;              // Switch between unique entry per jet pair (true) or multiple ones (false) (default is false)
    int Njetmin;               // Minimal number of jets in phase space (default is 1)
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
@@ -391,6 +392,13 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    } else {
       ldphi = true;
    }
+   // define logical for decision on unique entry per jet pair or not
+   SteeringPars["lunique"] = ftable->TestParameterInSteering("lunique");
+   if ( SteeringPars["lunique"] ) {
+      ftable->GetParameterFromSteering("lunique",lunique);
+   } else {
+      lunique = false;
+   }
    // overall minimum & maximum for 1st observable, e.g. maximal absolute rapidity |y_max|
    SteeringPars["obs0min"] = ftable->TestParameterInSteering("obs0min");
    obsmin[0] = ftable->GetObsBinsLoBoundsMin(0); // by default derived from binning in obs0
@@ -570,6 +578,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       // 2nd loop over jets l
       for (unsigned int l = 1; l <= njet; l++) {
          if (k==l) continue;
+         if (lunique && k>l) continue;
 
          // derive some jet-pair quantities; neighbour candidate is jet l
          double ptnbr = pj[l].perp();
