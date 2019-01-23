@@ -2,7 +2,12 @@
 TODO list for fastNLO_toolkit (orderd by priority)
 -----------------------------------------------------------------------
 
- - Test installation with lgcenv environment
+- Change everything to use LHAPDF6 features instead of deprecated LHAGLUE;
+  partially done in HOPPET interface
+- Drop LHAPDF5 support
+- Use binary read/write table to save storage space and read in times (Mark's suggestion)
+- Provide features to allow -> APPLgrid conversion and the inverse -> fastNLO
+- Test installation with lgcenv environment
    - Problem with zlib?
    - Problem with HOPPET?
  - Include stat. uncertainties into table
