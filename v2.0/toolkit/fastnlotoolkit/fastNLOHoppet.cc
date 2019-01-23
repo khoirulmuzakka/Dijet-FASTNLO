@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_reader_2.1.0                                                //
+//  fastNLO_toolkit                                                     //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -22,38 +22,33 @@
 //  This class inherits the PDF interface from
 //  fastNLOLHAPDF, while the alpha_s evolution
 //  is superseeded by the Alphas.h class.
-//lhasub
+//
 //////////////////////////////////////////////////////////////////////////
-
 
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-//#include "fastnlotk/fastNLOReader.h"
-//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOHoppet.h"
 #include "fastnlotk/HoppetInterface.h"
+#include "fastnlotk/speaker.h"
 
 using namespace std;
 
+
+
 //______________________________________________________________________________
 //
-//
-fastNLOHoppet::fastNLOHoppet(std::string name) : fastNLOLHAPDF(name) {
-   //Set some meaningful initial values
-   SetPDGValues();
-   // KR: Note: LHAPDF values cannot be taken here, since the class instantiation may
-   //     happen before defining the PDF set!
-   //   SetLHAPDFValues();
-};
-
 fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet) {
-   //Set some meaningful initial values
+   // Set some meaningful initial values
+   // Keep our PDG settings for now
    SetPDGValues();
-   // KR: For consistency with usage above.
-   //   SetLHAPDFValues();
+   // New: Set initial values via LHAPDF6 info system
+   //   SetLHAPDFValues(LHAPDFFile);
+   // Print out values for checking
+   //   PrintParmValues();
+   fastNLOHoppet::InitPDF();
 };
 
 
@@ -62,14 +57,14 @@ fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSe
 double fastNLOHoppet::GetQMass(int pdgid) const {
    return HoppetInterface::QMass[pdgid];
 }
-double fastNLOHoppet::GetMz() const {
-   return HoppetInterface::fMz;
-}
 int fastNLOHoppet::GetNFlavor() const {
    return HoppetInterface::fnFlavor;
 }
 int fastNLOHoppet::GetNLoop() const {
    return HoppetInterface::fnLoop;
+}
+double fastNLOHoppet::GetMz() const {
+   return HoppetInterface::fMz;
 }
 double fastNLOHoppet::GetAlphasMz() const {
    return HoppetInterface::fAlphasMz;
@@ -82,10 +77,6 @@ void fastNLOHoppet::SetQMass(int pdgid, double qmass) {
    HoppetInterface::QMass[pdgid] = qmass;
    HoppetInterface::InitHoppet(*this);
 }
-void fastNLOHoppet::SetMz(double Mz) {
-   HoppetInterface::fMz = Mz;
-   HoppetInterface::InitHoppet(*this);
-}
 void fastNLOHoppet::SetNFlavor(int nflavor) {
    HoppetInterface::fnFlavor = nflavor;
    HoppetInterface::InitHoppet(*this);
@@ -94,8 +85,12 @@ void fastNLOHoppet::SetNLoop(int  nloop) {
    HoppetInterface::fnLoop = nloop;
    HoppetInterface::InitHoppet(*this);
 }
+void fastNLOHoppet::SetMz(double Mz) {
+   HoppetInterface::fMz = Mz;
+   HoppetInterface::InitHoppet(*this);
+}
 void fastNLOHoppet::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
-   HoppetInterface::fAlphasMz    = AlphasMz;
+   HoppetInterface::fAlphasMz = AlphasMz;
    HoppetInterface::InitHoppet(*this);
 }
 
@@ -111,36 +106,47 @@ void fastNLOHoppet::SetPDGValues() {
    HoppetInterface::QMass[4]  = PDG_MB;
    HoppetInterface::QMass[5]  = PDG_MT;
    HoppetInterface::fMz       = PDG_MZ;
-   //Variable flavor number scheme
+   // Variable flavor number scheme
    HoppetInterface::fnFlavor = 0;
-   //2-loop alpha_s evolution
+   // 2-loop alpha_s evolution
    HoppetInterface::fnLoop = 2;
    HoppetInterface::fAlphasMz = PDG_ASMZ;
    HoppetInterface::InitHoppet(*this);
 }
 
-void fastNLOHoppet::SetLHAPDFValues() {
-   //Be sure LHAPDF is initialized when reading the properties
-   if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
-      if ( ! InitPDF() ) {
-         logger.error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
-         exit(1);
-      } else {
-         FillPDFCache();
-      }
-   }
-
-   for (int i = 0; i < 6; i++) {
-      HoppetInterface::QMass[i] = LHAPDF::getQMass(i+1);
-   }
-   //How to read LHAPDF Mz???
-   HoppetInterface::fMz = PDG_MZ;
-   HoppetInterface::fnFlavor = LHAPDF::getNf();
-   HoppetInterface::fnLoop = LHAPDF::getOrderAlphaS();
-   HoppetInterface::fAlphasMz = LHAPDF::alphasPDF(HoppetInterface::fMz);
+void fastNLOHoppet::SetLHAPDFValues(std::string LHAPDFFile) {
+   const LHAPDF::PDFSet PDFset(LHAPDFFile);
+   HoppetInterface::QMass[0]  = stod(PDFset.get_entry("MDown"));
+   HoppetInterface::QMass[1]  = stod(PDFset.get_entry("MUp"));
+   HoppetInterface::QMass[2]  = stod(PDFset.get_entry("MStrange"));
+   HoppetInterface::QMass[3]  = stod(PDFset.get_entry("MCharm"));
+   HoppetInterface::QMass[4]  = stod(PDFset.get_entry("MBottom"));
+   HoppetInterface::QMass[5]  = stod(PDFset.get_entry("MTop"));
+   HoppetInterface::fMz       = stod(PDFset.get_entry("MZ"));
+   // Variable flavor number scheme
+   //   HoppetInterface::fnFlavor  = stoi(PDFset.get_entry("NumFlavors"));
+   HoppetInterface::fnFlavor = 0;
+   HoppetInterface::fnLoop    = stoi(PDFset.get_entry("AlphaS_OrderQCD")) + 1;
+   HoppetInterface::fAlphasMz = stod(PDFset.get_entry("AlphaS_MZ"));
    HoppetInterface::InitHoppet(*this);
 }
 
+
+
+// Printers
+void fastNLOHoppet::PrintParmValues() {
+   for ( int i = 0; i<6; i++ ) {
+      cout << "fQMass[" << i << "] = " << HoppetInterface::QMass[i] << endl;
+   }
+   cout << "fMz       = " << HoppetInterface::fMz << endl;
+   cout << "fnFlavor  = " << HoppetInterface::fnFlavor << endl;
+   cout << "fnLoop    = " << HoppetInterface::fnLoop << endl;
+   cout << "fAlphasMz = " << HoppetInterface::fAlphasMz << endl;
+}
+
+
+
+// Initialisation
 bool fastNLOHoppet::InitPDF() {
    bool init = fastNLOLHAPDF::InitPDF();
    HoppetInterface::InitHoppet(*this);

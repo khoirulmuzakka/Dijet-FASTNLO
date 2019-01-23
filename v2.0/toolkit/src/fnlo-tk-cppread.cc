@@ -34,6 +34,12 @@
 #include "fastnlotk/fastNLOQCDNUMAS.h"
 #include "fastnlotk/fastNLOHoppetAs.h"
 
+#include "LHAPDF/Info.h"
+#include "LHAPDF/Config.h"
+#include "LHAPDF/PDFInfo.h"
+#include "LHAPDF/PDFSet.h"
+#include "LHAPDF/Factories.h"
+
 //! Function prototype for flexible-scale function
 double Function_Mu(double s1, double s2);
 
@@ -139,6 +145,13 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-cppread"] << "Using PDF set   : " << PDFFile << endl;
    }
+
+
+
+
+
+
+
    //--- PDF or scale variations
    int nvars = 1;
    const int nvarmax = 7;
@@ -752,7 +765,7 @@ int main(int argc, char** argv) {
    } else if (AsEvolCode == "HOPPET") {
 #ifdef WITH_HOPPET
       //! ONLY if compiled --with-hoppet support!
-      fnlo = new fastNLOHoppetAs(tablename);
+      fnlo = new fastNLOHoppetAs(tablename,PDFFile,0);
 #else
       printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
       printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
@@ -778,21 +791,20 @@ int main(int argc, char** argv) {
    // The table and PDF initialization could also be done in one step, e.g.:
    //   FastNLOAlphas fnlo(tablename, PDFFile, 0);
    //
-   // From here on parameter settings can be read from LHAPDF, e.g.
-   // to check the upper limit of the PDF member numbering do
-   //   int imaxpdf = fnlo->GetNPDFMaxMember();
+   // From here on parameter settings for a PDF set or member can be read
+   // from LHAPDF. LHAPDF6 uses a new metadata system that maintains these
+   // settings on PDF member or PDF set level or global level.
+   //
+   // For example to check the upper limit of the PDF member numbering do
+   //
+   // const LHAPDF::PDFSet PDFset(PDFFile);
+   // int imaxpdf = stoi(PDFset.get_entry("NumMembers"));
+   //
    // Note: Usually there is a member no. 0 corresponding to the central result,
-   //       so the total number of members (fnlo->GetNPDFMembers()) is imaxpdf + 1
+   //       which is counted as well.
    //
-   // Some remarks:
-   // 1) Values returned via LHAPDF are not always coherent or consistent
-   //    between the different PDF sets. Take care if you want to use them
-   //    for more than just information.
-   //
-   // 2) Astonishingly, there are no functions to access the value used for M_Z or
-   //    directly the value for alpha_s(M_Z).
-   //
-   // 3) The PDF sets within LHAPDF are usually available in the form of
+   // Remark:
+   //    The PDF sets within LHAPDF are usually available in the form of
    //    precalculated interpolation grids. Changing of parameters therefore
    //    is not possible.
    //    However, with fastNLO that separates matrix-element coefficients,

@@ -1,47 +1,65 @@
-#include "fastnlotk/HoppetInterface.h"
-#include "fastnlotk/fastNLOReader.h"
-#include "hoppet_v1.h"
-#include <LHAPDF/LHAPDF.h>
-#include "fastnlotk/speaker.h"
 #include <cstdlib>
+#include <LHAPDF/LHAPDF.h>
+#include "fastnlotk/fastNLOReader.h"
+#include "fastnlotk/speaker.h"
+#include "fastnlotk/HoppetInterface.h"
+#include "hoppet_v1.h"
 
-
-// Default values (PDG)
+// Initial values
 bool HoppetInterface::IsInitialized = false;
 fastNLOReader *HoppetInterface::fnlo = NULL;
-double HoppetInterface::fAlphasMz = PDG_ASMZ;
-double HoppetInterface::fMz = PDG_MZ;
-int HoppetInterface::fnFlavor = -1;
-int HoppetInterface::fnLoop = 1;
+// PDG
 double HoppetInterface::QMass[6] = {PDG_MD, PDG_MU, PDG_MS, PDG_MC, PDG_MB, PDG_MT};
+double HoppetInterface::fMz = PDG_MZ;
+double HoppetInterface::fAlphasMz = PDG_ASMZ;
+// VFNS & NLO
+int HoppetInterface::fnFlavor = 0;
+int HoppetInterface::fnLoop = 2;
+
+
 
 void HoppetInterface::InitHoppet(fastNLOReader& lfnlo) {
-
-   if (!IsInitialized) {
+   // Reinitialise also if fnLoop has been changed from initial value
+   if ( ! IsInitialized || HoppetInterface::fnLoop != 2 ) {
       StartHoppet();
       fnlo = &lfnlo;
    }
 
-   //If fnFlavor smaller than 1 use VFNS (NNPDF reports nf=-1)
-   hoppetsetpolemassvfn_(QMass[3], QMass[4], 10000000000.0);
-   say::info["InitHoppet"] << "Using variable-flavour number scheme with the the given masses."
-                          << " M_Top is set to 10000000000.0 GeV, so effectively nf_max = 5." <<  std::endl;
-   // Carry out evolution
-   hoppetEvolve(fAlphasMz, fMz, 2, 1.0, &HoppetInterface::LHAsub, 2.00001);
+   // If fnFlavor < 3 use VFNS up to Nf_max = 5 as default)
+   if ( HoppetInterface::fnFlavor < 3 ) {
+      hoppetsetpolemassvfn_(QMass[3], QMass[4], 1.E10);
+      say::info["InitHoppet"] << "Using variable-flavour number scheme with Nfmax = 5. "
+                              << "M_c, M_b are set to PDG values, and M_t to 10^10 GeV." <<  std::endl;
+   } else {
+      hoppetsetffn_(HoppetInterface::fnFlavor);
+   }
+   say::info["InitHoppet"] << "Using alpha_S(Q) = " << fAlphasMz << " at Q = " << fMz << " for " <<
+      HoppetInterface::fnLoop << " loops in alpha_S evolution and Nf = " <<
+      HoppetInterface::fnFlavor << " flavors." << std::endl;
+   // Carry out evolution defining alpha_S(Q), Q, nLoops, muR/muF, LHAsub, starting scale Q_PDF
+   hoppetEvolve(HoppetInterface::fAlphasMz, HoppetInterface::fMz, HoppetInterface::fnLoop, 1.0, &HoppetInterface::LHAsub, 2.00001);
    // Fills the HOPPET PDF represenation using PDF provided by LHAPDF.
    //hoppetAssign(&evolvepdf_);
 }
 
-void HoppetInterface::StartHoppet(){
-   double ymax = 12.0;
-   double dy = 0.1;
-   int order = -6;
+void HoppetInterface::StartHoppet() {
+   //   std::cout << "StartHoppet: Start. IsInitialized = " << IsInitialized << std::endl;
+   // Reasonable defaults for initialisation of PDF evolution
+   double ymax   = 12.0;
+   double dy     = 0.1;
+   double Qmin   = 1.0;
+   double Qmax   = 28000.;
    double dlnlnQ = dy/4.0;
-   double Qmin = 1.0;
-   double Qmax = 28000;
-   int fnLoop = 2.;
-   hoppetStartExtended( ymax, dy, Qmin, Qmax, dlnlnQ, fnLoop, order, factscheme_MSbar);
+   int numorder  = -6; // Note: Has nothing to do with perturbative order!
+   int fnLoop    = 2;  // NLO for a start; reinitialise with HoppetInterface::fnLoop if called again
+   if ( IsInitialized ) {
+      fnLoop = HoppetInterface::fnLoop;
+   }
+   //   std::cout << "StartHoppet: fnLoop = " << fnLoop << std::endl;
+   //   std::cout << "StartHoppet: HI::fnLoop = " << HoppetInterface::fnLoop << std::endl;
+   hoppetStartExtended( ymax, dy, Qmin, Qmax, dlnlnQ, fnLoop, numorder, factscheme_MSbar);
    IsInitialized = true;
+   //   std::cout << "StartHoppet: Ende. IsInitialized = " << IsInitialized << std::endl;
 }
 
 void HoppetInterface::LHAsub(const double & x, const double & Q, double * pdf) {

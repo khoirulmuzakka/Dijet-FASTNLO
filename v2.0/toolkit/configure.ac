@@ -136,12 +136,16 @@ if test "x$with_lhapdf" != "xno"; then
       AC_SUBST([LHAPDFBINPATH], ["$LHAPDFPREFIX/bin"])
       AC_SUBST([LHAPDFLIBPATH], [`$LHAPDFBIN --libdir`])
       AC_SUBST([LHAPDFINCLUDEPATH],[`$LHAPDFBIN --incdir`])
+      AC_SUBST([LHAPDFCPPFLAGS], [`$LHAPDFBIN --cflags`])
+      AC_SUBST([LHAPDFLDFLAGS], [`$LHAPDFBIN --libs`])
       AC_MSG_RESULT([Using $TMPNAM version $LHAPDFVERSION])
       AC_MSG_RESULT([Using $LHAPDFPREFIX for the $TMPNAM installation path])
       AC_MSG_RESULT([Using $LHAPDFSETPATH for the PDF sets])
       AC_MSG_RESULT([Using $LHAPDFBINPATH for the binaries])
       AC_MSG_RESULT([Using $LHAPDFLIBPATH for the library])
       AC_MSG_RESULT([Using $LHAPDFINCLUDEPATH for the includes])
+      AC_MSG_RESULT([Using $LHAPDFCPPFLAGS for the CPP flags])
+      AC_MSG_RESULT([Using $LHAPDFLDFLAGS for the linker flags])
    else
       AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
    fi
@@ -412,7 +416,7 @@ if test "x$with_yoda" != "xno"; then
       AC_MSG_RESULT([Using $YODALIBPATH for the library])
       AC_MSG_RESULT([Using $YODAINCLUDEPATH for the includes])
       AC_MSG_RESULT([Using $YODACPPFLAGS for the CPP flags])
-      AC_MSG_RESULT([Using $YODALDFLAGS for the libraries])
+      AC_MSG_RESULT([Using $YODALDFLAGS for the linker flags])
    else
       AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
    fi

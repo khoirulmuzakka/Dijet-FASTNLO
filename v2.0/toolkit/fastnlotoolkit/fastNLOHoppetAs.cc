@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_reader_2.1.0                                                //
+//  fastNLO_toolkit                                                     //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -22,38 +22,32 @@
 //  This class inherits the PDF interface from
 //  fastNLOLHAPDF, while the alpha_s evolution
 //  is superseeded by the Alphas.h class.
-//lhasub
+//
 //////////////////////////////////////////////////////////////////////////
-
 
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <LHAPDF/LHAPDF.h>
-//#include "fastnlotk/fastNLOReader.h"
-//#include "fastnlotk/speaker.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOHoppetAs.h"
 #include "hoppet_v1.h"
 
 using namespace std;
 
+
+
 //______________________________________________________________________________
 //
-//
-fastNLOHoppetAs::fastNLOHoppetAs(std::string name) : fastNLOHoppet(name) {
-   //Set some meaningful values
-   SetPDGValues();
-   // KR: Note: LHAPDF values cannot be taken here, since the class instantiation may
-   //     happen before defining the PDF set!
-   //   SetLHAPDFValues();
-};
-
 fastNLOHoppetAs::fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOHoppet(name,LHAPDFFile,PDFSet) {
-   //Set some meaningful initial values
+   // Set some meaningful initial values
+   // Keep our PDG settings for now
    SetPDGValues();
-   // KR: For consistency with usage above.
-   //   SetLHAPDFValues();
+   // New: Set initial values via LHAPDF6 info system
+   //   SetLHAPDFValues(LHAPDFFile);
+   // Print out values for checking
+   //   PrintParmValues();
+   fastNLOHoppet::InitPDF();
 };
 
 
@@ -61,8 +55,7 @@ fastNLOHoppetAs::fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int P
 // Evolution
 std::vector<double> fastNLOHoppetAs::GetXFX(double xp, double muf) const {
    //
-   //  GetXFX is used to get the parton array from the
-   //  pre-defined pdf-interface.
+   //  GetXFX is used to get the parton array from the pre-defined pdf-interface.
    //
    return fastNLOLHAPDF::GetXFX(xp, muf);
 }

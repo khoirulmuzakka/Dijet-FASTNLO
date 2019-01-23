@@ -54,7 +54,7 @@ if HAVE_LHAPDF
    my_include_dirs += -I${LHAPDFINCLUDEPATH}
 endif
 
-fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir}
+fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir} $(LHAPDFCPPFLAGS)
 fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
 if HAVE_ROOT
    fnlo_tk_example_CPPFLAGS += $(ROOTCPPFLAGS)
@@ -95,7 +95,7 @@ fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall
 #
 # Require lhapdf, use lhapdf-config if possible
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
-fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(LHAPDFLDFLAGS)
 fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
 if HAVE_ROOT
    fnlo_tk_example_LDFLAGS += $(ROOTLDFLAGS)

@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_reader_2.1.0                                                //
+//  fastNLO_toolkit                                                     //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -22,30 +22,26 @@
 //  This class inherits the PDF interface from
 //  fastNLOLHAPDF, while the alpha_s evolution
 //  is superseeded by the Alphas.h class.
-//lhasub
+//
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef FASTNLOHOPPETAS
 #define FASTNLOHOPPETAS
 
-//#include "fastNLOReader.h"
-//#include <iostream>
-//#include <cstdio>
-//#include <cstdlib>
-//#include <LHAPDF/LHAPDF.h>
-//#include "speaker.h"
 #include "fastNLOHoppet.h"
-//#include "hoppet_v1.h"
+
 
 
 class fastNLOHoppetAs : public fastNLOHoppet {
 
-   public:
-      fastNLOHoppetAs(std::string name);
-      fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet);
-      // ---- Alphas vars ---- //
-   protected:
-      virtual std::vector<double> GetXFX(double xp, double muf) const ;
+ public:
+   // Only allow constructor with information on LHAPDF set and member
+   // as needed for HOPPET initialisation.
+   fastNLOHoppetAs(std::string name) = delete;
+   fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet);
+
+ protected:
+   virtual std::vector<double> GetXFX(double xp, double muf) const;
 
 };
 
