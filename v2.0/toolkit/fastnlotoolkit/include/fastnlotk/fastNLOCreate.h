@@ -159,12 +159,18 @@ protected:
 
    inline void ApplyPDFWeight(std::vector<std::pair<int,double> >& nodes, const double x, const std::vector<double>* grid) const;
    inline double CalcPDFReweight(double x) const;
-   void FillContribution(int scalevar = 0);                                                                 //!< fill contribution into table
-   void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in pp/ppbar
-   void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin);                                        //!< fill flexible scale contribution in DIS
-   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale table in pp/ppbar
-   void FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, int scalevar);                            //!< fill fixed scale contribution in DIS
-   void FillRefContribution(int scalevar = 0);                                                              //!< fill contribution if this is a reference table
+   //!< Fill contribution into table
+   void FillContribution(int scalevar = 0, const double wgtfac=1.0);
+   //!< Fill flexible scale contribution in pp/ppbar
+   void FillContributionFlexHHC(fastNLOCoeffAddFlex* c, int ObsBin, const double wgtfac=1.0);
+   //!< fill flexible scale contribution in DIS
+   void FillContributionFlexDIS(fastNLOCoeffAddFlex* c, int ObsBin, const double wgtfac=1.0);
+   //!< fill fixed scale table in pp/ppbar
+   void FillContributionFixHHC(fastNLOCoeffAddFix* c, int ObsBin, int scalevar, const double wgtfac=1.0);
+   //!< fill fixed scale contribution in DIS
+   void FillContributionFixDIS(fastNLOCoeffAddFix* c, int ObsBin, int scalevar, const double wgtfac=1.0);
+   //!< fill contribution if this is a reference table
+   void FillRefContribution(int scalevar = 0, const double wgtfac=1.0);
    // KR: Don't see any use for shouldReadSteeringFile ==> remove it
    //   void ReadSteering(std::string steerfile, std::string steeringNameSpace = "", bool shouldReadSteeringFile = true);  //!< read steering file
    void ReadSteering(std::string steerfile, std::string steeringNameSpace = "");  //!< read steering file
