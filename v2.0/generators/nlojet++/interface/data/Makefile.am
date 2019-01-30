@@ -15,7 +15,7 @@ SUBDIRS = AzimuthalDecorrelation DijetAngular DijetMass Examples InclusiveJets I
 
 # Install all data files from gzipped tar archive to avoid limits in command line length!
 FIRST   = RivetAdditions
-MYDIRS  = Examples InclusiveJets DijetMass DijetAngular AzimuthalDecorrelation InclusiveNJetEvents
+MYDIRS  = Examples InclusiveJets DijetMass DijetAngular AzimuthalDecorrelation InclusiveNJetEvents InclusiveNJetDiffs
 ARCHIVE = Steering
 TAR     = $(ARCHIVE).tar
 TARGZ   = $(TAR).gz

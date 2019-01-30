@@ -140,7 +140,7 @@ private:
    Obs obsdef[3];
    double obs[3];
    double obs2[3];
-   vector<string> ScaleLabel; // Scale labels (Scale1: no default, must be defined; Scale2: default is "pT_max_[GeV]")
+   vector<string> ScaleLabel; // Scale labels (Scale1: must be defined; Scale2: only for flex-scale tables)
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
    enum Scales { PTMAX, PTJET };
    Scales mudef[2];
@@ -247,25 +247,23 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
       }
    }
    // scale descriptions
+   string label;
    SteeringPars["ScaleDescriptionScale1"] = ftable->TestParameterInSteering("ScaleDescriptionScale1");
-   ScaleLabel.resize(2);
    if ( SteeringPars["ScaleDescriptionScale1"] ) {
-      ftable->GetParameterFromSteering("ScaleDescriptionScale1",ScaleLabel[0]);
+      ftable->GetParameterFromSteering("ScaleDescriptionScale1",label);
+      ScaleLabel.push_back(label);
    } else {
       say::error["ScenarioCode"] << "No description of scale 1, aborted!" << endl;
       exit(1);
    }
    SteeringPars["ScaleDescriptionScale2"] = ftable->TestParameterInSteering("ScaleDescriptionScale2");
-   ScaleLabel[1] = "pT_max_[GeV]"; // default
    if ( SteeringPars["ScaleDescriptionScale2"] ) {
-      ftable->GetParameterFromSteering("ScaleDescriptionScale2",ScaleLabel[1]);
-   } else {
-      ScaleLabel[1] = "-";
-      say::warn["ScenarioCode"] << "No description of scale 2, flexible-scale tables not possible!" << endl;
+      ftable->GetParameterFromSteering("ScaleDescriptionScale2",label);
+      ScaleLabel.push_back(label);
    }
    // scale descriptions define the scales
    lptmax = true;
-   for ( unsigned int i = 0; i < 2; i++ ) {
+   for ( unsigned int i = 0; i < ScaleLabel.size(); i++ ) {
       if ( ScaleLabel[i] == "pT_max_[GeV]" ) {
          mudef[i] = PTMAX;
       } else if ( ScaleLabel[i] == "pT_jet_[GeV]" ) {
@@ -603,11 +601,14 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          exit(1);
       }
       int ikey = ftable->GetObsBinNumber( vobs );
-      count[ikey]  += 1;
-      acount[ikey] += 1;
-      value[ikey]   = vobs;
-      if ( imuscl > -1 ) {
-         scale[ikey]  += vobs[imuscl];
+      // Outside binning phase space: ikey = -1!
+      if ( ikey > -1 ) {
+         count[ikey]  += 1;
+         acount[ikey] += 1;
+         value[ikey]   = vobs;
+         if ( imuscl > -1 ) {
+            scale[ikey]  += vobs[imuscl];
+         }
       }
 
       // --- give some debug output before final selection
@@ -651,18 +652,21 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
       }
       // --- store result in key-value maps with ObsBin number for jet l as key
       int ikey = ftable->GetObsBinNumber( vobs );
-      count[ikey]  -= 1;
-      acount[ikey] += 1;
-      value[ikey]   = vobs;
-      if ( imuscl > -1 ) {
-         scale[ikey]  += vobs[imuscl];
+      // Outside binning phase space: ikey = -1!
+      if ( ikey > -1 ) {
+         count[ikey]  -= 1;
+         acount[ikey] += 1;
+         value[ikey]   = vobs;
+         if ( imuscl > -1 ) {
+            scale[ikey]  += vobs[imuscl];
+         }
       }
 
       // --- give some debug output before final selection
       if ( say::debug.GetSpeak() ) {
          say::debug["ScenarioCode"]  << "---------------- Result of second jet loop ----------------" << endl;
          for ( int i = 0; i<NDim; i++ ) {
-            say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs[i] << ", obsmax = " << obsmax[i] << endl;
+            say::debug["ScenarioCode"]  << "Obs. min/max values: " << i <<  " : obsmin = " << obsmin[i] << ", obs = " << obs2[i] << ", obsmax = " << obsmax[i] << endl;
          }
       }
    }
@@ -674,6 +678,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             obs[i] = value[iPair.first][i];
          }
          // cuts on observable limits
+         //         if ( NDim > 1 ) cout << "MinMax: i = 1: obsmin =  " << obsmin[1] << ", obsmax = " << obsmax[1] << endl;
+         //         if ( NDim > 2 ) cout << "MinMax: i = 2: obsmin =  " << obsmin[2] << ", obsmax = " << obsmax[2] << endl;
          if ( obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
               (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
               (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {
@@ -685,7 +691,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
 
             // --- set the renormalization and factorization scales
             // --- calculate the requested scales
-            for ( unsigned int i = 0; i < 2; i++ ) {
+            for ( unsigned int i = 0; i < ScaleLabel.size(); i++ ) {
                switch(mudef[i]) {
                case PTMAX :
                   // maximal jet pT
@@ -721,18 +727,20 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
                say::error["ScenarioCode"] << "Less than 1D(?!) or more than 3D binning not implemented here, aborted!" << endl;
                say::error["ScenarioCode"] << "DifferentialDimension NDim = " << NDim << endl;
             }
+            // Instead of multidimensional observables ...
             // for ( int i = 0; i<NDim; i++ ) {
             //    scen.SetObservableDimI( obs[i], i );
             // }
 
-            // for this type of scenario can set directly the known observable bin iPair.first
+            // ... set directly the known observable bin iPair.first for this type of scenario!
+            //            cout << "AAA Accepted iobs = " << iPair.first << ", mu = " << mu[0] << endl;
             scen.SetObsBin(iPair.first);
-            scen.SetObsScale1( mu[0] );   // must be consistent with 'mu' from contribs
+            scen.SetObsScale1(mu[0]);   // must be consistent with 'mu' from contribs
 
             // but must communicate additional potentially negative weight factor iPair.second
             // this factor is the difference in occurrences of jet algo 1 jets vs. jet algo 2 jets
-            if (lFlexibleScaleTable) {
-               scen.SetObsScale2( mu[1] );
+            if (lFlexibleScaleTable && ScaleLabel.size()==2) {
+               scen.SetObsScale2(mu[1]);
                ftable->FillAllSubprocesses(contribsflex,scen,(double)iPair.second);
             } else {
                ftable->FillAllSubprocesses(contribsfix,scen,(double)iPair.second);

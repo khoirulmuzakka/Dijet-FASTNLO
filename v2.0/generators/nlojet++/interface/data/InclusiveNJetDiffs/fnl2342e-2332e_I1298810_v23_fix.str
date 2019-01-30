@@ -74,7 +74,7 @@ BinSizeFactor                    2.              # Possibility to provide additi
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
                                                  #
 ScaleDescriptionScale1          "pT_jet_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
-ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
+# ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
 #   Observable binning

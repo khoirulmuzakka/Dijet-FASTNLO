@@ -283,6 +283,7 @@ AC_CONFIG_FILES([Makefile
                  interface/data/DijetMass/Makefile
                  interface/data/DijetAngular/Makefile
                  interface/data/AzimuthalDecorrelation/Makefile
+                 interface/data/InclusiveNJetDiffs/Makefile
                  interface/data/InclusiveNJetEvents/Makefile
                  interface/data/RivetAdditions/Makefile
                  interface/data/check/Makefile
