@@ -8,10 +8,12 @@
 class fnloScenario {
    //! Useful class to keep all scenario specific quantities,
    //! e.g. observables and scales.
+   //! KR: Test including additional weight factor per observable entry
+   //!     This could be helpful e.g. for jet cross section differences!
    friend class fastNLOCreate;
 
  public:
- fnloScenario() : _m1(0), _m2(0), _iOB(-1) {;}
+ fnloScenario() : _m1(0), _m2(0), _iOB(-1), _wo(1) {;}
    ~fnloScenario() {;};
    //! Store observable
    //!< Set observable of dimension iDim (e.g. in case of multidimensional measurements)
@@ -36,10 +38,14 @@ class fnloScenario {
    //!< Set scale 2
    inline void SetObsScale2(double mu) {_m2=mu;}
 
+   //! Store extra weight factor
+   inline void SetObsWeight(double w) {_wo=w;}
+
  private:
    std::map<int,double> _o;
    double _m1, _m2;
    int _iOB;
+   double _wo;
 };
 
 

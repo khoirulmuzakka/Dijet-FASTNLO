@@ -737,8 +737,11 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
             scen.SetObsBin(iPair.first);
             scen.SetObsScale1(mu[0]);   // must be consistent with 'mu' from contribs
 
-            // but must communicate additional potentially negative weight factor iPair.second
-            // this factor is the difference in occurrences of jet algo 1 jets vs. jet algo 2 jets
+            // But we must communicate additional potentially negative weight factor iPair.second!
+            // This factor is the difference in occurrences of jet algo 1 jets vs. jet algo 2 jets
+            scen.SetObsWeight((double)iPair.second);
+            // KR TODO The above would make the extension of FillAllSubprocesses with 3rd argument superfluous
+
             if (lFlexibleScaleTable && ScaleLabel.size()==2) {
                scen.SetObsScale2(mu[1]);
                ftable->FillAllSubprocesses(contribsflex,scen,(double)iPair.second);
