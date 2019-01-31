@@ -629,6 +629,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          case PTJETGEV :
             // jet pT
             obs2[i] = pj2[l].perp();
+            imuscl = i;
             break;
          case YJET :
             // jet rapidity
@@ -651,6 +652,12 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          vobs.push_back(obs2[i]);
       }
       // --- store result in key-value maps with ObsBin number for jet l as key
+      if ( (! lptmax) && imuscl < 0 ) {
+         say::error["ScenarioCode"] << "No scale-like observable selected, aborted!" << endl;
+         say::error["ScenarioCode"] << "imuscl = " << imuscl << endl;
+         say::error["ScenarioCode"] << "Please complement this scenario to include the requested scale." << endl;
+         exit(1);
+      }
       int ikey = ftable->GetObsBinNumber( vobs );
       // Outside binning phase space: ikey = -1!
       if ( ikey > -1 ) {
@@ -677,9 +684,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          for ( unsigned int i = 0; i < value[iPair.first].size(); i++ ) {
             obs[i] = value[iPair.first][i];
          }
+
          // cuts on observable limits
-         //         if ( NDim > 1 ) cout << "MinMax: i = 1: obsmin =  " << obsmin[1] << ", obsmax = " << obsmax[1] << endl;
-         //         if ( NDim > 2 ) cout << "MinMax: i = 2: obsmin =  " << obsmin[2] << ", obsmax = " << obsmax[2] << endl;
          if ( obsmin[0] <= obs[0] && obs[0] < obsmax[0] &&
               (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
               (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) ) {

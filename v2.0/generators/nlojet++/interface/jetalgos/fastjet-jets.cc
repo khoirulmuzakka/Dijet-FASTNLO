@@ -80,9 +80,9 @@ void fastjet_jets::setup(const JetAlgorithm jetalgo, const double jetsize,
     break;
   }
   if (jet_def == NULL) {
-    cerr << "fj-jets.cc: Selected jet algorithm undefined: jetalgo = "
+    cerr << "fastjet-jets.cc: Selected jet algorithm undefined: jetalgo = "
          << jetalgo << endl;
-    cerr << "fj-jets.cc: Aborted!" << endl;
+    cerr << "fastjet-jets.cc: Aborted!" << endl;
     exit(1);
   }
 }
@@ -95,9 +95,9 @@ operator()(const event_hhc &ev) {
 
   //----- fill input objects from NLOJet++ event -----
   if (say::debug.GetSpeak()) {
-    say::debug["fj-jets"] << "**************************\n";
-    say::debug["fj-jets"] << "Input objects: ip, px, py, pz, E, np\n";
-    say::debug["fj-jets"] << "--------------------------\n";
+    say::debug["fastjet-jets"] << "**************************\n";
+    say::debug["fastjet-jets"] << "Input objects: ip, px, py, pz, E, np\n";
+    say::debug["fastjet-jets"] << "--------------------------\n";
   }
   int np = ev.upper();
   input_objects.clear();
@@ -109,10 +109,10 @@ operator()(const event_hhc &ev) {
     const double E = ev[ip].T();
     input_objects.push_back(fastjet::PseudoJet(px, py, pz, E));
     if (say::debug.GetSpeak()) {
-      printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n", ip, px, py, pz, E, np);
+      printf(" # DEBUG.   [fastjet-jets] %5u %15.8f %15.8f %15.8f %15.8f %8u\n", ip, px, py, pz, E, np);
     }
   }
-  say::debug["fj-jets"] << "**************************\n";
+  say::debug["fastjet-jets"] << "**************************\n";
 
   //----- run the jet clustering with the above jet definition -----
   fastjet::ClusterSequence clust_seq(input_objects, *jet_def);
@@ -122,13 +122,13 @@ operator()(const event_hhc &ev) {
 
   //----- fill output jets from NLOJet++ event -----
   if (say::debug.GetSpeak()) {
-    say::debug["fj-jets"] << "**************************\n";
-    say::debug["fj-jets"] << "Jet algorithm: " << jet_def->description()
+    say::debug["fastjet-jets"] << "**************************\n";
+    say::debug["fastjet-jets"] << "Jet algorithm: " << jet_def->description()
                           << endl;
-    say::debug["fj-jets"] << "**************************\n";
-    say::debug["fj-jets"]
+    say::debug["fastjet-jets"] << "**************************\n";
+    say::debug["fastjet-jets"]
         << "Output jets (pT > 1 GeV): ij, px, py, pz, E, nj\n";
-    say::debug["fj-jets"] << "--------------------------\n";
+    say::debug["fastjet-jets"] << "--------------------------\n";
   }
   unsigned int nj = output_jets.size();
   _M_pj.clear();
@@ -140,11 +140,11 @@ operator()(const event_hhc &ev) {
     const double E = output_jets[ij].E();
     _M_pj.push_back(_Lv(px, py, pz, E));
     if (say::debug.GetSpeak()) {
-      printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n", ij + 1, px, py, pz, E,
+      printf(" # DEBUG.   [fastjet-jets] %5u %15.8f %15.8f %15.8f %15.8f %8u\n", ij + 1, px, py, pz, E,
              nj);
     }
   }
-  say::debug["fj-jets"] << "**************************\n";
+  say::debug["fastjet-jets"] << "**************************\n";
 
   return _M_pj;
 }

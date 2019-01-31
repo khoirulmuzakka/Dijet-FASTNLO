@@ -45,7 +45,7 @@ operator()(const event_hhc &ev, int jetalgo, double jetsize,
     const double E = ev[ip].T();
     input_objects.push_back(fastjet::PseudoJet(px, py, pz, E));
     if (say::debug.GetSpeak()) {
-      printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n", ip, px, py, pz, E, np);
+      printf(" # DEBUG.   [fj-jets] %5u %15.8f %15.8f %15.8f %15.8f %8u\n", ip, px, py, pz, E, np);
     }
   }
   say::debug["fj-jets"] << "**************************\n";
@@ -106,7 +106,7 @@ operator()(const event_hhc &ev, int jetalgo, double jetsize,
     const double E = output_jets[ij - 1].E();
     _M_pj.push_back(_Lv(px, py, pz, E));
     if (say::debug.GetSpeak()) {
-      printf("%5u %15.8f %15.8f %15.8f %15.8f %8u\n", ij, px, py, pz, E, nj);
+      printf(" # DEBUG.   [fj-jets] %5u %15.8f %15.8f %15.8f %15.8f %8u\n", ij, px, py, pz, E, nj);
     }
   }
   say::debug["fj-jets"] << "**************************\n";
