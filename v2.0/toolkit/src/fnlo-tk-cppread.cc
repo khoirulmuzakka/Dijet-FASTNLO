@@ -1351,37 +1351,37 @@ int main(int argc, char** argv) {
       }
       bool lkfix = false;
       if (ilo>-1 && inlo>-1) {
-	 header2 += "   KNLO";
-	 if (innlo>-1) {
-	    header2 += "      KNNLO";
-	 }
-	 lkfix = true;
+         header2 += "   KNLO";
+         if (innlo>-1) {
+            header2 += "      KNNLO";
+         }
+         lkfix = true;
       }
       bool lkthc = false;
       if (ithc1>-1 && lthcvar) {
-	 if (lkfix) {
-	    header2 += "      KTHC1";
+         if (lkfix) {
+            header2 += "      KTHC1";
          } else {
             header2 += "    KTHC1";
          }
-	 lkthc = true;
+         lkthc = true;
       } else if (ithc2>-1 && lthcvar) {
-	 if (lkfix) {
-	    header2 += "      KTHC2";
+         if (lkfix) {
+            header2 += "      KTHC2";
          } else {
             header2 += "    KTHC2";
          }
-	 lkthc = true;
+         lkthc = true;
       }
       if (inpc1>-1) {
-	 if (lkthc) {
-	    header2 += "     KNPC1";
+         if (lkthc) {
+            header2 += "     KNPC1";
          } else if (lkfix) {
             header2 += "      KNPC1";
          } else {
             header2 += "    KNPC1";
          }
-	 lkthc = true;
+         lkthc = true;
       }
 
       if (NDim == 1) {
@@ -1444,7 +1444,7 @@ int main(int argc, char** argv) {
                   header0.c_str(),headdim0.c_str(),DimLabel[0].c_str(),headdim2.c_str(),DimLabel[1].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
          yell << _SSEPLC << endl;
-         for (unsigned int i=0; i<xslo.size(); i++) {
+         for (int i=0; i<NObsBin; i++) {
             for (int j=0; j<NDim; j++) {
                if (i==0) {
                   NDimBins[j] = 1;
@@ -1502,7 +1502,7 @@ int main(int argc, char** argv) {
                   headdim2.c_str(),DimLabel[2].c_str(),headscl.c_str(),header2.c_str());
          yell << buffer << endl;
          yell << _SSEPLC << endl;
-         for (unsigned int i=0; i<xslo.size(); i++) {
+         for (int i=0; i<NObsBin; i++) {
             if (ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar && inpc1 > -1 ) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F %#9.5F",
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
