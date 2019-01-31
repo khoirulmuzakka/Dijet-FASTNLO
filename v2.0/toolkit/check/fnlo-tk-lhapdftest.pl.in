@@ -20,7 +20,7 @@ my $src = "@srcdir@";
 my $tab   = "fnl1014_I902309_2-2";
 my $tabfl = ${tab}.".tab";
 my $tabgz = ${tabfl}.".gz";
-foreach my $file ( "cpptest.log", "cppdiff.log", "${tabfl}", "${tabgz}" ) {
+foreach my $file ( "lhapdftest.log", "lhapdfdiff.log", "${tabfl}", "${tabgz}" ) {
     if ( -e $file ) {
         system("rm -f $file");
     }
@@ -31,34 +31,34 @@ foreach my $file ( "cpptest.log", "cppdiff.log", "${tabfl}", "${tabgz}" ) {
 my $cmd = "cp -f ${src}/../data/check/${tabgz} .";
 print "Executing command: $cmd\n";
 my $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-cpptest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-lhapdftest: Copying test table ${tabgz} failed: $ret, aborted!\n";}
 $cmd = "gunzip ${tabgz}";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-cpptest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-lhapdftest: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
 
 # Evaluate, keep only result lines
-$cmd = "../src/fnlo-tk-cppread ${tabfl} CT10nlo _ GRV _ _ 5 2 0.1185 _ | grep \"Calculate my cross sections\" -B1 -A11 > cpptest.log";
+$cmd = "../src/fnlo-tk-cppread ${tabfl} CT10nlo _ LHAPDF | tail -4 > lhapdftest.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-cpptest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-lhapdftest: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}
 
 # Determine difference to default evaluation output
-$cmd = "diff ${src}/../data/check/${tab}_cpp.log cpptest.log > cppdiff.log";
+$cmd = "diff ${src}/../data/check/${tab}_lhapdftest.log lhapdftest.log > lhapdfdiff.log";
 print "Executing command: $cmd\n";
 $ret = system("$cmd");
-if ( $ret ) {die "fnlo-tk-cpptest: Result comparison with 'diff' failed: $ret, aborted!\n";}
+if ( $ret ) {die "fnlo-tk-lhapdftest: Result comparison with 'diff' failed: $ret, aborted!\n";}
 
 # The diff.log must be empty
-if ( ! -z "cppdiff.log" ) {
-    print "fnlo-tk-cpptest: Evaluation of test table differs from default:\n";
-    $cmd = "cat cppdiff.log";
+if ( ! -z "lhapdfdiff.log" ) {
+    print "fnlo-tk-lhapdftest: Evaluation of test table differs from default:\n";
+    $cmd = "cat lhapdfdiff.log";
     print "Executing command: $cmd\n";
     $ret = system("$cmd");
-    print "fnlo-tk-cpptest: Do you use LHAPDF version 6? Do you have the CT10nlo PDF set installed? Is it found?\n";
-    die "fnlo-tk-cpptest: Table evaluation unit test failed, please fix!\n";
+    print "fnlo-tk-lhapdftest: Do you use LHAPDFTEST version 6? Do you have the CT10nlo PDF set installed? Is it found?\n";
+    die "fnlo-tk-lhapdftest: Table evaluation unit test failed, please fix!\n";
 }
 
-print "fnlo-tk-cpptest: Table evaluation unit test passed.\n";
+print "fnlo-tk-lhapdftest: Table evaluation unit test passed.\n";
 
 exit 0;

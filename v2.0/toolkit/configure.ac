@@ -668,10 +668,14 @@ AC_CONFIG_FILES([Makefile
                  src/fnlo-tk-config
                 ])
 
+AC_CONFIG_FILES([check/fnlo-tk-cpptest1.pl],[chmod +x check/fnlo-tk-cpptest1.pl])
+AC_CONFIG_FILES([check/fnlo-tk-cpptest2.pl],[chmod +x check/fnlo-tk-cpptest2.pl])cpp
+AC_CONFIG_FILES([check/fnlo-tk-rundecastest1.pl],[chmod +x check/fnlo-tk-rundecastest1.pl])
+AC_CONFIG_FILES([check/fnlo-tk-rundecastest2.pl],[chmod +x check/fnlo-tk-rundecastest2.pl])
+AC_CONFIG_FILES([check/fnlo-tk-lhapdftest.pl],[chmod +x check/fnlo-tk-lhapdftest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-cattest.pl],[chmod +x check/fnlo-tk-cattest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-cppnormtest.pl],[chmod +x check/fnlo-tk-cppnormtest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-cppscalestest.pl],[chmod +x check/fnlo-tk-cppscalestest.pl])
-AC_CONFIG_FILES([check/fnlo-tk-cpptest.pl],[chmod +x check/fnlo-tk-cpptest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-erasetest.pl],[chmod +x check/fnlo-tk-erasetest.pl])
 AC_CONFIG_FILES([check/fnlo-tk-erasetest2.pl],[chmod +x check/fnlo-tk-erasetest2.pl])
 AC_CONFIG_FILES([check/fnlo-tk-mergetest.pl],[chmod +x check/fnlo-tk-mergetest.pl])
@@ -679,7 +683,14 @@ if test "x$ZLIBTEST" != "x"; then
    AC_CONFIG_FILES([check/fnlo-tk-stattest.pl],[chmod +x check/fnlo-tk-stattest.pl])
    AC_CONFIG_FILES([check/fnlo-tk-zipapp.pl],[chmod +x check/fnlo-tk-zipapp.pl])
 fi
-
+if test "x$HOPPETPREFIX" != "x"; then
+   AC_CONFIG_FILES([check/fnlo-tk-hoppetastest1.pl],[chmod +x check/fnlo-tk-hoppetastest1.pl])
+   AC_CONFIG_FILES([check/fnlo-tk-hoppetastest2.pl],[chmod +x check/fnlo-tk-hoppetastest2.pl])
+fi
+if test "x$QCDNUMPREFIX" != "x"; then
+   AC_CONFIG_FILES([check/fnlo-tk-qcdnumastest1.pl],[chmod +x check/fnlo-tk-qcdnumastest1.pl])
+   AC_CONFIG_FILES([check/fnlo-tk-qcdnumastest2.pl],[chmod +x check/fnlo-tk-qcdnumastest2.pl])
+fi
 AC_CONFIG_FILES([check/fnlo-tk-ziptest.pl],[chmod +x check/fnlo-tk-ziptest.pl])
 
 AC_OUTPUT

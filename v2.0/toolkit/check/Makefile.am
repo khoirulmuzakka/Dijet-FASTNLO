@@ -14,11 +14,19 @@ AUTOMAKE_OPTIONS = gnu
 #
 # perl script targets to check the package (distributed, but not installed)
 #
-dist_check_SCRIPTS = fnlo-tk-cpptest.pl fnlo-tk-cppnormtest.pl fnlo-tk-cppscalestest.pl fnlo-tk-cattest.pl \
+dist_check_SCRIPTS = fnlo-tk-cpptest1.pl fnlo-tk-cpptest2.pl fnlo-tk-rundecastest1.pl fnlo-tk-rundecastest2.pl \
+	fnlo-tk-lhapdftest.pl fnlo-tk-cppnormtest.pl fnlo-tk-cppscalestest.pl fnlo-tk-cattest.pl \
 	fnlo-tk-erasetest.pl fnlo-tk-erasetest2.pl fnlo-tk-mergetest.pl fnlo-tk-stattest.pl
 if HAVE_LIBZ
    dist_check_SCRIPTS += fnlo-tk-ziptest.pl fnlo-tk-zipapp.pl
 endif
+if HAVE_HOPPET
+   dist_check_SCRIPTS += fnlo-tk-hoppetastest1.pl fnlo-tk-hoppetastest2.pl
+endif
+if HAVE_QCDNUM
+   dist_check_SCRIPTS += fnlo-tk-qcdnumastest1.pl fnlo-tk-qcdnumastest2.pl
+endif
+
 TESTS = $(dist_check_SCRIPTS)
 
 # Additional clean up for check targets
