@@ -2380,6 +2380,7 @@ int fastNLOCreate::GetBin() {
 
    //! Get dimensionality of binning
    const int idiff = GetNumDiffBin();
+   logger.debug["GetBin"] << "Dimensionality of scenario, idiff = NDim = " << idiff << endl;
 
    //! Check cache and get ObsBin from there if available
    if ( (int)fLastScen._o.size() == idiff ) {
@@ -2388,9 +2389,6 @@ int fastNLOCreate::GetBin() {
            ( idiff == 3 && fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] && fLastScen._o[2] == fScenario._o[2] ) ) {
          logger.debug["GetBin"] << "Taking ObsBin from cache, fObsBin = " << fObsBin << endl;
          return fObsBin;
-      } else {
-         logger.error["GetBin"] << "More than triple-differential binning not yet implemented, aborted!" << endl;
-         exit(1);
       }
    }
 
