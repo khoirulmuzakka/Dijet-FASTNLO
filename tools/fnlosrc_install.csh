@@ -576,18 +576,31 @@ if ( $withroot == 5 ) then
       mv root ${arc}
    endif
 else if ( $withroot == 6 ) then
-   set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
-#   set arc="root-6.10.06" # Don't use this one! Buggy -lImt library dependence ...
+#   set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
+   set arc="root-6.14.06"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
    endif
 endif
-if ( ($withroot == 5 || $withroot == 6) && ! -e ${arc}_installed  ) then
+if ( ! -e ${arc}_installed ) then
    cd ${arc}
-   ./configure --prefix=${base} --etcdir=${base}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
-   make -j${cores} install
-   cd ..
-   touch ${arc}_installed
+   if ( $withroot == 5 ) then
+      ./configure --prefix=${base} --etcdir=${base}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
+      make -j${cores} install
+      cd ..
+      touch ${arc}_installed
+   else if ( $withroot == 6 ) then
+      mkdir mybuild
+      cd mybuild
+      cmake ..
+      cmake --build . -- -j${cores}
+      cmake -DCMAKE_INSTALL_PREFIX=${base} -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
+      cd ..
+      cd ..
+      touch ${arc}_installed
+   else
+      cd ..
+   endif
 endif
 
 #
@@ -650,9 +663,11 @@ if ( $withoptional ) then
 #     fastNLO comes already with alpha_s evolutions from GRV or CRunDec, or
 #     uses the one from the PDFs in LHAPDF
 #
-   set arc="hoppet-1.1.5"
+#   set arc="hoppet-1.1.5"
+   set arc="hoppet-1.2.0"
    if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}-patched.tar.gz # Need patched version on newer systems like Ubuntu 16.04
+#      tar xzf ${arc}-patched.tar.gz # Need patched version on newer systems like Ubuntu 16.04
+      tar xzf ${arc}.tar.gz
       cd ${arc}
       ./configure --prefix=${base}
       make -j${cores} install
@@ -885,12 +900,13 @@ if ( $withsherpa ) then
 # Sherpa for use with MCgrid & fastNLO:
 # Version >= 2.2.0 is required!
 # For use of MPI with Sherpa corresponding system packages are required (MPICH, OpenMPI).
-# (Repacked version required for compatibility with C++11 standard enforcement.)
+# (Repacked version required for compatibility with C++11 standard enforcement.
+#  Plus additional patch in ./ATOOLS/Org/Gzip_Stream.C)
 #------------------------------------------------------------------------------
    set arc="SHERPA-MC-2.2.4"
 #   set arc="SHERPA-MC-2.2.5" # Does not work, not even after repacking
    if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}-repacked.tar.gz
+      tar xzf ${arc}-patched.tar.gz
 #      tar xzf ${arc}.tar.gz
       cd ${arc}
       ./configure --prefix=${base} --with-sqlite3=install --enable-gzip --enable-lhole --enable-fastjet=${base} --enable-lhapdf=${lhapdfbasepath} --enable-hepmc2=${base} --enable-rivet=${base} ${rootenablepath} --enable-openloops=${base}/src/OpenLoops-1.3.1 ${mpiopt} --enable-blackhat=${base}
