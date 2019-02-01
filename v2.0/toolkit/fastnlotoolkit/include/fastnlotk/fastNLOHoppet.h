@@ -38,24 +38,25 @@ class fastNLOHoppet : public fastNLOLHAPDF {
    // Only allow constructor with information on LHAPDF set and member
    // as needed for HOPPET initialisation.
    fastNLOHoppet(std::string name) = delete;
-   fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSet);
+   fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFMem = 0);
 
    // Getters
    double GetQMass(int pdgid) const;
+   double GetMz() const;
+   std::string GetNScheme() const;
    int GetNFlavor() const;
    int GetNLoop() const;
-   double GetMz() const;
    double GetAlphasMz() const;
 
    // Setters
    virtual bool InitPDF();
    void SetQMass(int pdgid, double qmass);
+   void SetMz(double Mz);
    void SetNFlavor(int nflavor);
    void SetNLoop(int nloop);
-   void SetMz(double Mz);
-   void SetAlphasMz(double AlphasMz, bool ReCalcCrossSection = false);
+   void SetAlphasMz(double AlphasMz);
    void SetPDGValues();
-   void SetLHAPDFValues(std::string LHAPDFFile);
+   void SetLHAPDFValues(std::string LHAPDFFile, int PDFMem = 0);
 
    // Printers
    void PrintParmValues();

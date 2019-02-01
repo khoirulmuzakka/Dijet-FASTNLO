@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_reader_2.1.0                                                //
+//  fastNLO_toolkit                                                     //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -24,6 +24,7 @@
 //  is superseeded by the Alphas.h class.
 //
 //////////////////////////////////////////////////////////////////////////
+
 #ifndef FASTNLOQCDNUMAS
 #define FASTNLOQCDNUMAS
 
@@ -44,42 +45,49 @@ extern "C" {
 class fastNLOQCDNUMAS : public fastNLOLHAPDF {
 
 public:
+   // Parameter initialisation with PDG values
    fastNLOQCDNUMAS(std::string name);
-   fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFSet);
-   //inherited
+   // Parameter initialisation with LHAPDF set values
+   fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFMem = 0);
+   // Inherited
    void CalcCrossSection();
 
-   void InitEvolveAlphas();
-   // ---- Alphas vars ---- //
-   // Setters
-   void SetMz(double Mz);
-   void SetNFlavor(int nflavor);
-   void SetNLoop(int nloop);
-   void SetQMass(int pdgid, double qmass);
-   void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
-   void SetPDGValues();
-   void SetLHAPDFValues();
    // Getters
-   double GetMz() const;
    double GetQMass(int pdgid) const;
+   double GetMz() const;
+   std::string GetNScheme() const;
    int GetNFlavor(int nflavor) const;
    int GetNLoop() const;
    double GetAlphasMz() const;
 
+   // Setters
+   void SetQMass(int pdgid, double qmass);
+   void SetMz(double Mz);
+   void SetNFlavor(int nflavor);
+   void SetNLoop(int nloop);
+   void SetAlphasMz(double AlphasMz);
+   void SetPDGValues();
+   void SetLHAPDFValues(std::string LHAPDFFile, int PDFMem = 0);
+
+   // Printers
+   void PrintParmValues();
+
+   // Other
+   void InitEvolveAlphas();
+
 
 
 protected:
-
-   // inherited functions
+   // Inherited functions
    double EvolveAlphas(double Q) const ;
+
    // ---- Alphas vars ---- //
-   double fAlphasMz;
+   double QMass[6];
    double fMz;
+   std::string fnScheme;
    int fnFlavor;
    int fnLoop;
-   double QMass[6];
-
-
+   double fAlphasMz;
 };
 
 #endif

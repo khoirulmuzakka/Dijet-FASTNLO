@@ -89,18 +89,42 @@ fastNLOLHAPDF::fastNLOLHAPDF(const fastNLOTable& table, string LHAPDFFile, int P
    // Everything set. Do cross sections calculation.
    CalcCrossSection();
 }
-//______________________________________________________________________________
 
-   // Getters
-   int fastNLOLHAPDF::GetIPDFMember() const {
-      return fiPDFMember;
-   };
-   int fastNLOLHAPDF::GetNPDFMembers() const {
-      return fnPDFs;
-   };
-   int fastNLOLHAPDF::GetNPDFMaxMember() const {
-      return fnPDFs-1;
-   };
+
+
+// Getters
+double fastNLOLHAPDF::GetQMass(int pdgid) const {
+   if (pdgid < 1 || pdgid > 6 ) {
+      logger.error["fastNLOLHAPDF::GetQMass"]<<"PDG code out of quark index range 1-6! Aborted.\n";
+      exit(1);
+   }
+   return LHAPDF::getQMass(pdgid);
+}
+
+int fastNLOLHAPDF::GetNLoop() const {
+   return (LHAPDF::getOrderAlphaS() + 1);
+}
+
+int fastNLOLHAPDF::GetNFlavor() const {
+   return (LHAPDF::getNf());
+}
+
+double fastNLOLHAPDF::GetAlphasMz() const {
+   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
+   return PDF->alphasQ(91.1876);
+   #endif
+   return LHAPDF::alphasPDF(91.1876);
+}
+
+int fastNLOLHAPDF::GetIPDFMember() const {
+   return fiPDFMember;
+};
+int fastNLOLHAPDF::GetNPDFMembers() const {
+   return fnPDFs;
+};
+int fastNLOLHAPDF::GetNPDFMaxMember() const {
+   return fnPDFs-1;
+};
 
 
 //______________________________________________________________________________
@@ -279,7 +303,7 @@ void fastNLOLHAPDF::SetNLoop(int nloop) {
    logger.warn["SetNLoop"]<<"WARNING! The no. of loops cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
-void fastNLOLHAPDF::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
+void fastNLOLHAPDF::SetAlphasMz(double AlphasMz) {
    logger.warn["SetAlphasMz"]<<"WARNING! alpha_s(M_Z) cannot be changed in alpha_s evolution of LHAPDF!"<<endl;
 }
 
@@ -287,28 +311,6 @@ void fastNLOLHAPDF::InitEvolveAlphas() {
    // For LHAPDF do nothing
 }
 
-double fastNLOLHAPDF::GetQMass(int pdgid) const {
-   if (pdgid < 1 || pdgid > 6 ) {
-      logger.error["GetQMass"]<<"PDG code out of quark range 1-6! Aborted\n";
-      exit(1);
-   }
-   return LHAPDF::getQMass(pdgid);
-}
-
-int fastNLOLHAPDF::GetNLoop() const {
-   return (LHAPDF::getOrderAlphaS() + 1);
-}
-
-int fastNLOLHAPDF::GetNFlavor() const {
-   return (LHAPDF::getNf());
-}
-
-double fastNLOLHAPDF::GetAlphasMz() const {
-   #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-   return PDF->alphasQ(91.1876);
-   #endif
-   return LHAPDF::alphasPDF(91.1876);
-}
 
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6

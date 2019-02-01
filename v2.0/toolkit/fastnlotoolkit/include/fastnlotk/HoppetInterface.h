@@ -14,6 +14,7 @@ class HoppetInterface {
       // ---- Alphas vars ---- //
       static double fAlphasMz;
       static double fMz;
+      static std::string fnScheme;
       static int fnFlavor;
       static int fnLoop;
       static double QMass[6];

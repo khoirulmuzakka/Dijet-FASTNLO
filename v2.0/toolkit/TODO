@@ -1,7 +1,8 @@
 -----------------------------------------------------------------------
-TODO list for fastNLO_toolkit (orderd by priority)
+TODO list for fastNLO_toolkit (ordered by priority)
 -----------------------------------------------------------------------
 
+- Add checks for HOPPET, CRunDec, QCDNUM
 - Change everything to use LHAPDF6 features instead of deprecated LHAGLUE;
   partially done in HOPPET interface
 - Drop LHAPDF5 support

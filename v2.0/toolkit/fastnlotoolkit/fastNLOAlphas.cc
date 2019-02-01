@@ -69,16 +69,16 @@ void fastNLOAlphas::SetNFlavor(int nflavor) {
 }
 
 void fastNLOAlphas::SetNLoop(int nloop) {
+   if ( nloop < 2 || nloop > 4 ) {
+      logger.error["fastNLOAlphas::SetNLoop"] << "Illegal no. of loops nloop = " << nloop <<
+         ", aborted! Only 2, 3, or 4 are allowed with fastNLO GRV code." << endl;
+      exit(11);
+   }
    Alphas::SetNLoop(nloop);
 }
 
-void fastNLOAlphas::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
-   logger.debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
-   //
-   //  Set the alpha_s value at M_Z
-   //
-   fAlphasMz    = AlphasMz;             // new alpha_s value
-   if (ReCalcCrossSection) CalcCrossSection();
+void fastNLOAlphas::SetAlphasMz(double AlphasMz) {
+   fAlphasMz    = AlphasMz;
 }
 
 

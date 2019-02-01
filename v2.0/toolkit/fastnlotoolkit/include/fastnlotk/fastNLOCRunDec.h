@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_reader_2.1.0                                                //
+//  fastNLO_toolkit                                                     //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -25,56 +25,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
 #ifndef FASTNLOCRUNDEC
 #define FASTNLOCRUNDEC
 
-//#include "fastNLOReader.h"
-//#include <iostream>
-//#include <cstdio>
-//#include <cstdlib>
-//#include <LHAPDF/LHAPDF.h>
-//#include "speaker.h"
 #include "fastNLOLHAPDF.h"
 #include "CRunDec.h"
 
 
+
 class fastNLOCRunDec : public fastNLOLHAPDF {
 
-    public:
-        fastNLOCRunDec(std::string name);
-        fastNLOCRunDec(std::string name, std::string LHAPDFFile, int PDFSet);
-        // ---- Alphas vars ---- //
-        // Setters
-        void SetMz(double Mz);
-        void SetNFlavor(int nflavor);
-        void SetNLoop(int nloop);
-        void SetQMass(int pdgid, double qmass);
-        void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection);
-        void SetLHAPDFValues();
-        void SetPDGValues();
-        // Getters
-        double GetMz() const;
-        double GetQMass(int pdgid) const;
-        int GetNFlavor() const;
-        int GetNLoop() const;
-        double GetAlphasMz() const;
+ public:
+   // Parameter initialisation with PDG values
+   fastNLOCRunDec(std::string name);
+   // Parameter initialisation with LHAPDF set values
+   fastNLOCRunDec(std::string name, std::string LHAPDFFile, int PDFMem = 0);
 
-    protected:
+   // Getters
+   double GetQMass(int pdgid) const;
+   double GetMz() const;
+   std::string GetNScheme() const;
+   int GetNFlavor() const;
+   int GetNLoop() const;
+   double GetAlphasMz() const;
 
-        // inherited functions
-        double EvolveAlphas(double Q) const ;
+   // Setters
+   void SetQMass(int pdgid, double qmass);
+   void SetMz(double Mz);
+   void SetNFlavor(int nflavor);
+   void SetNLoop(int nloop);
+   void SetAlphasMz(double AlphasMz);
+   void SetPDGValues();
+   void SetLHAPDFValues(std::string LHAPDFFile, int PDFMem = 0);
 
-        // ---- Alphas vars ---- //
-        CRunDec *crundec;
-        void InitCRunDec();
-        double fAlphasMz;
-        double fMz;
-        int fnFlavor;
-        int fnLoop;
-        double QMass[6];
+   // Printers
+   void PrintParmValues();
 
+ protected:
+   // Inherited functions
+   double EvolveAlphas(double Q) const ;
 
+   // ---- Alphas vars ---- //
+   void InitCRunDec();
+   CRunDec *crundec;
+   double QMass[6];
+   double fMz;
+   std::string fnScheme;
+   int fnFlavor;
+   int fnLoop;
+   double fAlphasMz;
 };
 
 #endif

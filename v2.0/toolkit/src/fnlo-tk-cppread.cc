@@ -751,11 +751,11 @@ int main(int argc, char** argv) {
    } else if (AsEvolCode == "LHAPDF") {
       fnlo = new fastNLOLHAPDF(tablename);
    } else if (AsEvolCode == "RUNDEC") {
-      fnlo = new fastNLOCRunDec(tablename);
+      fnlo = new fastNLOCRunDec(tablename,PDFFile,0);
    } else if (AsEvolCode == "QCDNUM") {
 #ifdef WITH_QCDNUM
       //! ONLY if compiled --with-qcdnum support!
-      fnlo = new fastNLOQCDNUMAS(tablename);
+      fnlo = new fastNLOQCDNUMAS(tablename,PDFFile,0);
 #else
       printf("fnlo-tk-cppread: ERROR! The alpha_s evolution code %s was selected!\n",AsEvolCode.c_str());
       printf("           But the fastNLO Toolkit was compiled without the optional support for this!\n");
@@ -798,7 +798,7 @@ int main(int argc, char** argv) {
    // For example to check the upper limit of the PDF member numbering do
    //
    // const LHAPDF::PDFSet PDFset(PDFFile);
-   // int imaxpdf = stoi(PDFset.get_entry("NumMembers"));
+   // int imaxpdf = PDFset.get_entry_as<int>("NumMembers");
    //
    // Note: Usually there is a member no. 0 corresponding to the central result,
    //       which is counted as well.

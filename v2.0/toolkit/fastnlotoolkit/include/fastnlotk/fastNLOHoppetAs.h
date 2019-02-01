@@ -38,7 +38,7 @@ class fastNLOHoppetAs : public fastNLOHoppet {
    // Only allow constructor with information on LHAPDF set and member
    // as needed for HOPPET initialisation.
    fastNLOHoppetAs(std::string name) = delete;
-   fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet);
+   fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFMem = 0);
 
  protected:
    virtual std::vector<double> GetXFX(double xp, double muf) const;

@@ -13,6 +13,7 @@ double HoppetInterface::QMass[6] = {PDG_MD, PDG_MU, PDG_MS, PDG_MC, PDG_MB, PDG_
 double HoppetInterface::fMz = PDG_MZ;
 double HoppetInterface::fAlphasMz = PDG_ASMZ;
 // VFNS & NLO
+std::string HoppetInterface:: fnScheme = "variable";
 int HoppetInterface::fnFlavor = 0;
 int HoppetInterface::fnLoop = 2;
 

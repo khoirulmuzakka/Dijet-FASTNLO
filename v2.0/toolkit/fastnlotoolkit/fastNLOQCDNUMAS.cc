@@ -33,35 +33,47 @@
 
 using namespace std;
 
+
+
 //______________________________________________________________________________
 //
-//
 fastNLOQCDNUMAS::fastNLOQCDNUMAS(std::string name) : fastNLOLHAPDF(name) {
-   //Set some meaningful initial values
+   // Without PDF info use PDG values as default
    SetPDGValues();
+   // Print out values for checking
+   //   PrintParmValues();
 };
-fastNLOQCDNUMAS::fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet), fAlphasMz(0.1184) {
-   //Set some meaningful initial values
-   SetPDGValues();
+fastNLOQCDNUMAS::fastNLOQCDNUMAS(std::string name, std::string LHAPDFFile, int PDFMem) : fastNLOLHAPDF(name,LHAPDFFile,PDFMem) {
+   // Set initial values via LHAPDF6 info system
+   SetLHAPDFValues(LHAPDFFile, PDFMem);
+   // Print out values for checking
+   //   PrintParmValues();
 };
 
 
 
 // Getters
 double fastNLOQCDNUMAS::GetQMass(int pdgid) const {
-    return QMass[pdgid];
+   if (pdgid < 1 || pdgid > 6 ) {
+      logger.error["fastNLOQCDNUMAS::GetQMass"]<<"PDG code out of quark index range 1-6! Aborted.\n";
+      exit(1);
+   }
+   return QMass[pdgid];
 }
 double fastNLOQCDNUMAS::GetMz() const {
-    return fMz;
+   return fMz;
+}
+std::string fastNLOQCDNUMAS::GetNScheme() const {
+   return fnScheme;
 }
 int fastNLOQCDNUMAS::GetNFlavor(int nflavor) const {
-    return nflavor;
+   return nflavor;
 }
 int fastNLOQCDNUMAS::GetNLoop() const {
-    return fnLoop;
+   return fnLoop;
 }
 double fastNLOQCDNUMAS::GetAlphasMz() const {
-    return fAlphasMz;
+   return fAlphasMz;
 };
 
 
@@ -76,13 +88,16 @@ void fastNLOQCDNUMAS::SetMz(double Mz) {
 void fastNLOQCDNUMAS::SetNFlavor(int  nflavor) {
    fnFlavor = nflavor;
 }
-void fastNLOQCDNUMAS::SetNLoop(int  nloop) {
+void fastNLOQCDNUMAS::SetNLoop(int nloop) {
+   if ( nloop < 1 || nloop > 3 ) {
+      logger.error["fastNLOQCDNUMAS::SetNLoop"] << "Illegal no. of loops nloop = " << nloop <<
+         ", aborted! Only 1, 2, or 3 are allowed with QCDNUM." << endl;
+      exit(11);
+   }
    fnLoop = nloop;
 }
-void fastNLOQCDNUMAS::SetAlphasMz(double AlphasMz , bool ReCalcCrossSection) {
-   logger.debug["SetAlphasMz"]<<"Setting alpha_s(Mz)="<<AlphasMz<<" and RecalculateCrossSection="<<(ReCalcCrossSection?"Yes":"No")<<endl;
+void fastNLOQCDNUMAS::SetAlphasMz(double AlphasMz) {
    fAlphasMz    = AlphasMz;
-   if (ReCalcCrossSection) CalcCrossSection();
 }
 
 
@@ -97,62 +112,93 @@ void fastNLOQCDNUMAS::SetPDGValues() {
    QMass[4]  = PDG_MB;
    QMass[5]  = PDG_MT;
    fMz       = PDG_MZ;
-   //Variable flavor number scheme
+   // Variable flavor number scheme
    fnFlavor = 0;
-   //2-loop alpha_s evolution
+   // 2-loop alpha_s evolution
    fnLoop = 2;
    fAlphasMz = PDG_ASMZ;
 }
 
-void fastNLOQCDNUMAS::SetLHAPDFValues() {
-   //Be sure LHAPDF is initialized when reading the properties
-   if (fchksum == 0 || fchksum != CalcChecksum(1.)) {
-      if ( ! InitPDF() ) {
-         logger.error["SetLHAPDFValues"]<<"No LHAPDF set initialized, aborting!\n";
-         exit(1);
-      } else {
-         FillPDFCache();
-      }
+void fastNLOQCDNUMAS::SetLHAPDFValues(std::string LHAPDFFile, int PDFMem) {
+   // AlphaS_MZ can vary among PDF members, so we really need the PDF member info from LHAPDF
+   const LHAPDF::PDFInfo PDFMemInfo(LHAPDFFile, PDFMem);
+   QMass[0] = PDFMemInfo.get_entry_as<double>("MDown");
+   QMass[1] = PDFMemInfo.get_entry_as<double>("MUp");
+   QMass[2] = PDFMemInfo.get_entry_as<double>("MStrange");
+   QMass[3] = PDFMemInfo.get_entry_as<double>("MCharm");
+   QMass[4] = PDFMemInfo.get_entry_as<double>("MBottom");
+   QMass[5] = PDFMemInfo.get_entry_as<double>("MTop");
+   fMz      = PDFMemInfo.get_entry_as<double>("MZ");
+   fnScheme = PDFMemInfo.get_entry_as<std::string>("FlavorScheme");
+   if ( PDFMemInfo.has_key("AlphaS_NumFlavors") ) {
+      fnFlavor = PDFMemInfo.get_entry_as<int>("AlphaS_NumFlavors");
+   } else {
+      fnFlavor = PDFMemInfo.get_entry_as<int>("NumFlavors");
    }
-   for (int i = 0; i < 6; i++) {
-      QMass[i] = LHAPDF::getQMass(i+1);
+   // Variable flavor numbers are usually set via Nf = 0 in evolution code.
+   // Ensure that fnFlavor is maximum Nf for variable flavor number scheme by
+   // setting quark masses to 10^10.
+   if ( fnFlavor != 0 && fnFlavor < 3 ) {
+      logger.error["fastNLOQCDNUMAS::SetLHAPDFValues"] << "Less than 3 flavors is not supported! Aborted." << endl;
+      exit(11);
    }
-   //How to read LHAPDF Mz???
-   fMz = PDG_MZ;
-   fnFlavor = LHAPDF::getNf();
-   fnLoop = LHAPDF::getOrderAlphaS() + 1;
-   fAlphasMz = LHAPDF::alphasPDF(fMz);
+   if ( fnScheme == "variable" && fnFlavor < 6 ) {
+      QMass[5] = 1.E10;
+      if ( fnFlavor < 5 ) QMass[4] = 1.E10;
+      if ( fnFlavor < 4 ) QMass[3] = 1.E10;
+      fnFlavor = 0;
+   }
+   if ( PDFMemInfo.has_key("AlphaS_OrderQCD") ) {
+      fnLoop = PDFMemInfo.get_entry_as<int>("AlphaS_OrderQCD") + 1;
+   } else {
+      fnLoop = PDFMemInfo.get_entry_as<int>("OrderQCD") + 1;
+   }
+   fAlphasMz = PDFMemInfo.get_entry_as<double>("AlphaS_MZ");
 }
 
 
 
-// Evolution
+// Printers
+void fastNLOQCDNUMAS::PrintParmValues() {
+   for ( int i = 0; i<6; i++ ) {
+      cout << "fQMass[" << i << "] = " << QMass[i] << endl;
+   }
+   cout << "fMz       = " << fMz << endl;
+   cout << "fnScheme  = " << fnScheme << endl;
+   cout << "fnFlavor  = " << fnFlavor << endl;
+   cout << "fnLoop    = " << fnLoop << endl;
+   cout << "fAlphasMz = " << fAlphasMz << endl;
+}
+
+
+
+// Initialisation
 void fastNLOQCDNUMAS::InitEvolveAlphas() {
-   //Ensure reasonable values are set
-   //TODO Really neccessary?
+   // Ensure reasonable values are set
+   // TODO Really neccessary?
    char filename[] = " ";
    int len_filename = strlen(filename);
    int lun = 6;
    qcinit_(&lun, filename, len_filename);
 
-   //LHAPDF LO=0 while QCDNUM LO=1
+   // LHAPDF LO=0 while QCDNUM LO=1
    int iord = fnLoop;
 
-   //TODO Set correct Array in q2. maybe fnloreader. getQScale...
+   // TODO Set correct Array in q2. maybe fnloreader. getQScale...
    double qarr[2] = {1.0, 1000000};
    double wgt[2] =  {1.0, 1.0};
-   //Length of array
+   // Length of array
    int n= 2;
-   //Number of grid points
+   // Number of grid points
    int nqin = 140;
-   //Real number generated grid points
+   // Real number generated grid points
    int nqout = 0;
-   //Create Q2 Grid
+   // Create Q2 Grid
    gqmake_(qarr, wgt, &n, &nqin, &nqout);
    setord_(&iord);
    double r2 = fMz * fMz;
    setalf_(&fAlphasMz, &r2);
-   //Get Indices of Flavor Thresholds (currently just the Q mass)
+   // Get Indices of Flavor Thresholds (currently just the Q mass)
    double Q2Mass[6];
    for (int i = 0; i < 6; i++)
       Q2Mass[i] = QMass[i]*QMass[i];
@@ -167,21 +213,22 @@ void fastNLOQCDNUMAS::InitEvolveAlphas() {
    setcbt_(&fnFlavor, &iqc, &iqb, &iqt);
 }
 
+// Evolution
 double fastNLOQCDNUMAS::EvolveAlphas(double Q) const {
    //
    // Implementation of Alpha_s evolution as function of Mu_r only.
    //
    double mu2 = Q*Q;
    int ierr = 9876;
-   //Number of really used flavors
-   int nf = 9;
+   // Number of really used flavors
+   int nf = 9; // KR: Why 9 ???!!!
    double as = asfunc_(&mu2, &nf , &ierr);
-   //cout << as << "  " << mu2 << " " << nf << endl;
    if (ierr > 0)
       logger.error["EvolveAlphas"]<<"Alphas evolution failed. ierr = "<<ierr<<", Q = "<<Q<<endl;
    return as;
 }
 
+// Calculation
 void fastNLOQCDNUMAS::CalcCrossSection() {
    InitEvolveAlphas();
    fastNLOLHAPDF::CalcCrossSection();

@@ -41,7 +41,7 @@ public:
    virtual void SetMz(double Mz);
    virtual void SetNFlavor(int nflavor);
    virtual void SetNLoop(int nloop);
-   virtual void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   virtual void SetAlphasMz(double AlphasMz);
    virtual void SetQMass(int pdgid, double mq);
    // Setters
    void SetLHAPDFFilename(std::string filename);

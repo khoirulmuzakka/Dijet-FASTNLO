@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//  fastNLO_toolkit                                                     //
+//  fastNLO_reader_2.1.0                                                //
 //  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch           //
 //                                                                      //
 //  The projects web page can be found at:                              //
@@ -32,7 +32,7 @@
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/fastNLOHoppet.h"
 #include "fastnlotk/HoppetInterface.h"
-#include "fastnlotk/speaker.h"
+//#include "fastnlotk/speaker.h"
 
 using namespace std;
 
@@ -40,12 +40,12 @@ using namespace std;
 
 //______________________________________________________________________________
 //
-fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOLHAPDF(name,LHAPDFFile,PDFSet) {
-   // Set some meaningful initial values
-   // Keep our PDG settings for now
-   SetPDGValues();
-   // New: Set initial values via LHAPDF6 info system
-   //   SetLHAPDFValues(LHAPDFFile);
+fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFMem) : fastNLOLHAPDF(name, LHAPDFFile, PDFMem) {
+   // Without PDF info use PDG values as default
+   //   SetPDGValues();
+   //   PrintParmValues();
+   // Set initial values via LHAPDF6 info system
+   SetLHAPDFValues(LHAPDFFile, PDFMem);
    // Print out values for checking
    //   PrintParmValues();
    fastNLOHoppet::InitPDF();
@@ -55,16 +55,23 @@ fastNLOHoppet::fastNLOHoppet(std::string name, std::string LHAPDFFile, int PDFSe
 
 // Getters
 double fastNLOHoppet::GetQMass(int pdgid) const {
+   if (pdgid < 1 || pdgid > 6 ) {
+      logger.error["fastNLOHoppet::GetQMass"]<<"PDG code out of quark index range 1-6! Aborted.\n";
+      exit(1);
+   }
    return HoppetInterface::QMass[pdgid];
+}
+double fastNLOHoppet::GetMz() const {
+   return HoppetInterface::fMz;
+}
+std::string fastNLOHoppet::GetNScheme() const {
+   return HoppetInterface::fnScheme;
 }
 int fastNLOHoppet::GetNFlavor() const {
    return HoppetInterface::fnFlavor;
 }
 int fastNLOHoppet::GetNLoop() const {
    return HoppetInterface::fnLoop;
-}
-double fastNLOHoppet::GetMz() const {
-   return HoppetInterface::fMz;
 }
 double fastNLOHoppet::GetAlphasMz() const {
    return HoppetInterface::fAlphasMz;
@@ -77,19 +84,24 @@ void fastNLOHoppet::SetQMass(int pdgid, double qmass) {
    HoppetInterface::QMass[pdgid] = qmass;
    HoppetInterface::InitHoppet(*this);
 }
-void fastNLOHoppet::SetNFlavor(int nflavor) {
-   HoppetInterface::fnFlavor = nflavor;
-   HoppetInterface::InitHoppet(*this);
-}
-void fastNLOHoppet::SetNLoop(int  nloop) {
-   HoppetInterface::fnLoop = nloop;
-   HoppetInterface::InitHoppet(*this);
-}
 void fastNLOHoppet::SetMz(double Mz) {
    HoppetInterface::fMz = Mz;
    HoppetInterface::InitHoppet(*this);
 }
-void fastNLOHoppet::SetAlphasMz(double AlphasMz, bool ReCalcCrossSection) {
+void fastNLOHoppet::SetNFlavor(int nflavor) {
+   HoppetInterface::fnFlavor = nflavor;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetNLoop(int nloop) {
+   if ( nloop < 1 || nloop > 3 ) {
+      logger.error["fastNLOHoppet::SetNLoop"] << "Illegal no. of loops nloop = " << nloop <<
+         ", aborted! Only 1, 2, or 3 are allowed with HOPPET." << endl;
+      exit(11);
+   }
+   HoppetInterface::fnLoop = nloop;
+   HoppetInterface::InitHoppet(*this);
+}
+void fastNLOHoppet::SetAlphasMz(double AlphasMz) {
    HoppetInterface::fAlphasMz = AlphasMz;
    HoppetInterface::InitHoppet(*this);
 }
@@ -114,20 +126,45 @@ void fastNLOHoppet::SetPDGValues() {
    HoppetInterface::InitHoppet(*this);
 }
 
-void fastNLOHoppet::SetLHAPDFValues(std::string LHAPDFFile) {
-   const LHAPDF::PDFSet PDFset(LHAPDFFile);
-   HoppetInterface::QMass[0]  = stod(PDFset.get_entry("MDown"));
-   HoppetInterface::QMass[1]  = stod(PDFset.get_entry("MUp"));
-   HoppetInterface::QMass[2]  = stod(PDFset.get_entry("MStrange"));
-   HoppetInterface::QMass[3]  = stod(PDFset.get_entry("MCharm"));
-   HoppetInterface::QMass[4]  = stod(PDFset.get_entry("MBottom"));
-   HoppetInterface::QMass[5]  = stod(PDFset.get_entry("MTop"));
-   HoppetInterface::fMz       = stod(PDFset.get_entry("MZ"));
-   // Variable flavor number scheme
-   //   HoppetInterface::fnFlavor  = stoi(PDFset.get_entry("NumFlavors"));
-   HoppetInterface::fnFlavor = 0;
-   HoppetInterface::fnLoop    = stoi(PDFset.get_entry("AlphaS_OrderQCD")) + 1;
-   HoppetInterface::fAlphasMz = stod(PDFset.get_entry("AlphaS_MZ"));
+void fastNLOHoppet::SetLHAPDFValues(std::string LHAPDFFile, int PDFMem) {
+   // AlphaS_MZ can vary among PDF members, so we really need the PDF member info from LHAPDF
+   const LHAPDF::PDFInfo PDFMemInfo(LHAPDFFile, PDFMem);
+   HoppetInterface::QMass[0] = PDFMemInfo.get_entry_as<double>("MDown");
+   HoppetInterface::QMass[1] = PDFMemInfo.get_entry_as<double>("MUp");
+   HoppetInterface::QMass[2] = PDFMemInfo.get_entry_as<double>("MStrange");
+   HoppetInterface::QMass[3] = PDFMemInfo.get_entry_as<double>("MCharm");
+   HoppetInterface::QMass[4] = PDFMemInfo.get_entry_as<double>("MBottom");
+   HoppetInterface::QMass[5] = PDFMemInfo.get_entry_as<double>("MTop");
+   HoppetInterface::fMz      = PDFMemInfo.get_entry_as<double>("MZ");
+   HoppetInterface::fnScheme = PDFMemInfo.get_entry_as<std::string>("FlavorScheme");
+   if ( PDFMemInfo.has_key("AlphaS_NumFlavors") ) {
+      HoppetInterface::fnFlavor = PDFMemInfo.get_entry_as<int>("AlphaS_NumFlavors");
+   } else {
+      HoppetInterface::fnFlavor = PDFMemInfo.get_entry_as<int>("NumFlavors");
+   }
+   // Variable flavor numbers are usually set via Nf = 0 in evolution code.
+   // Ensure that fnFlavor is maximum Nf for variable flavor number scheme by
+   // setting quark masses to 10^10.
+   if ( HoppetInterface::fnFlavor != 0 && HoppetInterface::fnFlavor < 3 ) {
+      logger.error["fastNLOHoppet::SetLHAPDFValues"] << "Less than 3 flavors is not supported! Aborted." << endl;
+      exit(11);
+   }
+   if ( HoppetInterface::fnScheme == "variable" && HoppetInterface::fnFlavor < 6 ) {
+      HoppetInterface::QMass[5] = 1.E10;
+      if ( HoppetInterface::fnFlavor < 5 ) HoppetInterface::QMass[4] = 1.E10;
+      if ( HoppetInterface::fnFlavor < 4 ) HoppetInterface::QMass[3] = 1.E10;
+      HoppetInterface::fnFlavor = 0;
+   }
+   if ( PDFMemInfo.has_key("AlphaS_OrderQCD") ) {
+      HoppetInterface::fnLoop = PDFMemInfo.get_entry_as<int>("AlphaS_OrderQCD") + 1;
+   } else {
+      HoppetInterface::fnLoop = PDFMemInfo.get_entry_as<int>("OrderQCD") + 1;
+   }
+   if ( HoppetInterface::fnFlavor > 3 ) {
+      logger.error["fastNLOHoppet::SetLHAPDFValues"] << "More than 3 loops is not supported! Aborted." << endl;
+      exit(11);
+   }
+   HoppetInterface::fAlphasMz = PDFMemInfo.get_entry_as<double>("AlphaS_MZ");
    HoppetInterface::InitHoppet(*this);
 }
 
@@ -139,6 +176,7 @@ void fastNLOHoppet::PrintParmValues() {
       cout << "fQMass[" << i << "] = " << HoppetInterface::QMass[i] << endl;
    }
    cout << "fMz       = " << HoppetInterface::fMz << endl;
+   cout << "fnScheme  = " << HoppetInterface::fnScheme << endl;
    cout << "fnFlavor  = " << HoppetInterface::fnFlavor << endl;
    cout << "fnLoop    = " << HoppetInterface::fnLoop << endl;
    cout << "fAlphasMz = " << HoppetInterface::fAlphasMz << endl;

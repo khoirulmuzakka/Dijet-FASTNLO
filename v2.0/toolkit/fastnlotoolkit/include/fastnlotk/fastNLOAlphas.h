@@ -51,7 +51,7 @@ public:
    void SetMz(double Mz);
    void SetNFlavor(int nflavor);
    void SetNLoop(int nloop);
-   void SetAlphasMz(double AlphasMz , bool ReCalcCrossSection = false);
+   void SetAlphasMz(double AlphasMz);
    // Getters
    double GetAlphasMz() const;
    void SetGRVtoPDG2012_2loop();

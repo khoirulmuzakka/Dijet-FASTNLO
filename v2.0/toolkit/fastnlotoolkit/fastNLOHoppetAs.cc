@@ -39,12 +39,12 @@ using namespace std;
 
 //______________________________________________________________________________
 //
-fastNLOHoppetAs::fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFSet = 0) : fastNLOHoppet(name,LHAPDFFile,PDFSet) {
-   // Set some meaningful initial values
-   // Keep our PDG settings for now
-   SetPDGValues();
-   // New: Set initial values via LHAPDF6 info system
-   //   SetLHAPDFValues(LHAPDFFile);
+fastNLOHoppetAs::fastNLOHoppetAs(std::string name, std::string LHAPDFFile, int PDFMem) : fastNLOHoppet(name,LHAPDFFile,PDFMem) {
+   // Without PDF info use PDG values as default
+   //   SetPDGValues();
+   //   PrintParmValues();
+   // Set initial values via LHAPDF6 info system
+   SetLHAPDFValues(LHAPDFFile, PDFMem);
    // Print out values for checking
    //   PrintParmValues();
    fastNLOHoppet::InitPDF();
