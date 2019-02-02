@@ -147,7 +147,8 @@ public:
    void PrintStats() const { fStats.PrintStats();}                                              //!< Print statistics
    void SetGlobalVerbosity(std::string sverb);                                                  //!< Set GlobalVerbosity using std::string variable
 
-   void SetCacheSize(int MaxCache, int CacheComp, int CacheType=2);                             //!< Set maximum number of events in cache. Set to 0 to deactivate caching, CacheComp: maximum numbers of entries to be compared with new element; fCacheType: 0: deactivate, 1: 1D cache, 2: cache per ObsBin and Proc
+   // KR Allow nnlo-bridge_0.0.40 to be linked
+   void SetCacheSize(int MaxCache, int CacheComp=2, int CacheType=2);                           //!< Set maximum number of events in cache. Set to 0 to deactivate caching, CacheComp: maximum numbers of entries to be compared with new element; fCacheType: 0: deactivate, 1: 1D cache, 2: cache per ObsBin and Proc
    int GetCacheSize() const { return fCacheMax; }                                               //!< Get max cache size
    int GetCacheComp() const { return fCacheComp; }                                              //!< Get cache comp value
    int GetCacheType() const { return fCacheType; }                                              //!< Get cache type

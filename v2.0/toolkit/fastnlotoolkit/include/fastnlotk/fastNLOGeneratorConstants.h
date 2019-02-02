@@ -1,9 +1,9 @@
-// This include must come first to enable conditional compilation e.g. using HAVE_LIBZ!
-#include <config.h>
-
 #ifndef __fnlogeneratorconstants__
 #define __fnlogeneratorconstants__
 
+// NEVER EVER include a project's internal config.h in installable header files!
+// Use for conditional compilation only in .cc source code files.
+// Otherwise conflicts with other linked projects are to be expected.
 #include <iostream>
 #include <string>
 #include <vector>
@@ -147,54 +147,10 @@ namespace fastNLO {
       std::string Mu2_DistanceMeasure;//!< "loglog025"
       int Mu2_NNodes;//!< 6
 
-      ScenarioConstants() {
-         SetDefaults();
-      }
-      void SetDefaults() {
-         PublicationUnits=12;
-         InclusiveJets=false;
-         ScenarioName="Undefined";
-         ScenarioDescription.clear();
-         BinSizeFactor=1.;
-         CalculateBinSize=true;
-         DifferentialDimension=0; //! a safe initialisation
-         DimensionIsDifferential.clear();
-         DimensionIsDifferential.push_back(2);
-         PDF1=2212;
-         PDF2=2212;
-#ifdef HAVE_LIBZ
-         OutputCompression=true;
-#else
-         OutputCompression=false;
-#endif /* HAVE_LIBZ */
-         CacheType =  2;
-         CacheMax  = 20;
-         CacheComp =  2;
-         OutputPrecision=8;
-         FlexibleScaleTable=false;
-         ScaleVariationFactors.clear();
-         ScaleVariationFactors.push_back(0.5);
-         ScaleVariationFactors.push_back(1);
-         ScaleVariationFactors.push_back(2);
-         ReadBinningFromSteering=true;
-         ApplyPDFReweighting=true;
-         CheckScaleLimitsAgainstBins=true;
-         X_Kernel="Lagrange";
-         X_DistanceMeasure="sqrtlog10";
-         X_NNodes=15;
-         X_NNodeCounting = "NodesPerBin";
-
-         Mu1_Kernel="Lagrange";
-         Mu1_DistanceMeasure="loglog025";
-         Mu1_NNodes=6;
-
-         Mu2_Kernel="Lagrange"; //Scale2 not used for fixed-scale tables
-         Mu2_DistanceMeasure="loglog025";
-         Mu2_NNodes=6;
-      }
-
-
+      // KR: Removed superfluous ScenarioConstants defaults.
+      //     This should be done via SetScenConstsDefaults() anyway!
    };
+
 
    struct WarmupConstants {
       //! Variables from warmup-run
@@ -243,9 +199,7 @@ namespace fastNLO {
       WarmupConstants() {
          Init();
       }
-
    };
-
 };
 
 #endif

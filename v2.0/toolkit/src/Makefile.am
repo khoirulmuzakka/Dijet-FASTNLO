@@ -48,25 +48,28 @@ fnlo_tk_cat_SOURCES   = fnlo-tk-cat.cc
 #
 # Preprocessor flags
 #
+# All targets
+AM_CPPFLAGS =
 my_include_dirs = -I${srcdir}/../fastnlotoolkit/include -I${top_builddir}/fastnlotoolkit/include -I${top_srcdir}/fastnlotoolkit/include
 
 if HAVE_LHAPDF
    my_include_dirs += -I${LHAPDFINCLUDEPATH}
 endif
 
-fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir} $(LHAPDFCPPFLAGS)
-fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
+# Individual targets
+fnlo_tk_cppread_CPPFLAGS = $(my_include_dirs) -I${includedir} $(LHAPDFCPPFLAGS) $(AM_CPPFLAGS)
+fnlo_tk_example_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS) $(AM_CPPFLAGS)
 if HAVE_ROOT
    fnlo_tk_example_CPPFLAGS += $(ROOTCPPFLAGS)
 endif
-fnlo_tk_yodaout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
-fnlo_tk_statunc_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS)
-fnlo_tk_rootout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS)
-fnlo_tk_merge_CPPFLAGS   = $(my_include_dirs) -I${includedir}
-fnlo_tk_merge2_CPPFLAGS  = $(my_include_dirs) -I${includedir}
-fnlo_tk_append_CPPFLAGS  = $(my_include_dirs) -I${includedir}
-fnlo_tk_modify_CPPFLAGS  = $(my_include_dirs) -I${includedir}
-fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
+fnlo_tk_yodaout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS) $(AM_CPPFLAGS)
+fnlo_tk_statunc_CPPFLAGS = $(my_include_dirs) -I${includedir} $(YODACPPFLAGS) $(AM_CPPFLAGS)
+fnlo_tk_rootout_CPPFLAGS = $(my_include_dirs) -I${includedir} $(ROOTCPPFLAGS) $(AM_CPPFLAGS)
+fnlo_tk_merge_CPPFLAGS   = $(my_include_dirs) -I${includedir} $(AM_CPPFLAGS)
+fnlo_tk_merge2_CPPFLAGS  = $(my_include_dirs) -I${includedir} $(AM_CPPFLAGS)
+fnlo_tk_append_CPPFLAGS  = $(my_include_dirs) -I${includedir} $(AM_CPPFLAGS)
+fnlo_tk_modify_CPPFLAGS  = $(my_include_dirs) -I${includedir} $(AM_CPPFLAGS)
+fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir} $(AM_CPPFLAGS)
 
 #
 # C++ compiler flags
@@ -74,40 +77,45 @@ fnlo_tk_cat_CPPFLAGS     = $(my_include_dirs) -I${includedir}
 # Recall: -std=c++11 is requested by default through configure.ac macro AX_CXX_COMPILE_STDCXX_11
 #         and works with g++, clang etc.!
 #         -std=gnu++11 is restricted to g++ only and not the best option
-fnlo_tk_cppread_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_example_CXXFLAGS = -g -O2 -Wall -Wno-deprecated-declarations
+# All targets
+AM_CXXFLAGS = -g -O2 -Wall -Wdeprecated-declarations
+# Debug flags
+# AM_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
+fnlo_tk_cppread_CXXFLAGS = $(AM_CXXFLAGS)
+fnlo_tk_example_CXXFLAGS = $(AM_CXXFLAGS)
 if HAVE_ROOT
    fnlo_tk_example_CXXFLAGS += $(ROOTCXXFLAGS)
 endif
-fnlo_tk_yodaout_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_statunc_CXXFLAGS = -g -O2 -Wall
-fnlo_tk_rootout_CXXFLAGS = -g -O2 -Wall $(ROOTCXXFLAGS) -Wdeprecated-declarations
-fnlo_tk_merge_CXXFLAGS   = -g -O2 -Wall
-fnlo_tk_merge2_CXXFLAGS  = -g -O2 -Wall
-fnlo_tk_append_CXXFLAGS  = -g -O2 -Wall
-fnlo_tk_modify_CXXFLAGS  = -g -O2 -Wall
-fnlo_tk_cat_CXXFLAGS     = -g -O2 -Wall
-# Debug flags
-#fnlo_CXXFLAGS = -g -ftrapping-math -fsignaling-nans -O0 -Wall
+fnlo_tk_yodaout_CXXFLAGS = $(AM_CXXFLAGS)
+fnlo_tk_statunc_CXXFLAGS = $(AM_CXXFLAGS)
+fnlo_tk_rootout_CXXFLAGS = $(AM_CXXFLAGS) $(ROOTCXXFLAGS)
+fnlo_tk_merge_CXXFLAGS   = $(AM_CXXFLAGS)
+fnlo_tk_merge2_CXXFLAGS  = $(AM_CXXFLAGS)
+fnlo_tk_append_CXXFLAGS  = $(AM_CXXFLAGS)
+fnlo_tk_modify_CXXFLAGS  = $(AM_CXXFLAGS)
+fnlo_tk_cat_CXXFLAGS     = $(AM_CXXFLAGS)
 
 #
 # Linker flags
 #
 # Require lhapdf, use lhapdf-config if possible
+# All targets
+AM_LDFLAGS = -L${pkglibdir} -lfastnlotoolkit
 my_lib_dirs = -L${srcdir}/../fastnlotoolkit -lfastnlotoolkit -L${top_builddir}/fastnlotoolkit -lfastnlotoolkit -L${top_srcdir}/fastnlotoolkit -lfastnlotoolkit
-fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(LHAPDFLDFLAGS)
-fnlo_tk_example_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+# Individual targets
+fnlo_tk_cppread_LDFLAGS = $(my_lib_dirs) $(AM_LDFLAGS) $(LHAPDFLDFLAGS)
+fnlo_tk_example_LDFLAGS = $(my_lib_dirs) $(AM_LDFLAGS) $(LHAPDFLDFLAGS)
 if HAVE_ROOT
    fnlo_tk_example_LDFLAGS += $(ROOTLDFLAGS)
 endif
-fnlo_tk_yodaout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODALDFLAGS)
-fnlo_tk_statunc_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(YODALDFLAGS)
-fnlo_tk_rootout_LDFLAGS = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit $(ROOTLDFLAGS)
-fnlo_tk_merge_LDFLAGS   = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
-fnlo_tk_merge2_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
-fnlo_tk_append_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
-fnlo_tk_modify_LDFLAGS  = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
-fnlo_tk_cat_LDFLAGS     = $(my_lib_dirs) -L${pkglibdir} -lfastnlotoolkit
+fnlo_tk_yodaout_LDFLAGS = $(my_lib_dirs) $(AM_LDFLAGS) $(LHAPDFLDFLAGS) $(YODALDFLAGS)
+fnlo_tk_statunc_LDFLAGS = $(my_lib_dirs) $(AM_LDFLAGS) $(LHAPDFLDFLAGS) $(YODALDFLAGS)
+fnlo_tk_rootout_LDFLAGS = $(my_lib_dirs) $(AM_LDFLAGS) $(LHAPDFLDFLAGS) $(ROOTLDFLAGS)
+fnlo_tk_merge_LDFLAGS   = $(my_lib_dirs) $(AM_LDFLAGS)
+fnlo_tk_merge2_LDFLAGS  = $(my_lib_dirs) $(AM_LDFLAGS)
+fnlo_tk_append_LDFLAGS  = $(my_lib_dirs) $(AM_LDFLAGS)
+fnlo_tk_modify_LDFLAGS  = $(my_lib_dirs) $(AM_LDFLAGS)
+fnlo_tk_cat_LDFLAGS     = $(my_lib_dirs) $(AM_LDFLAGS)
 
 # Files that are required to build the project but that can be
 # recreated IF the necessary autotools etc. are available by:

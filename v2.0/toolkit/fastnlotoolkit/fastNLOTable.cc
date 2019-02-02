@@ -1,4 +1,7 @@
-// This include must come first to enable conditional compilation e.g. using HAVE_LIBZ!
+// Precompiler variables for conditional compilation are generated and
+// stored automatically in config.h via AC_DEFINE statements in configure.ac.
+// To enable conditional compilation, e.g. using HAVE_LIBZ, this config file
+// MUST be the very first one to be included with
 #include <config.h>
 
 #include <algorithm>
