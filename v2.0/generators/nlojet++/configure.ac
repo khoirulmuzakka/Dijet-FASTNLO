@@ -260,9 +260,15 @@ AM_CONDITIONAL(HAVE_FASTJET, test "x$FASTJETPREFIX" != "x")
 AM_CONDITIONAL(HAVE_FASTJETCONFIG, test "x$FASTJETBIN" != "x")
 
 # Add subversion-like git revision number
-GITREV=`git describe`
-echo $GITREV>$srcdir/GITREV
+GITREV=`sh -c "git describe 2> /dev/null"`
+if { test "x$GITREV" = "x"; } ;
+   then GITREV=`cat $srcdir/GITREV`
+   else echo $GITREV>$srcdir/GITREV
+fi
 AC_SUBST(GITREV)
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([You are using fastNLO git revision number $GITREV.])
+AC_MSG_NOTICE([******************************************])
 
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
