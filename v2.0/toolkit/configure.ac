@@ -609,6 +609,17 @@ AC_ARG_ENABLE([fortranext],
 # Basic Fortran check
 if test "x$enable_fortranext" = "xyes"; then
    AC_PROG_FC
+# The following construct is required to make gfortran work on Mac
+# Makefile.am recipe from Mark
+#FRTLIB   = $(shell gfortran -print-file-name=libgfortran.a)
+#FRTLLIB  = -L$(subst /libgfortran.a, ,$(FRTLIB) ) -lgfortran
+# configure.ac version working without gmake extension
+   FRTLIB=`sh -c "gfortran -print-file-name=libgfortran.a 2> /dev/null"`
+   FRTLDFLAGS=`sh -c "echo $(echo "-L$FRTLIB" | sed 's/\/libgfortran\.a/\ -lgfortran/')"`
+   AC_SUBST(FRTLDFLAGS)
+   AC_MSG_NOTICE([******************************************])
+   AC_MSG_NOTICE([Additional Fortran LDFLAGS are: $FRTLDFLAGS.])
+   AC_MSG_NOTICE([******************************************])
 fi
 AC_MSG_NOTICE([******************************************])
 if test "x$enable_fortranext" = "xyes"; then
@@ -620,9 +631,15 @@ AC_MSG_NOTICE([******************************************])
 AM_CONDITIONAL(ENABLE_FORTRANEXT, [test "x$enable_fortranext" = "xyes"])
 
 # Add subversion-like git revision number
-GITREV=`git describe`
-echo $GITREV>$srcdir/GITREV
+GITREV=`sh -c "git describe 2> /dev/null"`
+if { test "x$GITREV" = "x"; } ;
+   then GITREV=`cat $srcdir/GITREV`
+   else echo $GITREV>$srcdir/GITREV
+fi
 AC_SUBST(GITREV)
+AC_MSG_NOTICE([******************************************])
+AC_MSG_NOTICE([You are using fastNLO git revision number $GITREV.])
+AC_MSG_NOTICE([******************************************])
 
 # Initialize Doxygen doc
 if test "x$DOXYGEN" != "x"; then
