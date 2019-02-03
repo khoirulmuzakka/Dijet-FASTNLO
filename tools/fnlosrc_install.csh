@@ -705,7 +705,7 @@ endif
 #------------------------------------------------------------------------------
 if ( ! $mpinnlo ) then
 #   set arc="fastnlo_toolkit-2.3.1-2585"
-   set arc="fastnlo_toolkit-2.3.1-2652"
+   set arc="fastnlo_toolkit-2.3.1-2657"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -742,7 +742,7 @@ if ( ! $mpinnlo ) then
 # fastNLO Interface NLOJet++:
 #------------------------------------------------------------------------------
 #   set arc="fastnlo_interface_nlojet-2.3.1pre-2424"
-   set arc="fastnlo_interface_nlojet-2.3.1pre-2652"
+   set arc="fastnlo_interface_nlojet-2.3.1pre-2657"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
