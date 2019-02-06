@@ -153,6 +153,10 @@ void fastNLOQCDNUMAS::SetLHAPDFValues(std::string LHAPDFFile, int PDFMem) {
    } else {
       fnLoop = PDFMemInfo.get_entry_as<int>("OrderQCD") + 1;
    }
+   if ( fnLoop > 3 ) {
+      logger.error["fastNLOQCDNUMAS::SetLHAPDFValues"] << "More than 3 loops is not supported! Aborted." << endl;
+      exit(11);
+   }
    fAlphasMz = PDFMemInfo.get_entry_as<double>("AlphaS_MZ");
 }
 

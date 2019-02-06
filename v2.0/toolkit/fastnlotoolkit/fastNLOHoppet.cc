@@ -160,7 +160,7 @@ void fastNLOHoppet::SetLHAPDFValues(std::string LHAPDFFile, int PDFMem) {
    } else {
       HoppetInterface::fnLoop = PDFMemInfo.get_entry_as<int>("OrderQCD") + 1;
    }
-   if ( HoppetInterface::fnFlavor > 3 ) {
+   if ( HoppetInterface::fnLoop > 3 ) {
       logger.error["fastNLOHoppet::SetLHAPDFValues"] << "More than 3 loops is not supported! Aborted." << endl;
       exit(11);
    }

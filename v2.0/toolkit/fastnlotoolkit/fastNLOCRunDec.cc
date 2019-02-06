@@ -93,7 +93,7 @@ void fastNLOCRunDec::SetNFlavor(int nflavor) {
 }
 void fastNLOCRunDec::SetNLoop(int nloop) {
    if ( nloop < 1 || nloop > 4 ) {
-      logger.error["fastNLOHoppet::SetNLoop"] << "Illegal no. of loops nloop = " << nloop <<
+      logger.error["fastNLOCRunDec::SetNLoop"] << "Illegal no. of loops nloop = " << nloop <<
          ", aborted! Only 1, 2, 3, or 4 are allowed with RUNDEC." << endl;
       exit(11);
    }
@@ -156,6 +156,10 @@ void fastNLOCRunDec::SetLHAPDFValues(std::string LHAPDFFile, int PDFMem) {
       fnLoop = PDFMemInfo.get_entry_as<int>("AlphaS_OrderQCD") + 1;
    } else {
       fnLoop = PDFMemInfo.get_entry_as<int>("OrderQCD") + 1;
+   }
+   if ( fnLoop > 4 ) {
+      logger.error["fastNLOCRunDec::SetLHAPDFValues"] << "More than 4 loops is not supported! Aborted." << endl;
+      exit(11);
    }
    fAlphasMz = PDFMemInfo.get_entry_as<double>("AlphaS_MZ");
 #else
