@@ -448,16 +448,20 @@ if test "x$with_root" != "xno"; then
       AC_MSG_NOTICE([No $TMPNAM installation path set. Try to find $TMPNAM in prefix path ...])
       AC_PATH_PROG([ROOTBIN],[root-config],[],[$prefix/bin])
       if test "x$ROOTBIN" = "x"; then
-         AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
-         AC_PATH_PROG([ROOTBIN],[root-config])
-         if test "x$ROOTBIN" = "x"; then
-            AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
-         fi
+          AC_MSG_NOTICE([No $TMPNAM installation found in prefix/bin path. Try to find $TMPNAM in prefix/root/bin path ...])
+          AC_PATH_PROG([ROOTBIN],[root-config],[],[$prefix/root/bin])
+          if test "x$ROOTBIN" = "x"; then
+               AC_MSG_NOTICE([No $TMPNAM installation found in prefix path. Try to find $TMPNAM in system path ...])
+               AC_PATH_PROG([ROOTBIN],[root-config])
+               if test "x$ROOTBIN" = "x"; then
+                  AC_MSG_ERROR([No $TMPNAM library found. Configuration aborted!])
+               fi
+          fi
       fi
    else
       AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
       if test "x$ROOTBIN" = "x"; then
-         AC_MSG_ERROR([root-config not found in given path to $TMPNAM! Configuration aborted!])
+         AC_MSG_ERROR([root-config not found in ROOTSYS/bin path to $TMPNAM! Configuration aborted!])
       fi
    fi
    AC_MSG_NOTICE([******************************************])
@@ -489,40 +493,91 @@ else
 fi
 AM_CONDITIONAL(HAVE_ROOT, test "x$ROOTPREFIX" != "x")
 
-# Create code documentation
-# Check on DOXYGEN
+# Create code documentation with Doxygen
 AC_MSG_NOTICE([******************************************])
-AC_MSG_NOTICE([Check for presence of doxygen ...])
+AC_MSG_NOTICE([Checking whether doxygen code documentation is requested ...])
+AC_MSG_NOTICE([Use en/disable_doxygen_doc to switch on/off.])
 AC_MSG_NOTICE([******************************************])
-AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
-if test "x$DOXYGEN" = "x"; then
-   AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
-else
-   DOXYVMIN="1.5"
-   DOXYVERS=`doxygen --version`
-   DOXYVORD=`echo -e "$DOXYVERS\n$DOXYVMIN" | sort -t"." -g | head -n1`
-   if test "x$DOXYVORD" = "x$DOXYVMIN"; then
-      AC_MSG_NOTICE([Creating code documentation using doxygen version $DOXYVERS.])
-      AC_MSG_NOTICE([******************************************])
-      DX_DOT_FEATURE(ON)
-      AC_CHECK_PROGS(DOT, dot, dot)
-      if test "x$DOT" = "x"; then
-         AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
-         DX_DOT_FEATURE(OFF)
-      fi
-      DX_HTML_FEATURE(ON)
-      DX_CHM_FEATURE(OFF)
-      DX_CHI_FEATURE(OFF)
-      DX_MAN_FEATURE(OFF)
-      DX_RTF_FEATURE(OFF)
-      DX_XML_FEATURE(OFF)
-      DX_PDF_FEATURE(ON)
-      DX_PS_FEATURE(OFF)
-   else
-      AC_MSG_WARN([Doxygen version $DOXYVERS too old. Continue without doxygen documentation.])
-      DOXYGEN=""
-   fi
+if test "x$enable_doxygen_chi" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_chi is not implemented and simply IGNORED!])
 fi
+if test "x$enable_doxygen_chm" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_chm is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_html" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_html is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_man" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_man is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_pdf" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_pdf is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_ps" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_ps is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_rtf" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_rtf is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_xml" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_xml is not implemented and simply IGNORED!])
+fi
+if test "x$enable_doxygen_dot" != "x"; then
+   AC_MSG_WARN([Option en/disable_doxygen_dot is not implemented. Dot will be used if available.])
+fi
+if test "x$enable_doxygen_doc" != "xno"; then
+# Check on DOXYGEN
+   AC_MSG_NOTICE([Doxygen code documentation desired.])
+   AC_CHECK_PROGS(DOXYGEN, doxygen, doxygen)
+   if test "x$DOXYGEN" = "x"; then
+      AC_MSG_WARN([Did not find doxygen. Continue without doxygen documentation.])
+      AC_MSG_NOTICE([******************************************])
+   else
+# Minimal version probably is 1.6
+      DOXYVMIN="1.5"
+      DOXYVERS=`doxygen --version`
+      DOXYVORD=`echo -e "$DOXYVERS\n$DOXYVMIN" | sort -t"." -g | head -n1`
+      if test "x$DOXYVORD" = "x$DOXYVMIN"; then
+         AC_MSG_NOTICE([Creating code documentation using doxygen version $DOXYVERS.])
+         DX_DOT_FEATURE(ON)
+         AC_CHECK_PROGS(DOT, dot, dot)
+         if test "x$DOT" = "x"; then
+            AC_MSG_WARN([Did not find dot. Continue doxygen documentation without dot graphics.])
+            DX_DOT_FEATURE(OFF)
+         fi
+         DX_CHM_FEATURE(OFF)
+         DX_CHI_FEATURE(OFF)
+         DX_MAN_FEATURE(OFF)
+         DX_RTF_FEATURE(OFF)
+         DX_XML_FEATURE(OFF)
+         DX_PS_FEATURE(OFF)
+# This if-then-else setup doesn't work as intended!
+#         if test "x$enable_doxygen_html" != "xno"; then
+            DX_HTML_FEATURE(ON)
+#            AC_MSG_NOTICE([Doxygen html code documentation switched on.])
+#         else
+#            DX_HTML_FEATURE(OFF)
+#            AC_MSG_NOTICE([Doxygen html code documentation switched off.])
+#         fi
+#         if test "x$enable_doxygen_pdf" != "xno"; then
+            DX_PDF_FEATURE(ON)
+#            AC_MSG_NOTICE([Doxygen pdf code documentation switched on.])
+#         else
+#            DX_PDF_FEATURE(OFF)
+#            AC_MSG_NOTICE([Doxygen pdf code documentation switched off.])
+#         fi
+      else
+         AC_MSG_WARN([Doxygen version $DOXYVERS too old. Continue without doxygen documentation.])
+         AC_MSG_NOTICE([******************************************])
+         DOXYGEN=""
+      fi
+   fi
+else
+   AC_MSG_NOTICE([No doxygen code documentation desired. Continue without doxygen documentation.])
+   AC_MSG_NOTICE([******************************************])
+   DOXYGEN=""
+fi
+
 # Additional check on epstopdf ...
 AC_CHECK_PROG(EPSTOPDF, epstopdf, epstopdf)
 if test "x$EPSTOPDF" = "x"; then
