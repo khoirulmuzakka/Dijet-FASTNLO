@@ -275,6 +275,8 @@ def main():
                         print '[fastnnlo_scaleunc]: Used scale factor MuR: ', fnlo.GetScaleFactorMuR(), '\n'
                         print '[fastnnlo_scaleunc]: Calculate scale uncertainties \n'
                 ## RELATIVE scale uncertainty with chosen type of scale variation (symmetric or asymmetric)
+                # Up to NLO, it is possible to use HOPPET with fixed-scale tables
+                #                fnlo.UseHoppetScaleVariations(True)
                 rel_scale_unc_item = np.array(fnlo.GetScaleUncertaintyVec(scale_var_type)) #calculate this already for all accessible orders in any case
                 rel_unc_list.append(rel_scale_unc_item)
                 if verb:
