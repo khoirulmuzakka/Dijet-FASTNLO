@@ -2821,13 +2821,13 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
          int kOrder = -1;
          if (BBlocksSMCalc[kFixedOrder][i]) {
             kOrder = BBlocksSMCalc[kFixedOrder][i]->GetIContrFlag2()-1;
-	    if ( kOrder > lOrdMax ) {
-	       logger.error["SetScaleFactorsMuRMuF"]<<"Order beyond NNLO found! Not yet implemented. Aborted."<<endl;
-	       exit(1);
-	    }
+            if ( kOrder > lOrdMax ) {
+               logger.error["SetScaleFactorsMuRMuF"]<<"Order beyond NNLO found! Not yet implemented. Aborted."<<endl;
+               exit(1);
+            }
          }
          if ( BBlocksSMCalc[kFixedOrder][i] && BBlocksSMCalc[kFixedOrder][i]->IsEnabled() ) {
-	    lOrder[kOrder] = true;
+            lOrder[kOrder] = true;
             // if (kOrder == 0) {
             //    lklo = true;
             // } else if (kOrder > 0) {
