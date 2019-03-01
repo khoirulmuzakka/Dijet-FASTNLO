@@ -25,7 +25,7 @@ parser.add_argument('-a','--afile', default='fastnlo', required=True,
                     help='Base name for fastNLO interpolation result, either with log or tab.gz extension.')
 parser.add_argument('-b','--bfile', default='theory', required=True,
                     help='Theory result, either with dat, out, or yoda extension.')
-parser.add_argument('-c', '--cname', default='', required=False, type=str,
+parser.add_argument('-c', '--cfile', default='', required=False, type=str,
                     help='Base name addition for comparisons. ' 'Default: none')
 parser.add_argument('-o', '--outfiles', default='fnlo-compare', required=False, type=str,
                     help='Start of output filename for plots. ' 'Default: fnlo-compare')
@@ -53,40 +53,39 @@ pylab.rcParams.update(params)
 # Input files
 afile = args['afile']
 bfile = args['bfile']
-cfile = afile
+cfile = args['cfile']
 lgtit = afile
-cname = args['cname']
 ext1 = [ 'log', 'tab.gz' ]
 ext2 = [ 'dat', 'out', 'yoda' ]
 aext = ''
 bext = ''
 cext = ''
-if cname:
-    afile += '_'+cname
 for ext in ext1:
     tmp = afile+'.'+ext
+    print 'Searching for afile ',tmp
     if os.path.isfile(tmp):
         afile = tmp
         aext  = ext
         break
 for ext in ext2:
-    tmp = cfile+'.'+ext
-    print cfile, ext, tmp
-    if os.path.isfile(tmp):
-        cfile = tmp
-        cext  = ext
-        break
-for ext in ext2:
     tmp = bfile+'.'+ext
+    print 'Searching for bfile ',tmp
     if os.path.isfile(tmp):
         bfile = tmp
         bext  = ext
+        break
+for ext in ext2:
+    tmp = cfile+'.'+ext
+    print 'Searching for cfile ',tmp
+    if os.path.isfile(tmp):
+        cfile = tmp
+        cext  = ext
         break
 
 if aext:
     print 'Reading fastNLO results from:',afile
 else:
-    print 'ERROR! No fastNLO file found for arguments -a = ', args['afile'],'-c = ',args['cname']
+    print 'ERROR! No fastNLO file found for arguments -a = ', args['afile'],'-c = ',args['cfile']
     exit(1)
 if cext:
     print 'Reading statistical uncertainties for fastNLO from ',cfile
@@ -183,7 +182,7 @@ ax.set_ylabel(r'$\bf d\sigma/dX$ (pb/[X])', horizontalalignment='right', x=1.0, 
 ax.set_xticklabels([])
 
 ax.set_title(r'Interpolation vs. direct calculation', fontweight=titwgt, y=1.05)
-axr.set_title(r'Ratio for {}'.format(cname), fontweight=titwgt)
+axr.set_title(r'Ratio for {}'.format(cfile), fontweight=titwgt)
 plt.axhline(y=1.01, linestyle='--', linewidth=1.0, color='black')
 plt.axhline(y=0.99, linestyle='--', linewidth=1.0, color='black')
 plt.fill_between([0.0,nobs+1],0.99,1.01, color='black', alpha=0.1)
