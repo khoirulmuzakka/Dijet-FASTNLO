@@ -2797,8 +2797,9 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    // The function aborts the whole program if non-sensical scale factors < 1.E-6 are requested.
    // The function returns true if the requested scale factors can be used with the available table:
    //
-   //   If it is NOT a flexibleScaleTable and there is no NLO scalevar table for xmuf,
-   //   xmur and xmuf are unchanged, a warning is printed and the function returns false!
+   //   If it is NOT a flexibleScaleTable and there is no NLO scalevar table for xmuf and
+   //   there is no HOPPET, then xmur and xmuf are unchanged, a warning is printed and
+   //   the function returns false!
    //   If threshold corrections are selected, then
    //   - only symmetric scale variations, i.e. xmur / xmuf = 1., are allowed,
    //   - the scale variations for xmuf must be stored in IDENTICAL order
@@ -2839,6 +2840,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
    bool lklo = lOrder[0];
    bool lkho = lOrder[1] || lOrder[2];
    bool lllo = (lklo && !lkho) || (lklo && lkho && !lOrder[2]) || (lklo && lOrder[1] && lOrder[2]);
+   bool lflex = GetIsFlexibleScaleTable();
 
    // Check whether threshold corrections exist and are activated
    bool lkthc = false;
@@ -2852,9 +2854,9 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       }
    }
 
-   // For fixed-order results mur scale factor variations are possible only with all lower orders included
+   // For fixed-scale tables mur scale factor variations are possible only with all lower orders included
    // If not, only the prestored muf scale factors are possible with whatever mur scale factors were used at filling time
-   if (!lllo && (fabs(xmur-xmuf) > DBL_MIN)) {
+   if (!lllo && !lflex && (fabs(xmur-xmuf) > DBL_MIN)) {
       logger.warn["SetScaleFactorsMuRMuF"]
             <<"Changing the MuR scale factor different from MuF is not possible when lower orders are missing, nothing changed!\n";
       logger.warn["SetScaleFactorsMuRMuF"]
@@ -2862,7 +2864,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
       logger.man<<"Please do MuR scale factors variations only, if all fixed-order contributions are present and switched on.\n";
       return false;
    }
-   if (!lllo && (fabs(xmuf-1.) > DBL_MIN)) {
+   if (!lllo && !lflex && (fabs(xmuf-1.) > DBL_MIN)) {
       logger.info["SetScaleFactorsMuRMuF"]
             <<"Changing the MuF scale factor from unity is possible only for the prestored values. To be checked!\n";
       logger.man<<"Please do MuF scale variations only, if either prestored values or HOPPET are available.\n";
@@ -2882,7 +2884,7 @@ bool fastNLOReader::SetScaleFactorsMuRMuF(double xmur, double xmuf) {
 
    // Deal with factorization scale first
    // Check whether corresponding xmuf variation exists in case of v2.0 table
-   if (!GetIsFlexibleScaleTable()) {
+   if (!lflex) {
 
       // Neither LO only, nor UseHoppet
       if ((lkho || lkthc) && !fUseHoppet) {
