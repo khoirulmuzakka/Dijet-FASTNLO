@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
    //! --- End counter
    string chmax = "1000";
    if (argc > 5) {
-      chmax = (const char*) argv[4];
+      chmax = (const char*) argv[5];
    }
    if (argc <= 5 || chmax == "_") {
       chmax = "1000";
