@@ -142,7 +142,7 @@ private:
    double obs2[3];
    vector<string> ScaleLabel; // Scale labels (Scale1: must be defined; Scale2: only for flex-scale tables)
    // enum to switch between implemented scale definitions (max. of 2 simultaneously)
-   enum Scales { PTMAX, PTJET };
+   enum Scales { PTMAX, PTJETMIN, PTJETAVE, PTJETMAX };
    Scales mudef[2];
    double mu[2];
    int jetalgo;               // Define 1st fastjet jet algorithm (no default, must be defined)
@@ -266,8 +266,14 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    for ( unsigned int i = 0; i < ScaleLabel.size(); i++ ) {
       if ( ScaleLabel[i] == "pT_max_[GeV]" ) {
          mudef[i] = PTMAX;
-      } else if ( ScaleLabel[i] == "pT_jet_[GeV]" ) {
-         mudef[i] = PTJET;
+      } else if ( ScaleLabel[i] == "pT_jet_min_[GeV]" ) {
+         mudef[i] = PTJETMIN;
+         lptmax = false;
+      } else if ( ScaleLabel[i] == "pT_jet_ave_[GeV]" ) {
+         mudef[i] = PTJETAVE;
+         lptmax = false;
+      } else if ( ScaleLabel[i] == "pT_jet_max_[GeV]" ) {
+         mudef[i] = PTJETMAX;
          lptmax = false;
       } else {
          say::error["ScenarioCode"] << "Unknown scale, i.e. scale description, aborted!" << endl;
@@ -561,7 +567,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // 1st jet loop k
    map<int,int> count;
    map<int,int> acount;
-   map<int,double> scale;
+   map<int,double> sclmin;
+   map<int,double> sclave;
+   map<int,double> sclmax;
    map<int,vector <double>> value;
    for (unsigned int k = 1; k <= njet; k++) {
       vector<double> vobs;
@@ -607,7 +615,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          acount[ikey] += 1;
          value[ikey]   = vobs;
          if ( imuscl > -1 ) {
-            scale[ikey]  += vobs[imuscl];
+            sclmin[ikey]  = (sclmin[ikey] > 0.) ? min(sclmin[ikey],vobs[imuscl]) : vobs[imuscl];
+            sclave[ikey]  += vobs[imuscl];
+            sclmax[ikey]  = max(sclmax[ikey],vobs[imuscl]);
          }
       }
 
@@ -665,7 +675,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          acount[ikey] += 1;
          value[ikey]   = vobs;
          if ( imuscl > -1 ) {
-            scale[ikey]  += vobs[imuscl];
+            sclmin[ikey]  = (sclmin[ikey] > 0.) ? min(sclmin[ikey],vobs[imuscl]) : vobs[imuscl];
+            sclave[ikey]  += vobs[imuscl];
+            sclmax[ikey]  = max(sclmax[ikey],vobs[imuscl]);
          }
       }
 
@@ -703,9 +715,23 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
                   // maximal jet pT
                   mu[i] = ptmax;
                   break;
-               case PTJET :
+               case PTJETMIN :
+                  // jet pT (in fact, minimum of all jets in same pT bin)
+                  // if ( (sclmax[iPair.first] - sclmin[iPair.first]) / sclave[iPair.first] * acount[iPair.first] > 1e-6 ) {
+                  //    cout << "MIN iPair.first = " << iPair.first << ", sclmin = " << sclmin[iPair.first] <<", sclave = " << sclave[iPair.first]/acount[iPair.first] << ", sclmax = " << sclmax[iPair.first] << endl;}
+                  mu[i] = sclmin[iPair.first];
+                  break;
+               case PTJETAVE :
                   // jet pT (in fact, average of all jets in same pT bin)
-                  mu[i] = scale[iPair.first]/acount[iPair.first];
+                  // if ( (sclmax[iPair.first] - sclmin[iPair.first]) / sclave[iPair.first] * acount[iPair.first] > 1e-6 ) {
+                  //    cout << "AVE iPair.first = " << iPair.first << ", sclmin = " << sclmin[iPair.first] <<", sclave = " << sclave[iPair.first]/acount[iPair.first] << ", sclmax = " << sclmax[iPair.first] << endl;}
+                  mu[i] = sclave[iPair.first]/acount[iPair.first];
+                  break;
+               case PTJETMAX :
+                  // jet pT (in fact, maximum of all jets in same pT bin)
+                  // if ( (sclmax[iPair.first] - sclmin[iPair.first]) / sclave[iPair.first] * acount[iPair.first] > 1e-6 ) {
+                  //    cout << "MAX iPair.first = " << iPair.first << ", sclmin = " << sclmin[iPair.first] <<", sclave = " << sclave[iPair.first]/acount[iPair.first] << ", sclmax = " << sclmax[iPair.first] << endl;}
+                  mu[i] = sclmax[iPair.first];
                   break;
                default :
                   say::error["ScenarioCode"] << "Scale not yet implemented, aborted!" << endl;

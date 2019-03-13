@@ -1503,12 +1503,13 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
       double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = c->GetNxmax(i);
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+         double Q2           = c->GetScaleNode1(i,jS1)*c->GetScaleNode1(i,jS1);
+         double lq2 = log(Q2);
          for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-            double Q2           = c->GetScaleNode1(i,jS1)*c->GetScaleNode1(i,jS1);
             double mur          = CalcMu(kMuR , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuR);
             double muf          = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-            double mur2         = mur*mur;
-            double muf2         = muf*muf;
+            double lf2 = 2*log(muf);
+            double lr2 = 2*log(mur);
             for (int x=0; x<nxmax; x++) {
                for (int n=0; n<c->GetNSubproc(); n++) {
                   if (!c->SubIsEnabled(n)) continue;
@@ -1518,13 +1519,11 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
                   double fac  = as * pdflc * unit;
                   double xsci = c->SigmaTildeMuIndep[i][x][jS1][kS2][n] * fac / c->GetNevt(i,n);
                   if (c->GetNScaleDep() >= 5) {
-                     double lf2 = log(muf2);
-                     double lr2 = log(mur2);
                      xsci             += c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * lf2 * fac / c->GetNevt(i,n);
                      xsci             += c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * lr2 * fac / c->GetNevt(i,n);
                      if (c->GetIPDFdef1() == 2 && c->fSTildeDISFormat==0) {     // DIS tables use log(mu/Q2) instead of log(mu) (but only for ln(mur), ln(muf))
-                        xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
-                        xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * log(Q2) * fac / c->GetNevt(i,n);
+                        xsci -= c->SigmaTildeMuFDep [i][x][jS1][kS2][n] * lq2 * fac / c->GetNevt(i,n);
+                        xsci -= c->SigmaTildeMuRDep [i][x][jS1][kS2][n] * lq2 * fac / c->GetNevt(i,n);
                      }
                      if (c->GetNScaleDep() >= 6) {
                         xsci             += c->SigmaTildeMuRRDep [i][x][jS1][kS2][n] * lr2*lr2 * fac / c->GetNevt(i,n);
@@ -2298,14 +2297,14 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
 
    for (unsigned int i=0; i<NObsBin; i++) {
       // speed up! if mu_f is only dependent on one variable, we can safe the loop over the other one
-      for (int x=0; x<c->GetNxmax(i); x++) {
-         //double xp = c->GetXNode1(i,x);
-         double xp = c->GetXNode1(i,x);
-         if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2) {   // that't the standard case!
-            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-               for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-                  double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
-
+      if (fMuFFunc != kScale1 &&  fMuFFunc != kScale2) {   // that't the standard case!
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+               double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+               for (int x=0; x<c->GetNxmax(i); x++) {
+                  //double xp = c->GetXNode1(i,x);
+                  double xp = c->GetXNode1(i,x);
+                  
                   if (SpeedUp) {
                      if (c == c0)
                         c->PdfXfx[i][x][jS1][kS2] = GetXFXSqrtS(xp,muf);
@@ -2321,18 +2320,24 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
                   //c->PdfLcMuVar[i][x][jS1][kS2] = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
                }
             }
-         } else if (fMuFFunc == kScale2) { // speed up
-            for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
-               double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+         }
+      } else if (fMuFFunc == kScale2) { // speed up
+         for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {
+            double muf = CalcMu(kMuF , 0 ,  c->GetScaleNode2(i,kS2) , fScaleFacMuF);
+            for (int x=0; x<c->GetNxmax(i); x++) {
+               double xp = c->GetXNode1(i,x);
                //vector < double > buffer = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
                vector<double > buffer = CalcPDFLinearCombination(c,GetXFXSqrtS(xp,muf));
                for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
                   c->PdfLcMuVar[i][x][jS1][kS2] = buffer;
                }
             }
-         } else if (fMuFFunc == kScale1) { // speed up
-            for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
-               double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
+         }
+      } else if (fMuFFunc == kScale1) { // speed up
+         for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
+            double muf = CalcMu(kMuF , c->GetScaleNode1(i,jS1) , 0 , fScaleFacMuF);
+            for (int x=0; x<c->GetNxmax(i); x++) {
+               double xp = c->GetXNode1(i,x);
                //vector < double > buffer = CalcPDFLinearCombDIS(GetXFXSqrtS(xp,muf) , c->GetNSubproc() );
                vector<double > buffer = CalcPDFLinearCombination(c,GetXFXSqrtS(xp,muf));
                for (unsigned int kS2=0; kS2<c->GetNScaleNode2(i); kS2++) {

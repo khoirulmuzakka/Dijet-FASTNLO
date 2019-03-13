@@ -73,7 +73,11 @@ BinSizeFactor                    2.              # Possibility to provide additi
                                                  # If the calculation should not be divided by bin width, then use 'DimensionIsDifferential' equal '0'
                                                  # and set 'CalculateBinSize' 'true' for each dimension.
                                                  #
-ScaleDescriptionScale1          "pT_jet_[GeV]" # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+                                                 # This defines the scale to be used (Note: The 1st scale must always be in units of [GeV]!)
+                                                 # Here, multiple jets per event can fall into the same obsbin. In that case:
+# ScaleDescriptionScale1         "pT_jet_min_[GeV]"# - take the minimum pT of all jets within same bin
+ScaleDescriptionScale1         "pT_jet_ave_[GeV]"# - take the average pT of all jets within same bin
+# ScaleDescriptionScale1         "pT_jet_max_[GeV]"# - take the maximum pT of all jets within same bin
 # ScaleDescriptionScale2          "pT_max_[GeV]"   # Specify 2nd scale name and unit (ONLY for flexible-scale tables)
 
 # -------------------------------------------------------------------- #
