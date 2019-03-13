@@ -1511,6 +1511,11 @@ int main(int argc, char** argv) {
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
                       fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
                       qscnlo[i],xslo[i],xsnlo[i],kfac1[i],kthc2[i],knpc1[i]);
+            } else if (ilo > -1 && inlo > -1 && inpc1 > -1) {
+               printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F %#9.5F",
+                      i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],
+                      fnlo->GetIDim1Bin(i)+1,LoBin[i][1],UpBin[i][1],fnlo->GetIDim2Bin(i)+1,LoBin[i][2],UpBin[i][2],
+                      qscnlo[i],xslo[i],xsnlo[i],kfac1[i],knpc1[i]);
             } else if (ilo > -1 && inlo > -1) {
                printf(" %5.i % -#10.4g %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g  %5.i  % -#10.4g  % -#10.4g % -#10.4g     %#18.11E %#18.11E %#9.5F",
                       i+1,BinSize[i],fnlo->GetIDim0Bin(i)+1,LoBin[i][0],UpBin[i][0],

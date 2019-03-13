@@ -345,9 +345,9 @@ int main(int argc, char** argv) {
 
    //! --- Determine dimensioning of observable bins in table
    const int NDim = fnlo->GetNumDiffBin();
-   if (NDim < 1 || NDim > 2) {
+   if (NDim < 1 || NDim > 3) {
       error["fnlo-tk-yodaout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
-      error["fnlo-tk-yodaout"] << "Only up to two dimensions currently possible with YODA/Rivet, aborted!" << endl;
+      error["fnlo-tk-yodaout"] << "Only up to three dimensions currently possible, aborted!" << endl;
       exit(1);
    }
 
@@ -437,7 +437,7 @@ int main(int argc, char** argv) {
    }
 
    //! --- Get RivetID
-   //!     For 2-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
+   //!     For 2+-dimensions determine running number in Rivet plot name by spotting the capital letter in "RIVET_ID=" in the fnlo table
    //!     For inverted order, the Id starts with "-" after "/".
    size_t capital_pos  = 0;
    int    invert_order = 1;
@@ -446,7 +446,7 @@ int main(int argc, char** argv) {
       warn["fnlo-tk-yodaout"] << "No Rivet ID found in fastNLO Table, no YODA formatted output possible, exiting!" << endl;
       exit(0);
    }
-   if ( NDim == 2 ) {
+   if ( NDim > 1 ) {
       size_t i0 = RivetId.find("/");
       /// Check for inversion of histogram order
       if ( RivetId.substr(i0,2) == "/-" ) {
@@ -462,7 +462,7 @@ int main(int argc, char** argv) {
          }
       }
       if (capital_pos == 0) {
-         error["fnlo-tk-yodaout"] << "Rivet ID found in fastNLO table does not indicate the 2-dim. histogram counter, aborted." << endl;
+         error["fnlo-tk-yodaout"] << "Rivet ID found in fastNLO table does not indicate the n-dim. histogram counter, aborted." << endl;
          exit(1);
       }
    }
@@ -523,8 +523,10 @@ int main(int argc, char** argv) {
    //! --- 2D
    else if (NDim == 2) {
       //! Loop over bins in outer (1st) dimension
+      int nhist = 0;
       for (unsigned int j=0; j<NDimBins[0]; j++) {
          //! Vectors to fill 2D scatter plot
+         nhist++;
          vector < double > x;
          vector < double > y;
          vector < double > exminus;
@@ -543,7 +545,7 @@ int main(int argc, char** argv) {
             iobs++;
          }
          /// Derive histogram counter
-         size_t ihist = (invert_order > 0) ? (counter + j) : (counter - j);
+         size_t ihist = (invert_order > 0) ? (counter + nhist - 1) : (counter - nhist + 1);
          if ( ihist == 0 || ihist > 99 ) {
             error["fnlo-tk-yodaout"] << "Rivet histogram counter out of range, aborted!" << endl;
             error["fnlo-tk-yodaout"] << "ihist = " << ihist << endl;
@@ -560,6 +562,54 @@ int main(int argc, char** argv) {
          /// Insert the plot pointer into the vector of analysis object pointers
          aos.push_back(plot);
 #endif
+      }
+   }
+   //! --- 3D
+   else if (NDim == 3) {
+      //! Loop over bins in outer (1st) dimension
+      int nhist = 0;
+      for (unsigned int j=0; j<NDimBins[0]; j++) {
+         //! Loop over bins in middle (2nd) dimension
+         NDimBins[1] = fnlo->GetNDim1Bins(j);
+         for (unsigned int k = 0; k<NDimBins[1]; k++) {
+            //! Vectors to fill 2D scatter plot
+            nhist++;
+            vector < double > x;
+            vector < double > y;
+            vector < double > exminus;
+            vector < double > explus;
+            vector < double > eyminus;
+            vector < double > eyplus;
+            //! Loop over bins in inner (3rd) dimension
+            NDimBins[2] = fnlo->GetNDim2Bins(j,k);
+            for (unsigned int l = 0; l<NDimBins[2]; l++) {
+               x.push_back((bins[iobs].second + bins[iobs].first)/2.0);
+               explus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+               exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
+               y.push_back(xs[iobs]);
+               eyplus.push_back(dxsu[iobs]);
+               eyminus.push_back(std::abs(dxsl[iobs]));
+               iobs++;
+            }
+            /// Derive histogram counter
+            size_t ihist = (invert_order > 0) ? (counter + nhist - 1) : (counter - nhist + 1);
+            if ( ihist == 0 || ihist > 99 ) {
+               error["fnlo-tk-yodaout"] << "Rivet histogram counter out of range, aborted!" << endl;
+               error["fnlo-tk-yodaout"] << "ihist = " << ihist << endl;
+               exit(1);
+            }
+            /// Convert size_t into string for naming
+            stringstream histno;
+            histno << ihist;
+            /// Replace counter part in RivetId by histno
+            RivetId.replace(capital_pos +3 - histno.str().size(), histno.str().size(), histno.str());
+#ifdef WITH_YODA
+            /// Pointer in order not to be deleted after we exit the loop, so we can then save the plots into the yoda file
+            YODA::Scatter2D * plot = new YODA::Scatter2D(x,y,exminus,explus,eyminus,eyplus,"/" + RivetId,LineName);
+            /// Insert the plot pointer into the vector of analysis object pointers
+            aos.push_back(plot);
+#endif
+         }
       }
    }
 
