@@ -117,8 +117,8 @@ if cext=='dat':
     ccols = np.loadtxt(cfile,usecols=range(3,5))
 xs_dat  = np.array(ccols[:,0])
 dxs_dat = np.array(ccols[:,1])
-dxsar   = np.divide(dxs_dat, xs_dat, out=np.ones_like(dxs_dat), where=xs_dat!=0)
-dxsa    = dxsar*xsa
+dxsar   = abs(np.divide(dxs_dat, xs_dat, out=np.ones_like(dxs_dat), where=xs_dat!=0))
+dxsa    = abs(dxsar*xsa)
 
 # Read Joao's output
 if bext=='out':
@@ -129,8 +129,8 @@ xsb = bcols['xs']
 dxsb = bcols['dxs']
 xsbl = bcols['xsl']
 xsbu = bcols['xsu']
-dxsblr = (xsbl-xsb)/xsb
-dxsbur = (xsbu-xsb)/xsb
+dxsblr = -abs((xsbl-xsb)/xsb)
+dxsbur = +abs((xsbu-xsb)/xsb)
 
 # Calculate ratios
 r_abl = np.divide(xsal, xsbl, out=np.ones_like(xsal), where=xsbl!=0)
@@ -140,9 +140,17 @@ nobs  = r_ab.size
 dxsbr = dxsb/xsb
 dxsr_ab = np.sqrt(dxsar*dxsar + dxsbr*dxsbr)
 
-#print dxsar
-#print dxsbr
-#print dxsar/dxsbr
+# Booleans for + and - x sections
+lfnp  = xsa>0
+lfnm  = xsa<0
+ljpp  = xsb>0
+ljpm  = xsb<0
+lablp = r_abl>0
+lablm = r_abl<0
+labp  = r_ab >0
+labm  = r_ab <0
+labup = r_abu>0
+labum = r_abu<0
 
 # Plots
 titwgt = 'bold'
@@ -194,20 +202,25 @@ x  = np.arange(1   , nobs+1.e-6)
 xa = np.arange(1-dx, nobs-dx+1.e-6)
 xb = np.arange(1+dx, nobs+dx+1.e-6)
 
-xcb = ax.errorbar(x, xsb, yerr=dxsb, marker='s', markersize=12, linestyle='none', fillstyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (dir.)', color='red')
-xca = ax.errorbar(x, xsa, yerr=dxsa, marker='x', markersize=12, linestyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (int.)', color='black')
+xcbp = ax.errorbar(x[ljpp], +xsb[ljpp], yerr=dxsb[ljpp], marker='s', markersize=12, linestyle='none', fillstyle='none', label=u'$\sigma(\mu_0)>0\,\pm\,$stat. (dir.)', color='purple')
+xcbm = ax.errorbar(x[ljpm], -xsb[ljpm], yerr=dxsb[ljpm], marker='s', markersize=12, linestyle='none', fillstyle='none', label=u'$\sigma(\mu_0)<0\,\pm\,$stat. (dir.)', color='royalblue')
+xcap = ax.errorbar(x[lfnp], +xsa[lfnp], yerr=dxsa[lfnp], marker='o', markersize=8, linestyle='none', label=u'$\sigma(\mu_0)>0\,\pm\,$stat. (int.)', color='red')
+xcam = ax.errorbar(x[lfnm], -xsa[lfnm], yerr=dxsa[lfnm], marker='o', markersize=8, linestyle='none', label=u'$\sigma(\mu_0)<0\,\pm\,$stat. (int.)', color='blue')
 xcsc = ax.fill_between(x,xsb-1.*(xsb-xsbl),xsb+1.*(xsbu-xsb),alpha=0.5,edgecolor='#ffffff',facecolor='pink',label='scale envelope (dir.)')
 
-rl = axr.errorbar(xa, r_abl, yerr=dxsar*r_abl, marker='v', linestyle='none', label=u'$\sigma(\mu_\mathrm{l,6P})\,\pm\,$stat. (int.)', color='blue')
-rc = axr.errorbar(x,  r_ab,  yerr=dxsr_ab*r_ab , marker='d', linestyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (tot.)', color='green')
-ru = axr.errorbar(xb, r_abu, yerr=dxsbr*r_abu, marker='^', linestyle='none', label=u'$\sigma(\mu_\mathrm{u,6P})\,\pm\,$stat. (dir.)', color='red')
+#rlp = axr.errorbar(xa[lablp], +r_abl[lablp], yerr=+dxsar[lablp]*r_abl[lablp], marker='v', linestyle='none', label=u'$\sigma(\mu_\mathrm{l,6P})\,\pm\,$stat. (int.)', color='blue', fillstyle='full')
+#rlm = axr.errorbar(xa[lablm], -r_abl[lablm], yerr=-dxsar[lablm]*r_abl[lablm], marker='v', linestyle='none', label=u'$\sigma(\mu_\mathrm{l,6P})\,\pm\,$stat. (int.)', color='blue', fillstyle='none')
+rl = axr.errorbar(xa, abs(r_abl), yerr=abs(dxsar*r_abl), marker='v', linestyle='none', label=u'$\sigma(\mu_\mathrm{l,6P})\,\pm\,$stat. (int.)', color='blue', fillstyle='full')
+rc = axr.errorbar(x,  abs(r_ab),  yerr=abs(dxsr_ab*r_ab), marker='d', linestyle='none', label=u'$\sigma(\mu_0)\,\pm\,$stat. (tot.)', color='green')
+ru = axr.errorbar(xb, abs(r_abu), yerr=abs(dxsbr*r_abu), marker='^', linestyle='none', label=u'$\sigma(\mu_\mathrm{u,6P})\,\pm\,$stat. (dir.)', color='red')
 #axr.fill_between(x,xsbl/xsb,xsbu/xsb)
 
 ax.set_xlim(0.0,nobs+1)
 axr.set_xlim(0.0,nobs+1)
-axr.set_ylim(0.90,1.10)
+axr.set_ylim(0.9,1.1)
 
-handles = [xcb,xcsc,xca,rl,rc,ru]
+#handles = [xcbp,xcbm,xcsc,xcap,xcam,rlp,rlm,rc,ru]
+handles = [xcbp,xcbm,xcsc,xcap,xcam,rl,rc,ru]
 labels  = [h.get_label() for h in handles]
 
 #legend = ax.legend()
