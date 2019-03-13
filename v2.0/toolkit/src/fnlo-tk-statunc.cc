@@ -478,7 +478,7 @@ int main(int argc, char** argv) {
          exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
          y.push_back(xs[iobs]);
          eyplus.push_back(dxsu[iobs]);
-         eyminus.push_back(abs(dxsl[iobs]));
+         eyminus.push_back(std::abs(dxsl[iobs]));
          iobs++;
       }
       stringstream plotno;                                                                         // To make i+1 from int
@@ -508,7 +508,7 @@ int main(int argc, char** argv) {
             exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
             y.push_back(xs[iobs]);
             eyplus.push_back(dxsu[iobs]);
-            eyminus.push_back(abs(dxsl[iobs]));
+            eyminus.push_back(std::abs(dxsl[iobs]));
             iobs++;
          }
          stringstream plotno;                                                                         // To make i+1 from int

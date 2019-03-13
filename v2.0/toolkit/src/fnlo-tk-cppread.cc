@@ -1179,12 +1179,12 @@ int main(int argc, char** argv) {
       if ( ilo > -1 && inlo > -1 ) {
          info["fnlo-tk-cppread"] << "Calculate fixed-order K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
-            if (abs(xslo[i]) > DBL_MIN) {
+            if (std::abs(xslo[i]) > DBL_MIN) {
                kfac1[i] = xsnlo[i]/xslo[i];
             } else {
                kfac1[i] = -1.;
             }
-            if ( innlo > -1 && abs(xsnlo[i]) > DBL_MIN) {
+            if ( innlo > -1 && std::abs(xsnlo[i]) > DBL_MIN) {
                kfac2[i] = xsnnlo[i]/xsnlo[i];
             } else {
                kfac2[i] = -1.;
@@ -1233,7 +1233,7 @@ int main(int argc, char** argv) {
       if ( ilo > -1 && ithc1 > -1 && lthcvar ) {
          info["fnlo-tk-cppread"] << "Calculate threshold correction K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
-            if (abs(xslo[i]) > DBL_MIN) {
+            if (std::abs(xslo[i]) > DBL_MIN) {
                kthc1[i] = xsthc1[i]/xslo[i];
             } else {
                kthc1[i] = -1.;
@@ -1243,7 +1243,7 @@ int main(int argc, char** argv) {
       if ( ilo > -1 && inlo > -1 && ithc2 > -1 && lthcvar) {
          info["fnlo-tk-cppread"] << "Calculate threshold correction K factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
-            if (abs(xsnlo[i]) > DBL_MIN) {
+            if (std::abs(xsnlo[i]) > DBL_MIN) {
                kthc2[i] = xsthc2[i]/xsnlo[i];
             } else {
                kthc2[i] = -1.;
@@ -1278,7 +1278,7 @@ int main(int argc, char** argv) {
       if ( ilo > -1 && inlo > -1 && inpc1 > -1 ) {
          info["fnlo-tk-cppread"] << "Calculate non-perturbative factors ..." << endl;
          for (unsigned int i=0; i<xslo.size(); i++) {
-            if (abs(xsnlo[i]) > DBL_MIN) {
+            if (std::abs(xsnlo[i]) > DBL_MIN) {
                knpc1[i] = xsnpc1[i]/xsnlo[i];
             } else {
                knpc1[i] = -1.;

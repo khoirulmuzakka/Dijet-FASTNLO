@@ -587,9 +587,9 @@ XsUncertainty fastNLOLHAPDF::GetPDFUncertainty(const fastNLO::EPDFUncertaintySty
             exit(1);
          }
          // Give back +- relative uncertainties
-         if ( abs(XsUnc.xs[iobs]) > DBL_MIN ) {
-            XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] / XsUnc.xs[iobs];
-            XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] / XsUnc.xs[iobs];
+         if ( fabs(XsUnc.xs[iobs]) > DBL_MIN ) {
+            XsUnc.dxsu[iobs] = +fabs(XsUnc.dxsu[iobs] / XsUnc.xs[iobs]);
+            XsUnc.dxsl[iobs] = -fabs(XsUnc.dxsl[iobs] / XsUnc.xs[iobs]);
          } else {
             XsUnc.dxsu[iobs] = 0.;
             XsUnc.dxsl[iobs] = 0.;
@@ -677,9 +677,9 @@ XsUncertainty fastNLOLHAPDF::GetAsUncertainty(const fastNLO::EAsUncertaintyStyle
 
    //! Divide by cross section != 0 to give relative uncertainties
    for ( unsigned int iobs = 0; iobs < NObsBin; iobs++ ) {
-      if ( abs(XsUnc.xs[iobs]) > DBL_MIN ) {
-         XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] / XsUnc.xs[iobs];
-         XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] / XsUnc.xs[iobs];
+      if ( fabs(XsUnc.xs[iobs]) > DBL_MIN ) {
+         XsUnc.dxsu[iobs] = +fabs(XsUnc.dxsu[iobs] / XsUnc.xs[iobs]);
+         XsUnc.dxsl[iobs] = -fabs(XsUnc.dxsl[iobs] / XsUnc.xs[iobs]);
       } else {
          XsUnc.dxsu[iobs] = 0.;
          XsUnc.dxsl[iobs] = 0.;

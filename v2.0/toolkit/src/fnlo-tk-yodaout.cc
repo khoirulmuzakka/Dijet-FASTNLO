@@ -206,6 +206,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-yodaout"] << "Deriving NNLO cross sections for comparison." << endl;
       } else if ( chord == "NNLO_only" ) {
          eOrder = kNextToNextToLeading;
+         bonly = true;
          shout["fnlo-tk-yodaout"] << "Experimental: Deriving NNLO contribution only for comparison." << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of fixed-order precision, " << chord << ", aborted!" << endl;
@@ -277,7 +278,7 @@ int main(int argc, char** argv) {
       }
    } else {
       info["fnlo-tk-yodaout"] << "The LO contribution has Id: " << ilo << endl;
-      if ( (eOrder > kLeading) & bonly ) {
+      if ( bonly ) {
          fnlo->SetContributionON(kFixedOrder, ilo, false);
       } else {
          fnlo->SetContributionON(kFixedOrder, ilo, true);
@@ -293,7 +294,9 @@ int main(int argc, char** argv) {
       }
    } else {
       info["fnlo-tk-yodaout"] << "The NLO contribution has Id: " << inlo << endl;
-      if ( eOrder == kNextToLeading || ((eOrder > kNextToLeading) & !bonly) ) {
+      if ( eOrder == kNextToLeading ) {
+         fnlo->SetContributionON(kFixedOrder, inlo, true);
+      } else if ( (eOrder > kNextToLeading) && !bonly ) {
          fnlo->SetContributionON(kFixedOrder, inlo, true);
       } else {
          fnlo->SetContributionON(kFixedOrder, inlo, false);
@@ -309,7 +312,9 @@ int main(int argc, char** argv) {
       }
    } else {
       info["fnlo-tk-yodaout"] << "The NNLO contribution has Id: " << innlo << endl;
-      if ( eOrder == kNextToNextToLeading || ((eOrder > kNextToNextToLeading) & !bonly) ) {
+      if ( eOrder == kNextToNextToLeading ) {
+         fnlo->SetContributionON(kFixedOrder, innlo, true);
+      } else if ( (eOrder > kNextToNextToLeading) && !bonly ) {
          fnlo->SetContributionON(kFixedOrder, innlo, true);
       } else {
          fnlo->SetContributionON(kFixedOrder, innlo, false);
@@ -505,7 +510,7 @@ int main(int argc, char** argv) {
          exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
          y.push_back(xs[iobs]);
          eyplus.push_back(dxsu[iobs]);
-         eyminus.push_back(abs(dxsl[iobs]));
+         eyminus.push_back(std::abs(dxsl[iobs]));
          iobs++;
       }
 #ifdef WITH_YODA
@@ -534,7 +539,7 @@ int main(int argc, char** argv) {
             exminus.push_back((bins[iobs].second - bins[iobs].first)/2.0);
             y.push_back(xs[iobs]);
             eyplus.push_back(dxsu[iobs]);
-            eyminus.push_back(abs(dxsl[iobs]));
+            eyminus.push_back(std::abs(dxsl[iobs]));
             iobs++;
          }
          /// Derive histogram counter
