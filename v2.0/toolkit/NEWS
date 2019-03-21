@@ -1,3 +1,11 @@
+IMPORTANT:
+==========
+To compare the actual fnlo-tk-cppread output with older revisions 2585 and earlier,
+asmz for use with GRV evolution (default) must be set explicitly to the previous
+PDG value of 0.1185. The actual one of PDG 2017, 0.1181, is the new default.
+
+
+
 Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2402:
 =================================================================================================
 Some major new developments are included in this release:
