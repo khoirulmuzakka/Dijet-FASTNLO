@@ -1120,6 +1120,7 @@ int main(int argc, char** argv) {
                                        << "                        Please check how this table was filled!" << endl;
             } else {
                error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+               exit(1);
             }
          }
       } else {
@@ -1127,6 +1128,7 @@ int main(int argc, char** argv) {
             error["fnlo-tk-cppread"] << "The selected fixed scale setting (fixmur, fixmuf) = ("
                                      << fixmur[ivar] << ","
                                      << fixmuf[ivar] << ") is not possible with this table, aborted!" << endl;
+            exit(1);
          }
          fnlo->SetExternalConstantForMuF(fixmuf[ivar]);
          fnlo->SetExternalConstantForMuR(fixmur[ivar]);
