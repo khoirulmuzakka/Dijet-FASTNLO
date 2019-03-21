@@ -1059,7 +1059,7 @@ endif
 if ( $withpython ) then
    setenv PYTHONPATHADD `find ${base}/lib* -name site-packages | tr '[:space:]' ':'`
    if ( ($withroot == 5 || $withroot == 6) && $pythonopt == "--enable-python" ) then
-      setenv PYTHONPATHADD ${base}/lib/root:${PYTHONPATHADD}
+      setenv PYTHONPATHADD ${base}/root/lib:${PYTHONPATHADD}
    endif
    if ( $?PYTHONPATHORIG ) then
    setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
