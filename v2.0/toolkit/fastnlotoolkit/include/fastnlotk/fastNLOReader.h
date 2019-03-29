@@ -255,6 +255,7 @@ protected:
    std::vector < double > QScale;
    std::vector < std::map< double, double > > fXSection_vsX1; //! Cross section vs. x ( XSection_vsX1[bin][<x,xs>] )
    std::vector < std::map< double, double > > fXSection_vsX2;
+   std::vector < std::map< double, double > > fXSection_vsQ2; //RADEK add
 
    // ----  reference tables ---- //
    std::vector < double > XSectionRef;

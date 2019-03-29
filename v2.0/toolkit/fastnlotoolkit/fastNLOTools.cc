@@ -29,13 +29,24 @@ namespace fastNLOTools {
    int ReadVector(vector<double >& v, istream& table , double nevts ){
       //! Read values according to the size() of the given vector
       //! from table (v2.0 format).
-      for( unsigned int i=0 ; i<v.size() ; i++){
-         table >> v[i];
-         v[i] *= nevts;
-         if ( !isfinite(v[i]) ) {
-            error["ReadVector"]<<"Non-finite number read from table, aborted! value = " << v[i] << endl;
-            error["ReadVector"]<<"Please check the table content." << endl;
-            exit(1);
+      const bool ReadBinary = false;
+      if ( !ReadBinary ) {
+         for( unsigned int i=0 ; i<v.size() ; i++){
+            table >> v[i];
+            v[i] *= nevts;
+            if ( !isfinite(v[i]) ) {
+               error["ReadVector"]<<"Non-finite number read from table, aborted! value = " << v[i] << endl;
+               error["ReadVector"]<<"Please check the table content." << endl;
+               exit(1);
+            }
+         }
+      }
+      else {
+         table.get();
+         float f;
+         for ( unsigned int k = 0; k < v.size(); ++k ) {
+            table.read(reinterpret_cast<char *>(&f), sizeof(f));
+            v[k] = f*nevts;
          }
       }
       return v.size();

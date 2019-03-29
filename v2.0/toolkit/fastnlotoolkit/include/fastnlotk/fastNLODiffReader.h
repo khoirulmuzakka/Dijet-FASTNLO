@@ -52,6 +52,9 @@ public:
    // ---- Print outs must be overwritten ---- //
    void PrintCrossSectionsWithReference();
 
+	std::map<double,  std::vector < std::map< double, double > > > Get3DCrossSection() { return xsQ2; }
+
+	void SetProtonE(double E) { fProtonE = E; }
 
 protected:
 
@@ -69,6 +72,11 @@ protected:
    virtual bool InitPDF() = 0;
    std::vector<double> GetXFX(double xp, double muf) const;
    virtual std::vector<double> GetDiffXFX(double xpom, double zpom, double muf) const = 0;
+
+
+	std::map<double,  std::vector < std::map< double, double > > > xsQ2;
+	double fProtonE;
+
 
 };
 
