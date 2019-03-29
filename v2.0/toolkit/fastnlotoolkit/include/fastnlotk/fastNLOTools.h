@@ -8,7 +8,7 @@
 
 namespace fastNLOTools {
 
-   const bool binary = false;
+   const bool binary = true;
 
    //! - Reading std::vectors from disk
    template<typename T> int ReadVector( std::vector<T>& v, std::istream& table , double nevts = 1);
@@ -184,16 +184,11 @@ int fastNLOTools::_Write1DVectorByN( const std::vector<T>& v, std::ostream& tabl
       std::vector<float> ff;
       ff.reserve(v.size());
       for ( auto val : v ) ff.push_back(val/nevts);
+      table << 'b';
       table.flush();
       table.write(reinterpret_cast<const char *>(&ff[0]), ff.size()*sizeof(float));
       table << std::endl;
    }
-   /* static int bb = 0; */
-   /* if ( bb++ > 3 )  exit(1); */
-   /* std::cout<<"size: " <<v.size() <<std::endl; */
-   /* for ( auto val : v ) std::cout<<"\t"<<val; */
-   /* std::cout<<std::endl; */
-
    return v.size();
 }
 

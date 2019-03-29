@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include "fastnlotk/fastNLOTools.h"
 
@@ -29,8 +30,14 @@ namespace fastNLOTools {
    int ReadVector(vector<double >& v, istream& table , double nevts ){
       //! Read values according to the size() of the given vector
       //! from table (v2.0 format).
-      const bool ReadBinary = false;
+      char b;
+      table>>b;
+      // table.get(b);
+      //cout<<"\tb="<<b<<"\t(b=b):"<<(b=='b')<<endl;
+      const bool ReadBinary = (b=='b');//!table.good();
+      //cout<<"good: "<<table.good()<<"\t fail="<<table.fail()<<"\tbad="<<table.bad()<<"\tv0="<<v[0]<<endl;
       if ( !ReadBinary ) {
+         table.unget();
          for( unsigned int i=0 ; i<v.size() ; i++){
             table >> v[i];
             v[i] *= nevts;
@@ -42,7 +49,7 @@ namespace fastNLOTools {
          }
       }
       else {
-         table.get();
+         //table.get();
          float f;
          for ( unsigned int k = 0; k < v.size(); ++k ) {
             table.read(reinterpret_cast<char *>(&f), sizeof(f));
@@ -76,15 +83,32 @@ namespace fastNLOTools {
          nn++;
       }
       v.resize(nProcLast);
-      for(unsigned int i0=0;i0<v.size();i0++){
-         table >> v[i0];
-         v[i0] *= nevts;
-         nn++;
-         if ( !isfinite(v[i0]) ) {
-            error["ReadFlexibleVector"]<<"Non-finite number read from table, aborted! value = " << v[i0] << endl;
-            error["ReadFlexibleVector"]<<"Please check the table content." << endl;
-            exit(1);
+
+
+      char b;
+      table>>b;
+      const bool ReadBinary = (b=='b');//!table.good();
+      if ( !ReadBinary ) {
+         table.unget();
+         for(unsigned int i0=0;i0<v.size();i0++){
+            table >> v[i0];
+            v[i0] *= nevts;
+            nn++;
+            if ( !isfinite(v[i0]) ) {
+               error["ReadFlexibleVector"]<<"Non-finite number read from table, aborted! value = " << v[i0] << endl;
+               error["ReadFlexibleVector"]<<"Please check the table content." << endl;
+               exit(1);
+            }
          }
+      }
+      else {
+         //table.get();
+         float f;
+         for ( unsigned int k = 0; k < v.size(); ++k ) {
+            table.read(reinterpret_cast<char *>(&f), sizeof(f));
+            v[k] = f*nevts;
+         }
+         nn+=v.size();
       }
       return nn;
    }
