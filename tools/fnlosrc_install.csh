@@ -239,8 +239,8 @@ echo "Python support: $tab $withpython"
 #       not required for mass production on compute clusters.
 # BUT:  APPLgrid requires ROOT!
 # Dare to try ROOT from cvmfs, e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt ?
-set rootbasepath="${base}"
-set rootbinpath="${base}/bin"
+set rootbasepath="${base}/root"
+set rootbinpath="${base}/root/bin"
 set withroot=0
 set withcvmfsroot=0
 if ( $#argv > 7 && $8 != "_") then
@@ -351,9 +351,9 @@ set rootenable="--disable-root"
 set rootenablepath="--disable-root"
 if ( $withroot != "0" ) then
    set rootopt="--with-root"
-   set rootoptpath="--with-root=${base}"
+   set rootoptpath="--with-root=${rootbasepath}"
    set rootenable="--enable-root"
-   set rootenablepath="--enable-root=${base}"
+   set rootenablepath="--enable-root=${rootbasepath}"
 endif
 # Use Sherpa with MPI
 # Attention! Buggy configure.ac in Sherpa:
@@ -386,6 +386,12 @@ else
 endif
 # $PATH set from now on ...
 #
+# If $withroot equals 5 or 6, use local ROOT installation
+if ( $withroot == 5 || $withroot == 6 ) then
+   setenv PATH ${rootbinpath}:${PATH}
+   echo 'setenv PATH '"${rootbinpath}:"'${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH='"${rootbinpath}:"'${PATH}' >> fnlosrc_source.sh
+endif
 # If $withcvmfsroot is set, use the ROOT installation from CVMFS.
 if ( $withcvmfsroot != "0" ) then
    set rootoptpath="--with-root=${rootbasepath}"
@@ -457,9 +463,9 @@ endif
 # $LD_LIBRARY_PATH set from now on ...
 #
 if ( $withroot == 5 || $withroot == 6 ) then
-   setenv LD_LIBRARY_PATH ${base}/lib/root:${LD_LIBRARY_PATH}
-   echo 'setenv LD_LIBRARY_PATH '"${base}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-   echo 'export LD_LIBRARY_PATH='"${base}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+   setenv LD_LIBRARY_PATH ${rootbasepath}/lib:${LD_LIBRARY_PATH}
+   echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+   echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 endif
 # If $withcvmfsroot is set, use the ROOT installation from CVMFS.
 if ( $withcvmfsroot != "0" ) then
@@ -585,7 +591,7 @@ endif
 if ( ! -e ${arc}_installed ) then
    cd ${arc}
    if ( $withroot == 5 ) then
-      ./configure --prefix=${base} --etcdir=${base}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
+      ./configure --prefix=${rootbasepath} --etcdir=${rootbasepath}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -594,7 +600,10 @@ if ( ! -e ${arc}_installed ) then
       cd mybuild
       cmake ..
       cmake --build . -- -j${cores}
-      cmake -DCMAKE_INSTALL_PREFIX=${base} -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
+      # As usual ROOT is buggy: CMAKE_INSTALL_BINDIR is not respected and everything ends in CMAKE_INSTALL_PREFIX!
+      #      cmake -DCMAKE_INSTALL_PREFIX=${base}/root -DCMAKE_INSTALL_BINDIR=${base}/bin -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
+      # Bug adapted version using addition of ${rootbasepath}/bin to PATH
+      cmake -DCMAKE_INSTALL_PREFIX=${rootbasepath} -P cmake_install.cmake
       cd ..
       cd ..
       touch ${arc}_installed
@@ -1049,6 +1058,9 @@ endif
 #
 if ( $withpython ) then
    setenv PYTHONPATHADD `find ${base}/lib* -name site-packages | tr '[:space:]' ':'`
+   if ( ($withroot == 5 || $withroot == 6) && $pythonopt == "--enable-python" ) then
+      setenv PYTHONPATHADD ${base}/root/lib:${PYTHONPATHADD}
+   endif
    if ( $?PYTHONPATHORIG ) then
    setenv PYTHONPATH ${PYTHONPATHADD}:${PYTHONPATHORIG}
    echo 'setenv PYTHONPATH '"${PYTHONPATHADD}:"'${PYTHONPATH}' >> fnlosrc_source.csh

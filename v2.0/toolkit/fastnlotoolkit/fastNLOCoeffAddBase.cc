@@ -564,26 +564,26 @@ bool fastNLOCoeffAddBase::SubSelect( vector< pair<int,int> > processes, bool on 
       // search for selected process in fPDFCoeff
       for ( unsigned int i = 0; i<fPDFCoeff.size(); i++ ) {
          for ( unsigned int j = 0; j<fPDFCoeff[i].size(); j++ ) {
-	    if ( p == fPDFCoeff[i][j] ) {
-	       // found! now check if the other proesses in this subcontribution are also to be selected
-	       vector< pair<int,int> > p_list = fPDFCoeff[i];
-	       bool f = true;
-	       for ( unsigned int n = 0; n<p_list.size(); n++ ) {
-		  bool ff = false;
-		  for ( unsigned int m = 0; m<processes.size(); m++ )
-		     if ( p_list[n] == processes[m] )
-			ff = true;
-	       	  f &= ff;
-	       }
-	       if (!f)
-		  return false;
-	       s.push_back(i);
-	    }
-	 }
+            if ( p == fPDFCoeff[i][j] ) {
+               // found! now check if the other proesses in this subcontribution are also to be selected
+               vector< pair<int,int> > p_list = fPDFCoeff[i];
+               bool f = true;
+               for ( unsigned int n = 0; n<p_list.size(); n++ ) {
+                  bool ff = false;
+                  for ( unsigned int m = 0; m<processes.size(); m++ )
+                     if ( p_list[n] == processes[m] )
+                        ff = true;
+                  f &= ff;
+               }
+               if (!f)
+                  return false;
+               s.push_back(i);
+            }
+         }
       }
       // uncomment to throw error on non-existing pairs
       //if (!fff)
-      //	 return false;
+      //         return false;
    }
    // now activate the selected subcontributions and return succes (true)
    for ( unsigned int k = 0; k<s.size(); k++ )
@@ -734,7 +734,7 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
    for(int i=0;i<NScaleDim;i++){
       fastNLOTools::PrintVector(ScaleDescript[i],"Scale descriptions (ScaleDescript)","#");
    }
-   if ( abs(iprint) > 0 ) {
+   if ( std::abs(iprint) > 0 ) {
       cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
       if ( NScales > 0 ) {fastNLOTools::PrintVector(Iscale,"Iscale (Unused, always 0) (Iscale)","#  ");}
       printf(" #   IRef                              %d\n",IRef);

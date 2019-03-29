@@ -36,6 +36,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <string>
 #include <unistd.h>
 #include "fastnlotk/fastNLOCreate.h"
@@ -1180,7 +1181,7 @@ vector<vector<pair<int,int> > > fastNLOCreate::ReadPartonCombinations(int ord, c
          logger.debug["ReadPartonCombinations"]<<"Adding to subprocess "<<iSubProc<<" parton pair (" << PartonCombinations[k][i]<<","<<PartonCombinations[k][i+1]<<")."<<endl;
          int iPart1 = PartonCombinations[k][i];
          int iPart2 = PartonCombinations[k][i+1];
-         if (abs(iPart1) > 6 || abs(iPart2) > 6) {
+         if (std::abs(iPart1) > 6 || std::abs(iPart2) > 6) {
             logger.error["ReadPartonCombinations"]<<"Parton flavor is larger than 6. There is nothing beyond the top-quark. Exiting."<<endl;
             exit(1);
          }

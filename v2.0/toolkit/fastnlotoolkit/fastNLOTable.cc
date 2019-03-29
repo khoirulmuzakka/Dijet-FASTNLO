@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <cstdlib>
 #include <unistd.h>
 #include <set>
@@ -641,74 +642,74 @@ void fastNLOTable::MergeTables(const std::vector<fastNLOTable*>& other, fastNLO:
                vector<double > vals(sAll.size()); // allocate only once
 
 //<<<<<<< .mine
-			      // for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
-			      // 	 vals.clear();
-			      // 	 double mean0 = 0;
-			      // 	 double rms = 0;
-			      // 	 unsigned int n0 = 0;
-			      // 	 if ( cutRMS != 0 ) {
-			      // 	    for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
-			      // 	       //vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-			      // 	       double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-			      // 	       if ( vv != 0 ) {
-			      // 		  mean0 += vv;
-			      // 		  rms   += vv*vv;
-			      // 		  n0++;
-			      // 	       }
-			      // 	    }
-			      // 	    if ( n0 != 0 ) {
-			      // 	       mean0 /= n0;
-			      // 	       rms = sqrt(rms/n0);
-			      // 	    }
-			      // 	 }
+                              // for ( int im = 0 ; im<cMax ; im++ ) { // mu-indep, mur, muf, ...
+                              //         vals.clear();
+                              //         double mean0 = 0;
+                              //         double rms = 0;
+                              //         unsigned int n0 = 0;
+                              //         if ( cutRMS != 0 ) {
+                              //            for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+                              //               //vals[is] = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                              //               double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                              //               if ( vv != 0 ) {
+                              //                  mean0 += vv;
+                              //                  rms   += vv*vv;
+                              //                  n0++;
+                              //               }
+                              //            }
+                              //            if ( n0 != 0 ) {
+                              //               mean0 /= n0;
+                              //               rms = sqrt(rms/n0);
+                              //            }
+                              //         }
 
-			      // 	 // fill 'vals'
-			      // 	 //vals.reserve(sAll.size());
-			      // 	 for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
-			      // 	    double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
-			      // 	    if ( ( cutRMS == 0 && vv != 0 ) ||
-			      // 		 ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
-			      // 	       // fill vals array again, now with cuts
-			      // 	       vals.push_back(vv);
-			      // 	    }
-			      // 	    // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
-			      // 	    //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
-			      // 	    // }
-			      // 	 }
-			      // 	 if ( cutRMS!=0  && n0 != vals.size() )
-			      // 	    logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
-			      // 	 if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
-			      // 	    logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
-			      // 	    exit(1);
-			      // 	 }
+                              //         // fill 'vals'
+                              //         //vals.reserve(sAll.size());
+                              //         for ( unsigned int is = 0 ; is < sAll.size() ; is++ ) {
+                              //            double vv = (*sAll[is][im])[iobs][x][jS1][kS2][n] / nAll[is];
+                              //            if ( ( cutRMS == 0 && vv != 0 ) ||
+                              //                 ( cutRMS!=0 && vv!=0 && n0 !=0 && fabs(vv-mean0) < rms*cutRMS ) ){
+                              //               // fill vals array again, now with cuts
+                              //               vals.push_back(vv);
+                              //            }
+                              //            // else if ( (*sAll[0][im])[iobs][x][jS1][kS2][n]!=0 && vv!=0 ) {
+                              //            //    cout<<"discard tab-ID="<<is<<"\trms="<<rms<<"\tvv-mean="<<fabs(vv-mean0)<<endl;
+                              //            // }
+                              //         }
+                              //         if ( cutRMS!=0  && n0 != vals.size() )
+                              //            logger.info["MergeTables"]<<"Discarded "<<sAll.size()-vals.size()<<" value(s) out of "<< sAll.size()<<" [CutRMS or zero] (bin="<<iobs<<", proc="<<n<<")."<<endl;
+                              //         if ( cutRMS!=0  && n0!=0 && vals.size()==0 ) {
+                              //            logger.error["MergeTables"]<<"Too tight RMS cut. No values remain. Exiting."<<endl;
+                              //            exit(1);
+                              //         }
 
-			      // 	 // assign merged values
-			      // 	 if ( moption == kMean  ) {
-			      // 	    double mean = 0;
-			      // 	    for ( auto ii : vals ) mean+=ii;
-			      // 	    //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
-			      // 	    if ( mean != 0 )
-			      // 	       (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
-			      // 	    else
-			      // 	       (*s0[im])[iobs][x][jS1][kS2][n] = 0;
-			      // 	 }
-			      // 	 else if ( moption == kMedian ) {
-			      // 	    double median = 0;
-			      // 	    if ( vals.size() ) {
-			      // 	       std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
-			      // 	       median = vals[vals.size()/2];
-			      // 	       if ( vals.size()%2 == 0 ) {
-			      // 		  median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
-			      // 	       }
-			      // 	       // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
-			      // 	       // 	   im,     mean*nAll[0],    rms*nAll[0],
-			      // 	       // 	   (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
-			      // 	    }
-			      // 	    (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0]; // nAll[0] is 'new' normalisation
-			      // 	 }
-			      // 	 else {// cutRMS !=0
-			      // 	    double wsum=0, ssum=0; //nsum=0
-			      // 	    unsigned int nn = 0;
+                              //         // assign merged values
+                              //         if ( moption == kMean  ) {
+                              //            double mean = 0;
+                              //            for ( auto ii : vals ) mean+=ii;
+                              //            //(*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/sAll.size();
+                              //            if ( mean != 0 )
+                              //               (*s0[im])[iobs][x][jS1][kS2][n] = mean*nAll[0]/vals.size();
+                              //            else
+                              //               (*s0[im])[iobs][x][jS1][kS2][n] = 0;
+                              //         }
+                              //         else if ( moption == kMedian ) {
+                              //            double median = 0;
+                              //            if ( vals.size() ) {
+                              //               std::nth_element( vals.begin(), vals.begin()+vals.size()/2,vals.end() );
+                              //               median = vals[vals.size()/2];
+                              //               if ( vals.size()%2 == 0 ) {
+                              //                  median = (median + *(std::max_element(vals.begin(),vals.begin()+vals.size()/2))) /2.;
+                              //               }
+                              //               // printf("mu[%d] mean=% 8.2e\trms=% 8.2e\tv0=% 8.2e\tmedian=% 8.2e\n",
+                              //               //          im,     mean*nAll[0],    rms*nAll[0],
+                              //               //          (*s0[im])[iobs][x][jS1][kS2][n],   median * nAll[0] );
+                              //            }
+                              //            (*s0[im])[iobs][x][jS1][kS2][n] = median*nAll[0]; // nAll[0] is 'new' normalisation
+                              //         }
+                              //         else {// cutRMS !=0
+                              //            double wsum=0, ssum=0; //nsum=0
+                              //            unsigned int nn = 0;
 // =======
                 for (unsigned int iobs=0 ; iobs<ctrb->SigmaTildeMuIndep.size() ; iobs++) {
                    for (unsigned int jS1=0; jS1<ctrb->GetNScaleNode1(iobs); jS1++) {
@@ -1889,7 +1890,7 @@ void fastNLOTable::PrintScenario(int iprint) const {
    fastNLOTools::PrintVector(DimLabel,"Dimension labels (DimLabel)","#");
    fastNLOTools::PrintVector(IDiffBin,"Differential dimension (IDiffBin)","#");
    printf(" #\n");
-   if ( abs(iprint) > 1 ) {
+   if ( std::abs(iprint) > 1 ) {
       cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
       for (unsigned int i=0; i<NObsBin; i++) {
          // Print only for first and last observable bin
@@ -1914,7 +1915,7 @@ void fastNLOTable::PrintScenario(int iprint) const {
       if ( INormFlag<0 ) {
          printf(" # Normalization table (DenomTable)    %s\n",DenomTable.data());
       }
-      if ( abs(iprint) > 1 ) {
+      if ( std::abs(iprint) > 1 ) {
          cout << fastNLO::_SSEP20C << " Extended information (iprint > 1) " << fastNLO::_SSEP20 << endl;
          for (unsigned int i=0; i<NObsBin; i++) {
             // Print only for first and last observable bin
@@ -2532,7 +2533,7 @@ void fastNLOTable::PrintHeader(int iprint) const {
    printf(" # Scenario name (ScenName)            %s\n",ScenName.data());
    printf(" # Theory contributions (Ncontrib)     %d\n",GetNcontrib());
    printf(" # Data contribution 0/1 (Ndata)       %d\n",GetNdata());
-   if ( abs(iprint) > 0 ) {
+   if ( std::abs(iprint) > 0 ) {
       cout << fastNLO::_SSEP20C << " Extended information (iprint > 0) " << fastNLO::_SSEP20 << endl;
       printf(" #   Separator (tablemagicno)            %d\n",fastNLO::tablemagicno);
       printf(" #   Unused (Nmult)                      %d\n",GetNmult());

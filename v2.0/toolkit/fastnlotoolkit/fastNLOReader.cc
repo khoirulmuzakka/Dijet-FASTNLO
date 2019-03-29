@@ -780,14 +780,14 @@ bool fastNLOReader::SetScaleVariation(int scalevar) {
       }
 
       if (lkthc) {
-         if (abs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN) {
+         if (fabs(fScaleFacMuR-fScaleFacMuF) > DBL_MIN) {
             logger.error["SetScaleVariation."]<<"Threshold corrections only allow for symmetric variations of the renormalization and factorization scales,"<<endl;
             logger.error["SetScaleVariation."]<<"but fScaleFacMuR = "<<fScaleFacMuR<<" is different from fScaleFacMuF = "<<fScaleFacMuF<<", stopped!"<<endl;
             exit(1);
          }
          fastNLOCoeffAddFix* cThC = (fastNLOCoeffAddFix*)B_ThC();
          double fScaleFacMuF2 = cThC->GetScaleFactor(fScalevar);
-         if (abs(fScaleFacMuF2-fScaleFacMuF) > DBL_MIN) {
+         if (fabs(fScaleFacMuF2-fScaleFacMuF) > DBL_MIN) {
             logger.error["SetScaleVariation."]<<"Scale variations different for NLO and ThC contributions. This should never happen!"<<endl;
             logger.error["SetScaleVariation."]<<"Please do not use this method directly but only via SetScaleFactorsMuRMuF and check the return code!"<<endl;
             exit(1);
@@ -1084,7 +1084,7 @@ vector < double > fastNLOReader::GetNormCrossSection() {
 
    unsigned int nDim = GetNumDiffBin();
    // iDim ranges from 0 to nDim-1
-   unsigned int iDim = abs(INormFlag)-1;
+   unsigned int iDim = std::abs(INormFlag)-1;
    if (iDim > nDim-1) {
       logger.error["GetNormCrossSection"]<<"Normalization to slice in dimension " << iDim << " not possible, aborting!"<<endl;
       logger.error["GetNormCrossSection"]<<"INormFlag = "<<INormFlag<<", nDim = "<<nDim<<endl;
@@ -1122,7 +1122,7 @@ vector < double > fastNLOReader::GetNormCrossSection() {
             twidth += bwidth;
          }
       }
-      if (abs(xsnorm) > DBL_MIN) {
+      if (fabs(xsnorm) > DBL_MIN) {
          XSectionNorm[iobs] = XSectionNorm[iobs] / xsnorm;
       } else {
          logger.warn["GetNormCrossSection"]<<"Normalization divisor too small, normalized cross section set to -1!"<<endl;
@@ -1570,7 +1570,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
    }
 
    /// Test that PDF cache is filled with non-zero values for this contribution
-   if (abs(c->PdfLc[0][0][0][0]) < DBL_MIN) {
+   if (fabs(c->PdfLc[0][0][0][0]) < DBL_MIN) {
       logger.debug["CalcCrossSectionv20"]<<"Need to refill PDF cache for this contribution. Normally, should not be necessary here, aborted!"<<endl;
       exit(1);
       //      FillPDFCache(0.,true);
@@ -2364,7 +2364,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv20(fastNLOCoeffAddFix* c) {
 
    bool IsPPBar;
    // ----- if ppbar ---- //
-   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && abs(c->NPDFPDG[0]) == 2212) {
+   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && std::abs(c->NPDFPDG[0]) == 2212) {
       IsPPBar = true;
    }
    // ----- if pp ---- //
@@ -2505,7 +2505,7 @@ void fastNLOReader::FillBlockBPDFLCsHHCv21(fastNLOCoeffAddFlex* c) {
 
    bool IsPPBar;
    // ----- if ppbar ---- //
-   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && abs(c->NPDFPDG[0]) == 2212) {
+   if (c->NPDFPDG[0] == -c->NPDFPDG[1] && std::abs(c->NPDFPDG[0]) == 2212) {
       IsPPBar = true;
    }
    // ----- if pp ---- //
@@ -3501,9 +3501,9 @@ XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eS
 
    //! Divide by cross section != 0 to give relative uncertainties
    for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
-      if (abs(XsUnc.xs[iobs]) > DBL_MIN) {
-         XsUnc.dxsu[iobs] = XsUnc.dxsu[iobs] / XsUnc.xs[iobs];
-         XsUnc.dxsl[iobs] = XsUnc.dxsl[iobs] / XsUnc.xs[iobs];
+      if (fabs(XsUnc.xs[iobs]) > DBL_MIN) {
+         XsUnc.dxsu[iobs] = +fabs(XsUnc.dxsu[iobs] / XsUnc.xs[iobs]);
+         XsUnc.dxsl[iobs] = -fabs(XsUnc.dxsl[iobs] / XsUnc.xs[iobs]);
       } else {
          XsUnc.dxsu[iobs] = 0.;
          XsUnc.dxsl[iobs] = 0.;
