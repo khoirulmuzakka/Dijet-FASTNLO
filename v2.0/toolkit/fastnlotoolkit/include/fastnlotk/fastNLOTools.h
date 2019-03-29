@@ -185,9 +185,9 @@ int fastNLOTools::_Write1DVectorByN( const std::vector<T>& v, std::ostream& tabl
       ff.reserve(v.size());
       for ( auto val : v ) ff.push_back(val/nevts);
       table << 'b';
-      table.flush();
+      //table.flush();
       table.write(reinterpret_cast<const char *>(&ff[0]), ff.size()*sizeof(float));
-      table << std::endl;
+      //table << std::endl;
    }
    return v.size();
 }
