@@ -155,7 +155,8 @@ if ( $#argv < 2 ) then
    echo "                        Set to _ to skip this setting."
    echo " 3rd optional argument: Sub path to GCC setup script in cvmfs software distribution."
    echo "                        The minimally required version is gcc 4.8.1!"
-   echo "                        e.g. external/gcc/4.8.1/etc/profile.d/init.csh."
+   echo "                        e.g. external/gcc/4.8.1/etc/profile.d/init"
+   echo "                        (.csh or .sh are added automatically)."
    echo "                        Set to _ to skip this setting."
    echo " 4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
    echo " 5th optional argument: Include grid creation with NNLOJET? def.=0"
@@ -197,7 +198,7 @@ else
    endif
    echo "MYCVMFS is undefined: $tab $2"
 endif
-# gcc from CMVFS (e.g. external/gcc/4.8.1/etc/profile.d/init.csh)?
+# gcc from CMVFS (e.g. external/gcc/4.8.1/etc/profile.d/init.[c]sh)?
 set gccsetup="_"
 if ( $#argv > 2 ) then
    set gccsetup=$3
@@ -440,9 +441,9 @@ if ( $MYCPPFLAGS != "" ) then
 endif
 # Use modern gcc; gcc 4.4 from slc6 is too antique
 if ( $?MYCVMFS ) then
-   source ${MYCVMFS}/${gccsetup}
-   echo 'source '"${MYCVMFS}/${gccsetup}"'' >> fnlosrc_source.csh
-   echo 'source '"${MYCVMFS}/${gccsetup}"'' >> fnlosrc_source.sh
+   source ${MYCVMFS}/${gccsetup}.csh
+   echo 'source '"${MYCVMFS}/${gccsetup}.csh"'' >> fnlosrc_source.csh
+   echo 'source '"${MYCVMFS}/${gccsetup}.sh"''  >> fnlosrc_source.sh
    echo ""
    echo "ATTENTION: Environment has been complemented by source'ing"
    echo "   ${MYCVMFS}/${gccsetup}"
