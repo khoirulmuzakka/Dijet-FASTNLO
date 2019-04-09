@@ -3,7 +3,7 @@
 %{
 /**
  * This is a workaround for a minor swig bug when building on gcc 4.6.1 and above.
- * Prior to gcc 4.6.1 the STL headers like vector, string, etc. used to 
+ * Prior to gcc 4.6.1 the STL headers like vector, string, etc. used to
  * automatically pull in the cstddef header but starting with gcc 4.6.1 they no
  * longer do. This leads to swig generated a file that does not compile so we
  * explicitly include cstddef so the swig generated file will compile.
@@ -53,5 +53,11 @@ namespace std {
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOAlphas.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOCRunDec.h"
-%include "../fastnlotoolkit/include/fastnlotk/CRunDec.h"
 %include "../fastnlotoolkit/include/fastnlotk/Alphas.h"
+/* Avoid syntax errors because of 'as' by ignoring declarations using '*as' in CRunDec */
+/* Let's hope this doesn't break anything important ... */
+%ignore mPS2mSI;
+%ignore m1S2mSI;
+%ignore mRS2mSI;
+%ignore mRSp2mSI;
+%include "../fastnlotoolkit/include/fastnlotk/CRunDec.h"
