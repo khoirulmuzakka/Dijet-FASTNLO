@@ -22,6 +22,7 @@
 #include <vector>
 #include "fastnlotk/fastNLOAlphas.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/speaker.h"
 #ifdef WITH_YODA
 #include "YODA/Scatter2D.h"
@@ -39,33 +40,44 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! --- Print program purpose
-   yell << _CSEPSC << endl;
-   info["fnlo-tk-yodaout"] << "Program to read fastNLO tables and write out" << endl;
-   info["fnlo-tk-yodaout"] << "QCD cross sections in YODA format for use with Rivet" << endl;
-   info["fnlo-tk-yodaout"] << "(If compiled without YODA support only text printout is given)" << endl;
-   yell << _SSEPSC << endl;
-   info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
-   info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
-   yell << _CSEPSC << endl;
-
    //! --- Parse commmand line
    char buffer[1024];
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-yodaout"] << "fastNLO YODA Writer" << endl;
-   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
+      yell << "" << endl;
+      yell << _CSEPSC << endl;
+      shout["fnlo-tk-yodaout"] << "fastNLO YODA Writer" << endl;
+      yell << _SSEPSC << endl;
       error["fnlo-tk-yodaout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-yodaout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
+      shout["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
+      shout["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      if (tablename == "-v") {
+         fastNLOTools::PrintFastnloVersion();
+         return 0;
+      }
+      //! --- Print program purpose
+      yell << _CSEPSC << endl;
+      info["fnlo-tk-yodaout"] << "Program to read fastNLO tables and write out" << endl;
+      info["fnlo-tk-yodaout"] << "QCD cross sections in YODA format for use with Rivet" << endl;
+      info["fnlo-tk-yodaout"] << "(If compiled without YODA support only text printout is given)" << endl;
+      yell << _SSEPSC << endl;
+      info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
+      info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
+      info["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
+      info["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
+      yell << _CSEPSC << endl;
+      yell << "" << endl;
       //! --- Usage info
       if (tablename == "-h") {
+         yell << _CSEPSC << endl;
+         info["fnlo-tk-yodaout"] << "fastNLO YODA Writer" << endl;
+         yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-yodaout"] << "This program evaluates a fastNLO table and" << endl;
          info["fnlo-tk-yodaout"] << "prints out cross sections with either scale or" << endl;

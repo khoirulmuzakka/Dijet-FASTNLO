@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include "fastnlotk/fastNLOLHAPDF.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/speaker.h"
 #ifdef WITH_ROOT
 //! Includes for filling ROOT histograms
@@ -42,34 +43,44 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! --- Print program purpose
-   yell << _CSEPSC << endl;
-   info["fnlo-tk-rootout"] << "Program to read fastNLO tables and write out" << endl;
-   info["fnlo-tk-rootout"] << "QCD cross sections into ROOT histograms" << endl;
-   yell << _SSEPSC << endl;
-   info["fnlo-tk-rootout"] << "For more explanations type:" << endl;
-   info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
-   yell << _CSEPSC << endl;
-
    //! --- Parse commmand line
    char buffer[1024];
    char titlel[1024];
    char titleu[1024];
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
-   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
+      yell << "" << endl;
+      yell << _CSEPSC << endl;
+      shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
+      yell << _SSEPSC << endl;
       error["fnlo-tk-rootout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-rootout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
+      shout["fnlo-tk-rootout"] << "For version number printout type:" << endl;
+      shout["fnlo-tk-rootout"] << "./fnlo-tk-rootout -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      if (tablename == "-v") {
+         fastNLOTools::PrintFastnloVersion();
+         return 0;
+      }
+      //! --- Print program purpose
+      yell << _CSEPSC << endl;
+      info["fnlo-tk-rootout"] << "Program to read fastNLO tables and write out" << endl;
+      info["fnlo-tk-rootout"] << "QCD cross sections into ROOT histograms" << endl;
+      yell << _SSEPSC << endl;
+      info["fnlo-tk-rootout"] << "For more explanations type:" << endl;
+      info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
+      info["fnlo-tk-rootout"] << "For version number printout type:" << endl;
+      info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -v" << endl;
+      yell << _CSEPSC << endl;
       //! --- Usage info
       if (tablename == "-h") {
+         yell << _CSEPSC << endl;
+         info["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
+         yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-rootout"] << "This program evaluates a fastNLO table and" << endl;
          info["fnlo-tk-rootout"] << "writes histograms with cross sections and scale or" << endl;
