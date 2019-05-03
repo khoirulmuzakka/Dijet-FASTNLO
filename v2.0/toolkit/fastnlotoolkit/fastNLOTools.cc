@@ -11,6 +11,17 @@ using namespace fastNLO;
 namespace fastNLOTools {
 
    //________________________________________________________________________________________________________________ //
+   void PrintFastnloVersion() {
+      char fnlo[100];
+      sprintf(fnlo,"%c[%d;%dmfast%c[%d;%dmNLO\033[0m",27,0,31,27,0,34);
+      char subproject[100]      = FNLO_SUBPROJECT;
+      char package_version[100] = FNLO_VERSION;
+      char gitrev[100]          = FNLO_GITREV;
+      cout << fnlo << "_" << subproject << " Version " << package_version << "_" << gitrev << endl;
+      return;
+   }
+
+   //________________________________________________________________________________________________________________ //
    bool CheckVersion(int version ){
       if ( fastNLO::CompatibleVersions.count(version) == 0 ) {
          error["fastNLOTools::CheckVersion"]<<"This table version ("<<version<<") is incompatible with this fastNLO code."<<endl;
