@@ -353,7 +353,7 @@ int main(int argc, char** argv) {
    //! --- Existing ROOT file will be overwritten!
    TFile *rootfile = new TFile(RootFileName.c_str(),"RECREATE");
 
-   //  Initialize histogram multiplicity and counter
+   //  Define histogram multiplicity and initialise histogram counter
    const unsigned int nMult = 3;
    unsigned int nHist       = 0;
 
@@ -447,199 +447,59 @@ int main(int argc, char** argv) {
                yell << _SSEPSC << endl;
             }
 
-            //! --- Initialize dimension bin and continuous observable bin counter
+            //! --- Initialize dimension bin counter
             unsigned int NDimBins[NDim];
             NDimBins[0] = fnlo.GetNDim0Bins();
-            unsigned int nHistBins = 0;
 
-            //! --- 1D
-            if (NDim == 1) { // One histogram only
-               nHist = 1;
-            }
-            //! --- 2D
-            else if (NDim == 2) { // One histogram per 2nd dimension bin
-               nHist = NDimBins[0];
-            }
-            //! --- 3D
-            else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
-               for (unsigned int j=0; j<NDimBins[0]; j++) {
-                  nHist += fnlo.GetNDim1Bins(j);
+            if ( iUnc==0 ) {
+               //! --- 1D
+               if (NDim == 1) { // One histogram only
+                  nHist = 1;
                }
-            }
-            //! -- Not implemented
-            else {
-               error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
-               error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
-               exit(1);
+               //! --- 2D
+               else if (NDim == 2) { // One histogram per 2nd dimension bin
+                  nHist = NDimBins[0];
+               }
+               //! --- 3D
+               else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
+                  for (unsigned int j=0; j<NDimBins[0]; j++) {
+                     nHist += fnlo.GetNDim1Bins(j);
+                  }
+               }
+               //! -- Not implemented
+               else {
+                  error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
+                  error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
+                  exit(1);
+               }
             }
 
             //! --- Book ROOT histos
             TH1D *histo[nMult*nHist];
 
-            unsigned int iobs      = 0;
-            cout << "ZZZZZ iobs = " << iobs << endl;
-            unsigned int ihind = 0;
-
-            //! Loop over bins in outer (1st) dimension (might be only one!)
-            for (unsigned int i=0; i<NDimBins[0]; i++) {
-
-               cout << "YYYYY iobs, ihind = " << iobs << ", " << ihind << endl;
-
-               //! --- 1D or 2D table
-               if (NDim == 1 || NDim == 2) {
-                  //! --- 1D table
-                  if (NDim == 1) {
-                     // No. of bins in differential distribution equals total no. of observable bins
-                     nHistBins = NDimBins[0];
-                  }
-                  //! --- 2D table
-                  else if (NDim == 2) {
-                     // No. of bins in differential distribution equals no. of observable bins in 2nd dimension
-                     NDimBins[1] = fnlo.GetNDim1Bins(i);
-                     nHistBins = NDimBins[1];
-                  }
-
-                  // Arrays to fill ROOT histos
-                  // N+1 bin borders
-                  double xbins[nHistBins+1];
-                  // N+2 ROOT histo bins
-                  double ycont[nHistBins+2];
-                  double dylow[nHistBins+2];
-                  double dyupp[nHistBins+2];
-                  // Underflow bin
-                  ycont[0] = 0.;
-                  dylow[0] = 0.;
-                  dyupp[0] = 0.;
-                  for (unsigned int j = 0; j<nHistBins; j++) {
-                     xbins[j]   = bins[iobs].first;
-                     ycont[j+1] = XsUnc.xs[iobs];
-                     dylow[j+1] = XsUnc.dxsl[iobs];
-                     dyupp[j+1] = XsUnc.dxsu[iobs];
-                     iobs++;
-                  }
-                  // Right edge
-                  xbins[nHistBins] = bins[iobs-1].second;
-                  // Overflow bin
-                  ycont[nHistBins+1] = 0.;
-                  dylow[nHistBins+1] = 0.;
-                  dyupp[nHistBins+1] = 0.;
-
-                  // fastNLO numbering for ROOT histos
-                  int iScale = 1;
-                  int iProc  = 0;
-                  int iDim0  = i+1;
-                  int iOff   = 0;
-                  int iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                  char histno[9];
-
-                  if ( iUnc==0 ) {
-                     // Cross section
-                     sprintf(histno,"h%07i",iHist);
-                     histo[i+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                     histo[i+iUnc]->SetContent(ycont);
-                     histo[i+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-                     histo[i+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
-                     nHist++;
-                  }
-
-                  // Lower uncertainty
-                  iOff  = iOffs[iUnc];
-                  iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                  sprintf(histno,"h%07i",iHist);
-                  histo[i+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                  histo[i+iUnc]->SetContent(dylow);
-                  histo[i+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-                  histo[i+iUnc]->GetYaxis()->SetTitle(titlel);
-                  nHist++;
-
-                  // Upper uncertainty
-                  iOff  = iOffs[iUnc]+1;
-                  iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                  sprintf(histno,"h%07i",iHist);
-                  histo[i+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                  histo[i+iUnc]->SetContent(dyupp);
-                  histo[i+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-                  histo[i+iUnc]->GetYaxis()->SetTitle(titleu);
-                  nHist++;
+            //! Loop over no. of histograms
+            unsigned int iobs = 0;
+            unsigned int i = 0;
+            unsigned int j = 0;
+            for (unsigned int ih=0; ih<nHist; ih++) {
+               //               cout << "AAAAA: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
+               unsigned int nHistBins = 0;
+               //! --- 1D table
+               if (NDim == 1) { // One histogram only
+                  // No. of bins in differential distribution equals total no. of observable bins
+                  nHistBins = NDimBins[0];
                }
-
+               //! --- 2D table
+               else if (NDim == 2) { // One histogram per 2nd dimension bin
+                  // No. of bins in differential distribution equals no. of observable bins in 2nd dimension
+                  NDimBins[1] = fnlo.GetNDim1Bins(i);
+                  nHistBins = NDimBins[1];
+               }
                //! --- 3D table
                else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
-                  //! Loop over bins in middle (2nd) dimension
                   NDimBins[1] = fnlo.GetNDim1Bins(i);
-                  cout << "NDimBins[1] = " << NDimBins[1] << endl;
-                  for (unsigned int j = 0; j<NDimBins[1]; j++) {
-                     cout << "BBB j = " << j << endl;
-                     ihind++;
-                     //! Loop over bins in inner (3rd) dimension
-                     NDimBins[2] = fnlo.GetNDim2Bins(i,j);
-                     nHistBins = NDimBins[2];
-
-                     // Arrays to fill ROOT histos
-                     // N+1 bin borders
-                     double xbins[nHistBins+1];
-                     // N+2 ROOT histo bins
-                     double ycont[nHistBins+2];
-                     double dylow[nHistBins+2];
-                     double dyupp[nHistBins+2];
-                     // Underflow bin
-                     ycont[0] = 0.;
-                     dylow[0] = 0.;
-                     dyupp[0] = 0.;
-                     cout << "i, j, = " << i << ", " << j << endl;
-                     for (unsigned int k = 0; k<nHistBins; k++) {
-                           xbins[k]   = bins[iobs].first;
-                           ycont[k+1] = XsUnc.xs[iobs];
-                           dylow[k+1] = XsUnc.dxsl[iobs];
-                           dyupp[k+1] = XsUnc.dxsu[iobs];
-                           cout << "iobs, xbins, ycont, dylow, dyupp = " << iobs << ", " << xbins[k] << ", " << ycont[k+1] << ", " << dylow[k+1] << ", " << dyupp[k+1] << endl;
-                           iobs++;
-                     }
-                     // Right edge
-                     xbins[nHistBins] = bins[iobs-1].second;
-                     // Overflow bin
-                     ycont[nHistBins+1] = 0.;
-                     dylow[nHistBins+1] = 0.;
-                     dyupp[nHistBins+1] = 0.;
-
-                     // fastNLO numbering for ROOT histos
-                     int iScale = 1;
-                     int iProc  = 0;
-                     int iDim0  = ihind;
-                     int iOff   = 0;
-                     int iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                     char histno[9];
-
-                     if ( iUnc==0 ) {
-                        // Cross section
-                        sprintf(histno,"h%07i",iHist);
-                        histo[ihind-1+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                        histo[ihind-1+iUnc]->SetContent(ycont);
-                        histo[ihind-1+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-2].c_str());
-                        histo[ihind-1+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
-                        //                           nHist++;
-                     }
-
-                     // Lower uncertainty
-                     iOff  = iOffs[iUnc];
-                     iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                     sprintf(histno,"h%07i",iHist);
-                     histo[ihind-1+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                     histo[ihind-1+iUnc]->SetContent(dylow);
-                     histo[ihind-1+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-2].c_str());
-                     histo[ihind-1+iUnc]->GetYaxis()->SetTitle(titlel);
-                     //                        nHist++;
-
-                     // Upper uncertainty
-                     iOff  = iOffs[iUnc]+1;
-                     iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
-                     sprintf(histno,"h%07i",iHist);
-                     histo[ihind-1+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                     histo[ihind-1+iUnc]->SetContent(dyupp);
-                     histo[ihind-1+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-2].c_str());
-                     histo[ihind-1+iUnc]->GetYaxis()->SetTitle(titleu);
-                     //                        nHist++;
-                  }
+                  NDimBins[2] = fnlo.GetNDim2Bins(i,j);
+                  nHistBins = NDimBins[2];
                }
                //! ---  Not yet implemented
                else {
@@ -647,6 +507,86 @@ int main(int argc, char** argv) {
                   error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
                   exit(1);
                }
+
+               // Arrays to fill ROOT histos
+               // N+1 bin borders
+               double xbins[nHistBins+1];
+               // N+2 ROOT histo bins
+               double ycont[nHistBins+2];
+               double dylow[nHistBins+2];
+               double dyupp[nHistBins+2];
+               // Underflow bin
+               ycont[0] = 0.;
+               dylow[0] = 0.;
+               dyupp[0] = 0.;
+               for (unsigned int k = 0; k<nHistBins; k++) {
+                  xbins[k]   = bins[iobs].first;
+                  ycont[k+1] = XsUnc.xs[iobs];
+                  dylow[k+1] = XsUnc.dxsl[iobs];
+                  dyupp[k+1] = XsUnc.dxsu[iobs];
+                  iobs++;
+               }
+               // Right edge
+               xbins[nHistBins] = bins[iobs-1].second;
+               // Overflow bin
+               ycont[nHistBins+1] = 0.;
+               dylow[nHistBins+1] = 0.;
+               dyupp[nHistBins+1] = 0.;
+
+               // fastNLO numbering for ROOT histos
+               int iScale = 1;
+               int iProc  = 0;
+               int iDim0  = ih+1;
+               int iOff   = 0;
+               int iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
+               char histno[9];
+
+               if ( iUnc==0 ) {
+                  // Cross section
+                  sprintf(histno,"h%07i",iHist);
+                  histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+                  histo[ih+iUnc]->SetContent(ycont);
+                  histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+                  histo[ih+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
+               }
+
+               // Lower uncertainty
+               iOff  = iOffs[iUnc];
+               iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
+               sprintf(histno,"h%07i",iHist);
+               histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+               histo[ih+iUnc]->SetContent(dylow);
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetYaxis()->SetTitle(titlel);
+
+               // Upper uncertainty
+               iOff  = iOffs[iUnc]+1;
+               iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
+               sprintf(histno,"h%07i",iHist);
+               histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+               histo[ih+iUnc]->SetContent(dyupp);
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetYaxis()->SetTitle(titleu);
+
+               if (NDim == 1 ) {
+                  iobs = 0;
+               } else if (NDim == 2) {
+                  i++;
+                  if (i == NDimBins[0]) {
+                     iobs = 0;
+                  }
+               } else {
+                  j++;
+                  if (j == NDimBins[1]) {
+                     i++;
+                     if (i == NDimBins[0]) {
+                        i = 0;
+                        iobs = 0;
+                     }
+                     j = 0;
+                  }
+               }
+               //               cout << "ZZZZZ: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
             }
          }
       }
