@@ -541,7 +541,7 @@ void fastNLOReader::SetFilename(string filename) {
 
 //______________________________________________________________________________
 void fastNLOReader::OrderCoefficients() {
-   logger.debug["OrderCoefficients"]<<endl;
+   logger.debug["OrderCoefficients"]<<"Start"<<endl;
 
    // Initialize Coeff's
    fastNLOCoeffBase* Coeff_LO    = NULL;
@@ -550,6 +550,9 @@ void fastNLOReader::OrderCoefficients() {
    fastNLOCoeffBase* Coeff_THC1  = NULL;
    fastNLOCoeffBase* Coeff_THC2  = NULL;
    fastNLOCoeffBase* Coeff_NPC1  = NULL;
+   fastNLOCoeffBase* Coeff_UNC1  = NULL;
+   fastNLOCoeffBase* Coeff_UNC2  = NULL;
+   fastNLOCoeffBase* Coeff_UNC3  = NULL;
 
    // run over all coefficient tables, identify and sort contributions.
    for (unsigned int i= 0; i<fCoeff.size() ; i++) {
@@ -600,13 +603,34 @@ void fastNLOReader::OrderCoefficients() {
             }
          }
       }
-      // multiplicative corrections
+      // Multiplicative corrections
       else if (fastNLOCoeffMult::CheckCoeffConstants(c,true)) {
          // Non-perturbative corrections
-         if (c->GetIContrFlag1()==4)  Coeff_NPC1 = c;
-         else {
+         if (c->GetIContrFlag1()==4) {
+            logger.debug["OrderCoefficients"]<<"Found NPC1 contribution."<<endl;
+            Coeff_NPC1 = c;
+         } else {
             logger.error["ReadTable"]<<"Further multiplicative corrections not yet implemented, stopped!\n";
             exit(1);
+         }
+      }
+      // Relative uncertainty
+      else if (fastNLOCoeffUnc::CheckCoeffConstants(c,true)) {
+         // For a particular perturbative order
+         if (c->GetIContrFlag1()==5) {
+            if (c->GetIContrFlag2()==1) {
+               logger.debug["OrderCoefficients"]<<"Found UNC1 contribution."<<endl;
+               Coeff_UNC1 = c;
+            } else if (c->GetIContrFlag2()==2) {
+               logger.debug["OrderCoefficients"]<<"Found UNC2 contribution."<<endl;
+               Coeff_UNC2 = c;
+            } else if (c->GetIContrFlag2()==3) {
+               logger.debug["OrderCoefficients"]<<"Found UNC3 contribution."<<endl;
+               Coeff_UNC3 = c;
+            } else {
+               logger.error["ReadTable"]<<"Further relative uncertainties not yet implemented, stopped!\n";
+               exit(1);
+            }
          }
       }
    }
@@ -617,17 +641,11 @@ void fastNLOReader::OrderCoefficients() {
    BBlocksSMCalc.resize(defsize);
 
    // Assign non-perturbative corrections, switch off by default
-   if (Coeff_NPC1) {
-      BBlocksSMCalc[kNonPerturbativeCorrection].push_back(Coeff_NPC1);
-   }
+   if (Coeff_NPC1) BBlocksSMCalc[kNonPerturbativeCorrection].push_back(Coeff_NPC1);
 
    // Assign threshold corrections, switch off by default
-   if (Coeff_THC1) {
-      BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC1);
-   }
-   if (Coeff_THC2) {
-      BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC2);
-   }
+   if (Coeff_THC1) BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC1);
+   if (Coeff_THC2) BBlocksSMCalc[kThresholdCorrection].push_back(Coeff_THC2);
 
    // Assign fixed order calculations (LO must be [0], because second index corresponds to ESMOrder enum)
    // Push null pointer if no LO ...!
@@ -654,8 +672,12 @@ void fastNLOReader::OrderCoefficients() {
       info["OrderCoefficients"]<<"Could not find any NNLO calculation."<<endl;
    }
 
-   //int iprint = 2;
-   //Print(iprint);
+   // Assign uncertainty contributions, switch like Fixed-Order coefficients
+   if (Coeff_UNC1) BBlocksSMCalc[kFixedOrderUncertainty].push_back(Coeff_UNC1);
+   if (Coeff_UNC2) BBlocksSMCalc[kFixedOrderUncertainty].push_back(Coeff_UNC2);
+   if (Coeff_UNC3) BBlocksSMCalc[kFixedOrderUncertainty].push_back(Coeff_UNC3);
+
+   logger.debug["OrderCoefficients"]<<"End"<<endl;
 }
 
 
@@ -672,8 +694,11 @@ void fastNLOReader::SetCoefficientUsageDefault() {
    }
    // If filled, activate LO, NLO, and NNLO
    if (BBlocksSMCalc[kFixedOrder][kLeading]) BBlocksSMCalc[kFixedOrder][kLeading]->Enable();   //LO
+   if (BBlocksSMCalc[kFixedOrderUncertainty][kLeading]) BBlocksSMCalc[kFixedOrderUncertainty][kLeading]->Enable();   //LO
    if (BBlocksSMCalc[kFixedOrder][kNextToLeading]) BBlocksSMCalc[kFixedOrder][kNextToLeading]->Enable();  //NLO
+   if (BBlocksSMCalc[kFixedOrderUncertainty][kNextToLeading]) BBlocksSMCalc[kFixedOrderUncertainty][kNextToLeading]->Enable();   //NLO
    if (BBlocksSMCalc[kFixedOrder][kNextToNextToLeading]) BBlocksSMCalc[kFixedOrder][kNextToNextToLeading]->Enable();  //NNLO
+   if (BBlocksSMCalc[kFixedOrderUncertainty][kNextToNextToLeading]) BBlocksSMCalc[kFixedOrderUncertainty][kNextToNextToLeading]->Enable();   //NNLO
 }
 
 
@@ -1964,6 +1989,8 @@ void fastNLOReader::FillAlphasCache(bool lForce) {
                   FillAlphasCacheInBlockBv20((fastNLOCoeffAddFix*)c);
                else if (fastNLOCoeffMult::CheckCoeffConstants(c,true))
                   logger.info["FillAlphasCache"]<<"Nothing to be done for multiplicative contribution."<<endl;
+               else if (fastNLOCoeffUnc::CheckCoeffConstants(c,true))
+                  logger.info["FillAlphasCache"]<<"Nothing to be done for uncertainty contribution."<<endl;
                else {
                   logger.error["FillAlphasCache"]<<"Could not identify contribution. Printing."<<endl;
                   c->Print(-1);
@@ -2208,6 +2235,8 @@ void fastNLOReader::FillPDFCache(double chksum, bool lForce) {
                   }
                } else if (fastNLOCoeffMult::CheckCoeffConstants(c,true)) {
                   logger.info["FillPDFCache"]<<"Nothing to be done for multiplicative contribution."<<endl;
+               } else if (fastNLOCoeffUnc::CheckCoeffConstants(c,true)) {
+                  logger.info["FillPDFCache"]<<"Nothing to be done for uncertainty contribution."<<endl;
                } else {
                   logger.error["FillPDFCache"]<<"Could not identify contribution. Printing."<<endl;
                   c->Print(-1);
@@ -2304,7 +2333,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
                for (int x=0; x<c->GetNxmax(i); x++) {
                   //double xp = c->GetXNode1(i,x);
                   double xp = c->GetXNode1(i,x);
-                  
+
                   if (SpeedUp) {
                      if (c == c0)
                         c->PdfXfx[i][x][jS1][kS2] = GetXFXSqrtS(xp,muf);
@@ -3523,3 +3552,64 @@ std::vector< std::vector<double> > fastNLOReader::GetScaleUncertaintyVec(const E
    xsUncVec[2] = xsUnc.dxsl;
    return xsUncVec;
 }
+
+
+//______________________________________________________________________________
+// XsUncertainty fastNLOReader::GetExtraUncertainty(const EExtraUncertaintyStyle eExtraUnc) {
+//    XsUncertainty XsUnc = GetExtraUncertainty(eScaleUnc, false);
+//    return XsUnc;
+// }
+
+
+// //______________________________________________________________________________
+// XsUncertainty fastNLOReader::GetExtraUncertainty(const EExtraUncertaintyStyle eExtraUnc, bool lNorm) {
+//    // Get
+//    XsUncertainty XsUnc;
+
+//    unsigned int NObsBin = GetNObsBin();
+
+//    if (eExtraUnc == kStat) {
+//       logger.info["GetExtraUncertainty"]<<"Symmetric uncorrelated (statistical) uncertainty selected."<<endl;
+//    } else if (eExtraUnc == kBias) {
+//       logger.info["GetExtraUncertainty"]<<"Asymmetric correlated (bias) uncertainty selected."<<endl;
+//    } else {
+//       logger.error["GetExtraUncertainty"]<<"ERROR! This uncertainty type has not yet been implemented, sorry."<<endl;
+//       logger.error["GetExtraUncertainty"]<<"eExtraUnc = "<<eExtraUnc<<endl;
+//       exit(1);
+//    }
+
+//    vector < double > MyXSection;
+//    //! Cross section and absolute uncertainties
+//    for (unsigned int iscl = 0; iscl <= npoint; iscl++) {
+//       SetScaleFactorsMuRMuF(xmurs[iscl],xmufs[iscl]);
+//       CalcCrossSection();
+//       MyXSection = GetCrossSection(lNorm);
+//       for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
+//          if (iscl == 0) {
+//             XsUnc.xs.push_back(MyXSection[iobs]);
+//             XsUnc.dxsu.push_back(0);
+//             XsUnc.dxsl.push_back(0);
+//          } else {
+//             XsUnc.dxsu[iobs] = max(XsUnc.dxsu[iobs],MyXSection[iobs]-XsUnc.xs[iobs]);
+//             XsUnc.dxsl[iobs] = min(XsUnc.dxsl[iobs],MyXSection[iobs]-XsUnc.xs[iobs]);
+//          }
+//       }
+//    }
+
+//    //! Divide by cross section != 0 to give relative uncertainties
+//    for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
+//       if (fabs(XsUnc.xs[iobs]) > DBL_MIN) {
+//          XsUnc.dxsu[iobs] = +fabs(XsUnc.dxsu[iobs] / XsUnc.xs[iobs]);
+//          XsUnc.dxsl[iobs] = -fabs(XsUnc.dxsl[iobs] / XsUnc.xs[iobs]);
+//       } else {
+//          XsUnc.dxsu[iobs] = 0.;
+//          XsUnc.dxsl[iobs] = 0.;
+//       }
+//       logger.debug["GetExtraUncertainty"]<<"iobs = " << iobs << "dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
+//    }
+
+//    logger.info["GetExtraUncertainty"]<<"Setting scale factors back to default of unity."<<endl;
+//    SetScaleFactorsMuRMuF(xmurs[0],xmufs[0]);
+
+//    return XsUnc;
+// }

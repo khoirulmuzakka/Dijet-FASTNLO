@@ -34,6 +34,9 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
    } else if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==1 ) {
       // Data contribution
       return false;
+   } else if ( c->GetIAddMultFlag()==2 && c->GetIDataFlag()==0 ) {
+      // Uncertainty contribution
+      return false;
    } else {
       // Unknown contribution
       say::error["fastNLOCoeffAddBase::CheckCoeffConstants"]
@@ -53,6 +56,7 @@ fastNLOCoeffAddBase* fastNLOCoeffAddBase::Clone() const {
 
 ///________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::Read(istream& table){
+   debug["Read"]<<"Start reading base content of additive table contribution ..."<<endl;
    fastNLOCoeffBase::ReadBase(table);
    CheckCoeffConstants(this);
    ReadCoeffAddBase(table);
@@ -62,6 +66,7 @@ void fastNLOCoeffAddBase::Read(istream& table){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
+   debug["ReadCoeffAddBase"]<<"Start reading base content of additive table contribution ..."<<endl;
    CheckCoeffConstants(this);
    char buffer[5257];
    string stest;

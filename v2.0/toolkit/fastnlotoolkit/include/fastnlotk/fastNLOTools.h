@@ -15,6 +15,7 @@ namespace fastNLOTools {
 
    template<typename T>  int ReadFlexibleVector(std::vector<T>& v, std::istream& table, int nProcLast=0 , double nevts = 1);
    int ReadFlexibleVector( std::vector<std::string >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
+   void PrintFlexibleVector( std::vector<std::string >& v, std::string vname );
    int ReadFlexibleVector( std::vector<double >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
    int ReadFlexibleVector( std::vector<int >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );
    int ReadFlexibleVector( std::vector<unsigned long long >& v, std::istream& table , int nProcLast = 0 , double nevts = 1 );

@@ -50,8 +50,8 @@ namespace fastNLO {
    typedef std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<double > > > > > > > v7d;
 
    // ---- constants ---- //
-   static const std::set<int> CompatibleVersions{20000,21000,22000,23000,23500,23600,24000};
-   const int tabversion   = 23600;
+   static const std::set<int> CompatibleVersions{20000,21000,22000,23000,23500,23600,24000,25000};
+   const int tabversion   = 25000;
    const int tablemagicno = 1234567890;
    // separating character between entries in table
    const char sep[] = "\n";
@@ -85,10 +85,11 @@ namespace fastNLO {
    };
 
    enum ESMCalculation {
-      kFixedOrder               = 0,    // Fixed order calculation (pQCD)
+      kFixedOrder               = 0,    // Fixed-order calculation (pQCD)
       kThresholdCorrection      = 1,    // Threshold corrections
       kElectroWeakCorrection    = 2,    // Electroweak corrections
       kNonPerturbativeCorrection= 3,    // Non-perturbative corrections|Hadronisation corrections
+      kFixedOrderUncertainty    = 5,    // Fixed-order uncertainty
       kContactInteraction       = 10    // Contact interactions
    };
 
@@ -108,6 +109,13 @@ namespace fastNLO {
       kSymmetricTwoPoint        = 1,    // symmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2)
       kAsymmetricSixPoint       = 2     // asymmetric (mu_r,mu_f) scale variations by factors (1/2,1/2), (2,2) plus
                                         // (1/2,1), (1,1/2), (1,2), (2,1)
+   };
+
+   enum EExtraUncertaintyStyle {
+      kStat                     = 0,    // symmetric, uncorrelated (e.g. statistical from numerical integrations)
+      kBias                     = 1,    // asymmetric, correlated (e.g. from interpolation bias)
+      kSystSym                  = 2,    // symmetric, correlated (e.g. ?)
+      kStatAsym                 = 3,    // asymmetric, uncorrelated (e.g. ?)
    };
 
    enum EPDFUncertaintyStyle {

@@ -26,7 +26,7 @@ fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
 void fastNLOCoeffBase::Read(istream& table){
    // basic read function.
    // reads in only 'base'-variables.
-   debug["Read"]<<endl;
+   debug["Read"]<<"Start reading base content of table contribution ..."<<endl;
    ReadBase(table);
    EndReadCoeff(table);
 }
@@ -34,45 +34,32 @@ void fastNLOCoeffBase::Read(istream& table){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::ReadBase(istream& table){
-   debug["ReadBase"]<<endl;
-   //table.peek();
-
+   debug["ReadBase"]<<"Reading base content of table contribution ..."<<endl;
    table >> fVersionRead;
+   debug["ReadBase"]<<"1. fVersionRead = "<<fVersionRead<<endl;
    if ( fVersionRead == fastNLO::tablemagicno )
       fVersionRead = 22000 ;
+   debug["ReadBase"]<<"2. fVersionRead = "<<fVersionRead<<endl;
    //fastNLOTools::ReadMagicNo(table);
    std::string stest;
-   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase"
-   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
-
+   if ( fVersionRead>=24000 ) {
+      table >> stest;
+      fastNLOTools::ReadUnused(table);
+   }
    table >> IXsectUnits;
+   debug["ReadBase"]<<"IXsectUnits = "<<IXsectUnits<<endl;
    table >> IDataFlag;
    table >> IAddMultFlag;
+   debug["ReadBase"]<<"IDataFlag = "<<IDataFlag<<", IAddMultFlag = "<<IAddMultFlag<<endl;
    table >> IContrFlag1;
    table >> IContrFlag2;
+   debug["ReadBase"]<<"IContrFlag1 = "<<IContrFlag1<<", IContrFlag2 = "<<IContrFlag2<<endl;
    table >> NScaleDep;
+   debug["ReadBase"]<<"NScaleDep = "<<NScaleDep<<endl;
    fastNLOTools::ReadFlexibleVector(CtrbDescript,table);
+   fastNLOTools::PrintFlexibleVector(CtrbDescript,"CtrbDescript");
    fastNLOTools::ReadFlexibleVector(CodeDescript,table);
-   //printf("  *  fastNLOCoeffBase::Read().  IDataFlag: %d, IAddMultFlag: %d, IContrFlag1: %d, IContrFlag2: %d,, NScaleDep: %d\n",IDataFlag,IAddMultFlag,IContrFlag1,IContrFlag2,NScaleDep );
-   // int NContrDescr;
-   // table >> NContrDescr;
-   // CtrbDescript.resize(NContrDescr);
-   // char buffer[5257];
-   // table.getline(buffer,5256);
-   // for(int i=0;i<NContrDescr;i++){
-   //    table.getline(buffer,256);
-   //    CtrbDescript[i] = buffer;
-   //    //      StripWhitespace(CtrbDescript[i]);
-   // }
-   // int NCodeDescr;
-   // table >> NCodeDescr;
-   // CodeDescript.resize(NCodeDescr);
-   // table.getline(buffer,256);
-   // for(int i=0;i<NCodeDescr;i++){
-   //    table.getline(buffer,256);
-   //    CodeDescript[i] = buffer;
-   //    //      StripWhitespace(CodeDescript[i]);
-   // }
+   fastNLOTools::PrintFlexibleVector(CodeDescript,"CodeDescript");
    if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }
 

@@ -44,15 +44,19 @@ namespace fastNLOTools {
    //________________________________________________________________________________________________________________ //
    int ReadUnused(istream& table ){
       //! Read values, which are not known to the current code.
+      debug["ReadUnused"]<<"Start reading unused." << endl;
       int nLines = 0;
       table >> nLines;
+      debug["ReadUnused"]<<"Read from table, nLines = " << nLines << endl;
       if ( nLines==fastNLO::tablemagicno ) {
-         error["ReadUnused"]<<"Number of lines identical to magic number. Exiting."<<endl; exit(3);
+         error["ReadUnused"]<<"Number of lines identical to magic number. Exiting."<<endl;
+         exit(3);
       }
       string sUnused;
       if ( nLines > 0 ) std::getline(table,sUnused); // discard empty space due to precendent >>
-      for( int i=0 ; i<nLines ; i++)
-         std::getline(table,sUnused);
+      for( int i=0 ; i<nLines ; i++) std::getline(table,sUnused);
+      debug["ReadUnused"]<<"Returning nLines = " << nLines << endl;
+      debug["ReadUnused"]<<"End reading unused." << endl;
       return nLines;
    }
 
@@ -102,13 +106,21 @@ namespace fastNLOTools {
    int ReadFlexibleVector(vector<std::string >& v, istream& table , int size , double nevts ){
       if ( size == 0 ) table >> size;
       v.resize(size);
-      if ( size > 0 ) std::getline(table,v[0]); // discard empty space due to precendent >>
+      if ( size > 0 ) std::getline(table,v[0]); // discard empty space due to precedent >>
       for( auto& i : v) {
          std::getline(table,i);
       }
       return v.size() + 1;
    }
 
+   //________________________________________________________________________________________________________________ //
+   void PrintFlexibleVector(vector<std::string >& v, std::string vname) {
+      cout << vname << " has size " << v.size() << " and contains: " << endl;
+      for (unsigned int i=0; i < v.size(); i++) {
+         cout << v[i] << endl;
+      }
+      return;
+   }
 
    //________________________________________________________________________________________________________________ //
    int ReadFlexibleVector(vector<int >& v, istream& table , int size , double nevts ){
@@ -339,10 +351,13 @@ namespace fastNLOTools {
 
    //________________________________________________________________________________________________________________ //
    void PutBackMagicNo(istream& table){
-   //! Put magic number back
+      //! Put magic number back
+      debug["PutBackMagicNo"]<<"Start"<<endl;
       for(int i=0;i<(int)(log10((double)tablemagicno)+1);i++){
+         debug["PutBackMagicNo"]<<"unget loop"<<endl;
          table.unget();
       }
+      debug["PutBackMagicNo"]<<"unget line"<<endl;
       table.unget();
    }
 
@@ -355,6 +370,7 @@ namespace fastNLOTools {
       }
       string line;
       std::getline(table,line);
+      debug["ReadMagicNo"]<<"Read line is " << line << endl;
       if ( line=="" ) std::getline(table,line);  // last one was '<<'
       if( line != std::to_string(tablemagicno)){
          error["ReadMagicNo"]<<"Found '"<<line<<"' instead of "<<tablemagicno<<"."<<endl;
@@ -363,6 +379,7 @@ namespace fastNLOTools {
          exit(2);
          return false;
       };
+      debug["ReadMagicNo"]<<"Read the magic number " << line << endl;
       return true;
    }
 

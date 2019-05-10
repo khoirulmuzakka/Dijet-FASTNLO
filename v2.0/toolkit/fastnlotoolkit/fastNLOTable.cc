@@ -89,11 +89,12 @@ void fastNLOTable::ReadTable(){
    logger.debug["ReadTable"]<<"Reading scenario."<<endl;
    ReadScenario(*strm);
    // read b-blocks
-   logger.debug["ReadTable"]<<"Reading coeff tables."<<endl;
+   logger.debug["ReadTable"]<<"Reading coefficient tables."<<endl;
    ReadCoeffTables(*strm, nCoeff);
    // close stream
    logger.debug["ReadTable"]<<"Reading done closing files."<<endl;
    CloseFileRead(*strm);
+   logger.debug["ReadTable"]<<"Files closed."<<endl;
 }
 
 
@@ -103,6 +104,7 @@ int fastNLOTable::ReadHeader(istream& table) {
    //!< Read table header (formely named BlockA1 and BlockA2)
    //!< return number of contributions to follow
    //!<
+   logger.debug["ReadHeader"]<<"Start reading header." <<endl;
    table.peek();
    if (table.eof()) {
       logger.error["ReadHeader"]<<"Cannot read from stream."<<endl;
@@ -111,13 +113,15 @@ int fastNLOTable::ReadHeader(istream& table) {
    fastNLOTools::ReadMagicNo(table);
    table >> Itabversion;
    fastNLOTools::CheckVersion(Itabversion);
-   std::string test;
-   if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Header
-   table >> ScenName;
-   if ( test != "" )  {
-      logger.warn["ReadHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
-   }
    // check if ScenName contains spaces
+   // KR: Aber nicht so ... Was soll das?
+   // std::string test;
+   // if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Header
+   table >> ScenName;
+   // if ( test != "" )  {
+   //    cout << "test is " << test << endl;
+   //    logger.warn["ReadHeader"]<<"Scenario name is not allowed to contain white spaces!!"<<endl;
+   // }
    int Ncontrib,Ndata,Nmult;
    table >> Ncontrib;
    table >> Nmult ; // not used any longer
@@ -129,6 +133,8 @@ int fastNLOTable::ReadHeader(istream& table) {
    fastNLOTools::ReadUnused(table); // Imachine
    fastNLOTools::ReadMagicNo(table);
    fastNLOTools::PutBackMagicNo(table);
+   logger.debug["ReadHeader"]<<"Table has " << Ncontrib << " contributions and " << Ndata << " data contributions." <<endl;
+   logger.debug["ReadHeader"]<<"End reading header." <<endl;
    return Ncontrib+Ndata;
 }
 
@@ -136,9 +142,12 @@ int fastNLOTable::ReadHeader(istream& table) {
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadCoeffTables(istream& table, int nCoeff){
    //!< read nCoeff Coefficient tables (additive, multiplicative and data)
+   logger.debug["ReadCoeffTable"]<<"Reading " << nCoeff << " coefficient tables."<<endl;
    for (int i=0; i<nCoeff; i++) {
       fastNLOCoeffBase cTemp(NObsBin);
+      logger.debug["ReadCoeffTable"]<<"Reading base content of table no. " << i << " ..."<<endl;
       cTemp.ReadBase(table);
+      logger.debug["ReadCoeffTable"]<<"Reading remaining table content of table no. " << i << " ..."<<endl;
       fastNLOCoeffBase* cN = ReadRestOfCoeffTable(cTemp, table);
       CreateCoeffTable(i, cN);
    }
@@ -161,6 +170,11 @@ fastNLOCoeffBase* fastNLOTable::ReadRestOfCoeffTable(const fastNLOCoeffBase& cB,
    } else if ( fastNLOCoeffMult::CheckCoeffConstants(&cB,quiet) ) {
       logger.debug["ReadRestOfCoeffTable"]<<"Found multiplicative contribution. Now reading in."<<endl;
       fastNLOCoeffMult* cN = new fastNLOCoeffMult(cB);
+      cN->ReadRest(table);
+      return cN;
+   } else if ( fastNLOCoeffUnc::CheckCoeffConstants(&cB,quiet) ) {
+      logger.debug["ReadRestOfCoeffTable"]<<"Found uncertainty contribution. Now reading in."<<endl;
+      fastNLOCoeffUnc* cN = new fastNLOCoeffUnc(cB);
       cN->ReadRest(table);
       return cN;
    } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(&cB,quiet) ) {
@@ -245,9 +259,11 @@ void fastNLOTable::WriteHeader(std::ostream& table) {
 // ___________________________________________________________________________________________________
 void fastNLOTable::ReadScenario(istream& table){
    //table.peek();
+   logger.debug["ReadScenario"]<<"Start reading scenario." <<endl;
    fastNLOTools::ReadMagicNo(table);
-   std::string test;
-   if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Scenario
+   // KR: Was soll das?
+   // std::string test;
+   // if ( Itabversion >= 24000 ) table >> test; // "fastNLO_Scenario
    table >> Ipublunits;
    fastNLOTools::ReadFlexibleVector(ScDescript,table);
    char buffer[257];
@@ -291,10 +307,6 @@ void fastNLOTable::ReadScenario(istream& table){
       }
    }
    fastNLOTools::ReadFlexibleVector(BinSize,table,NObsBin);
-   // BinSize.resize(NObsBin);
-   // for(unsigned int i=0;i<NObsBin;i++){
-   //    table >> BinSize[i];
-   // }
 
    table >> INormFlag;
    if( INormFlag < 0 ) table >> DenomTable;
@@ -306,15 +318,11 @@ void fastNLOTable::ReadScenario(istream& table){
          table >> IDivUpPointer[i];
       }
    }
-   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
-   if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
+   // if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
+   // if ( Itabversion >= 24000 ) fastNLOTools::ReadUnused(table); // v2.4 yet unused
    fastNLOTools::ReadMagicNo(table);
-   // if (!fastNLOTools::ReadMagicNo(table)) {
-   //    logger.error["ReadScenario"]<<"Did not find final magic number, aborting!"<<endl;
-   //    logger.error["ReadScenario"]<<"Please check compatibility of tables and program version!"<<endl;
-   //    exit(1);
-   // }
    fastNLOTools::PutBackMagicNo(table);
+   logger.debug["ReadScenario"]<<"End reading scenario." <<endl;
 }
 
 
@@ -472,6 +480,15 @@ bool fastNLOTable::IsCatenable(const fastNLOTable& other) const {
             fastNLOCoeffMult* cmultthis  = (fastNLOCoeffMult*)fCoeff[j];
             fastNLOCoeffMult* cmultother = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
             if ( cmultthis->IsCatenable(*cmultother) ) {
+               matches[ic]++;
+               continue;
+            }
+         }
+         // uncertainty?
+         else if ( fastNLOCoeffUnc::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffUnc* cuncthis  = (fastNLOCoeffUnc*)fCoeff[j];
+            fastNLOCoeffUnc* cuncother = (fastNLOCoeffUnc*)other.GetCoeffTable(ic);
+            if ( cuncthis->IsCatenable(*cuncother) ) {
                matches[ic]++;
                continue;
             }
@@ -1002,6 +1019,16 @@ void fastNLOTable::AddTable(const fastNLOTable& other, fastNLO::EMerge moption) 
                exit(1);
             }
          }
+         // Uncertainty?
+         else if ( fastNLOCoeffUnc::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffUnc* clhs = (fastNLOCoeffUnc*)fCoeff[jc];
+            fastNLOCoeffUnc* crhs = (fastNLOCoeffUnc*)other.GetCoeffTable(ic);
+            if ( clhs->IsCompatible(*crhs) ) {
+               logger.error["AddTable"]<<"Found matching uncertainty contribution. This is not allowed. Aborted!" << endl;
+               wasAdded = true;
+               exit(1);
+            }
+         }
          // Data?
          else if ( fastNLOCoeffData::CheckCoeffConstants(cother,quiet) ) {
             fastNLOCoeffData* clhs = (fastNLOCoeffData*)fCoeff[jc];
@@ -1033,6 +1060,9 @@ void fastNLOTable::AddTable(const fastNLOTable& other, fastNLO::EMerge moption) 
             newnc++;
          } else if ( fastNLOCoeffMult::CheckCoeffConstants(add,quiet) ) {
             add = new fastNLOCoeffMult((fastNLOCoeffMult&)*add);
+            newnc++;
+         } else if ( fastNLOCoeffUnc::CheckCoeffConstants(add,quiet) ) {
+            add = new fastNLOCoeffUnc((fastNLOCoeffUnc&)*add);
             newnc++;
          } else if ( fastNLOCoeffData::CheckCoeffConstants(add,quiet) ) {
             add = new fastNLOCoeffData((fastNLOCoeffData&)*add);
@@ -1168,6 +1198,15 @@ int fastNLOTable::GetNmult() const {
    int ret = 0;
    for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ )
       if ( (fCoeff[i]->GetIDataFlag()==0) && (fCoeff[i]->GetIAddMultFlag()==1) ) ret++;
+   return ret;
+}
+
+
+// ___________________________________________________________________________________________________
+int fastNLOTable::GetNunc() const {
+   int ret = 0;
+   for ( unsigned int i = 0 ; i<fCoeff.size() ; i++ )
+      if ( (fCoeff[i]->GetIDataFlag()==0) && (fCoeff[i]->GetIAddMultFlag()==2) ) ret++;
    return ret;
 }
 
@@ -2220,6 +2259,10 @@ void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
          logger.info["EraseBinFromTable"]<<"Found multiplicative contribution. Now erasing index no. " << iObsIdx << endl;
          fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
          cmult->EraseBin(iObsIdx);
+      } else if ( fastNLOCoeffUnc::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.info["EraseBinFromTable"]<<"Found uncertainty contribution. Now erasing index no. " << iObsIdx << endl;
+         fastNLOCoeffUnc* cunc = (fastNLOCoeffUnc*)fCoeff[ic];
+         cunc->EraseBin(iObsIdx);
       } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
          logger.info["EraseBinFromTable"]<<"Found additive fix-table contribution. Now erasing index no. " << iObsIdx << endl;
          fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
@@ -2277,6 +2320,10 @@ void fastNLOTable::MultiplyBinInTable(unsigned int iObsIdx, double fact) {
          logger.debug["MultiplyBinInTable"]<<"Found multiplicative contribution. Skipped! Index no. " << iObsIdx << endl;
          fastNLOCoeffMult* cmult = (fastNLOCoeffMult*)fCoeff[ic];
          cmult->MultiplyBin(iObsIdx,fact);
+      } else if ( fastNLOCoeffUnc::CheckCoeffConstants(ctmp,quiet) ) {
+         logger.debug["MultiplyBinInTable"]<<"Found uncertainty contribution. Skipped! Index no. " << iObsIdx << endl;
+         fastNLOCoeffUnc* cunc = (fastNLOCoeffUnc*)fCoeff[ic];
+         cunc->MultiplyBin(iObsIdx,fact);
       } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
          logger.debug["MultiplyBinInTable"]<<"Found additive fix-table contribution. Now multiplying index no. " << iObsIdx << endl;
          fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
@@ -2334,6 +2381,16 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
             fastNLOCoeffMult* crhs = (fastNLOCoeffMult*)other.GetCoeffTable(ic);
             if ( clhs->IsCatenable(*crhs) ) {
                logger.info["CatBinToTable"]<<"Found multiplicative contribution. Now catenating index no. " << iObsIdx << endl;
+               clhs->CatBin(*crhs,iObsIdx);
+               continue;
+            }
+         }
+         // Uncertainty?
+         else if ( fastNLOCoeffUnc::CheckCoeffConstants(cother,quiet) ) {
+            fastNLOCoeffUnc* clhs = (fastNLOCoeffUnc*)fCoeff[jc];
+            fastNLOCoeffUnc* crhs = (fastNLOCoeffUnc*)other.GetCoeffTable(ic);
+            if ( clhs->IsCatenable(*crhs) ) {
+               logger.info["CatBinToTable"]<<"Found uncertainty contribution. Now catenating index no. " << iObsIdx << endl;
                clhs->CatBin(*crhs,iObsIdx);
                continue;
             }

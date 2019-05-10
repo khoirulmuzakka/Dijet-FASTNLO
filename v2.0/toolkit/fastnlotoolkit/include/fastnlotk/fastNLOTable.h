@@ -13,6 +13,7 @@
 #include "fastNLOCoeffAddFlex.h"
 #include "fastNLOCoeffData.h"
 #include "fastNLOCoeffMult.h"
+#include "fastNLOCoeffUnc.h"
 #include "fastNLOConstants.h"
 
 
@@ -50,6 +51,7 @@ class fastNLOTable {
    void   SetScenName(std::string name){ScenName = name;}
 
    int  GetNmult() const;
+   int  GetNunc() const;
    int  GetNcontrib() const;
    int  GetNdata() const;
 
@@ -221,7 +223,7 @@ class fastNLOTable {
    /// ___________________________________________________________________________________________________
    /// Other useful functions
    /// ___________________________________________________________________________________________________
-   void MergeTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge ); //!< 'merge' 
+   void MergeTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge ); //!< 'merge'
    void MergeTables(const std::vector<fastNLOTable*>& tables, fastNLO::EMerge option=fastNLO::kMerge, double cutRMS=0 ); //!< 'merge' (also supports 'median' and 'mean')
    void AddTable(const fastNLOTable& rhs, fastNLO::EMerge option=fastNLO::kMerge); //!< 'merge'
    void SetUserWeights(double wgt); //!< Set user weights for subsequent mergeing wgt

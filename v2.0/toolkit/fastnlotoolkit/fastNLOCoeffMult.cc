@@ -35,6 +35,9 @@ bool fastNLOCoeffMult::CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet
    } else if ( c->GetIAddMultFlag()==0 && c->GetIDataFlag()==1 ) {
       // Data contribution
       return false;
+   } else if ( c->GetIAddMultFlag()==2 && c->GetIDataFlag()==0 ) {
+      // Uncertainty contribution
+      return false;
    } else {
       // Unknown contribution
       say::error["fastNLOCoeffMult::CheckCoeffConstants"]
@@ -55,6 +58,7 @@ fastNLOCoeffMult* fastNLOCoeffMult::Clone() const {
 
 ///________________________________________________________________________________________________________________ //
 void fastNLOCoeffMult::Read(istream& table){
+   debug["Read"]<<"Start reading base content of multiplicative table contribution ..."<<endl;
    fastNLOCoeffBase::ReadBase(table);
    ReadRest(table);
 }
@@ -62,6 +66,7 @@ void fastNLOCoeffMult::Read(istream& table){
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffMult::ReadRest(istream& table){
+   debug["ReadRest"]<<"Start reading rest of multiplicative table contribution ..."<<endl;
    CheckCoeffConstants(this);
    ReadCoeffMult(table);
    EndReadCoeff(table);
@@ -94,6 +99,7 @@ void fastNLOCoeffMult::ReadCoeffMult(istream& table){
    CorrHi.resize(fNObsBins);
    for(int i=0;i<fNObsBins;i++){
       table >> fact[i];
+      cout << "fact["<<i<<"] = " << fact[i] << endl;
       UncorLo[i].resize(Nuncorrel);
       UncorHi[i].resize(Nuncorrel);
       for(int j=0;j<Nuncorrel;j++){

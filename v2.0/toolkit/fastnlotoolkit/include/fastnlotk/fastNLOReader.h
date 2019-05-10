@@ -104,6 +104,12 @@ public:
    //! Function for use with pyext (TODO: Clean this up)
    std::vector< std::vector<double> > GetScaleUncertaintyVec( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
 
+
+   //! Return struct with vectors containing the cross section values and the selected extra uncertainty
+   XsUncertainty GetExtraUncertainty( const fastNLO::EExtraUncertaintyStyle eExtraUnc );
+   XsUncertainty GetExtraUncertainty( const fastNLO::EExtraUncertaintyStyle eExtraUnc, bool lNorm );
+
+
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
    fastNLO::EScaleFunctionalForm GetMuFFunctionalForm() const { return fMuFFunc; };
