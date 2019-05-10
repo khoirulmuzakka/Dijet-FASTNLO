@@ -72,14 +72,22 @@ void fastNLOCoeffAddFix::ReadCoeffAddFix(istream& table){
       table >> Nscalenode[i];
    }
    // printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d,  NScaleDim %d  \n",
-   //     fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+   // 	  fNObsBins, Nscalevar[0] , Nscalenode[0] , NScaleDim );
+   // pre-binary
+   // ScaleFac.resize(NScaleDim);
+   // for(int i=0;i<NScaleDim;i++){
+   //    ScaleFac[i].resize(Nscalevar[i]);
+   //    for(int j=0;j<Nscalevar[i];j++){
+   //       table >> ScaleFac[i][j];
+   //    }
+   // }
+
    ScaleFac.resize(NScaleDim);
    for(int i=0;i<NScaleDim;i++){
       ScaleFac[i].resize(Nscalevar[i]);
-      for(int j=0;j<Nscalevar[i];j++){
-         table >> ScaleFac[i][j];
-      }
    }
+   fastNLOTools::ReadVector( ScaleFac , table , 1);
+
    // printf("  *  fastNLOCoeffAddFix::Read().bins %d, NScalevar[0] %d, Nscalenode[0] %d, ScaleFac[0][0] %d,  NScaleDim %d  \n",
    //     fNObsBins, Nscalevar[0] , Nscalenode[0] , ScaleFac[0][0], NScaleDim );
    fastNLOTools::ResizeVector( ScaleNode , fNObsBins, 1 , Nscalevar[0] , Nscalenode[0] );

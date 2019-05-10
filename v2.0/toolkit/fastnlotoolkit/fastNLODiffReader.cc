@@ -29,6 +29,7 @@ fastNLODiffReader::fastNLODiffReader(string filename) : fastNLOReader(filename) 
    fzmin = 0;
    fzmax = 1.;
    fxpom = 0.01;
+   fProtonE = 920.;
 }
 
 
@@ -44,6 +45,7 @@ void fastNLODiffReader::SetXPomSlicing(int nSlice, double* xpom, double* dxpom) 
       fdxPoms[i] = dxpom[i];
       logger.debug["SetXPomlicing"]<<"[i]="<<i<<"\tfxPomx[i]="<<fxPoms[i]<<"\tfdxPoms[i]="<<fdxPoms[i]<<endl;
    }
+   fPDFCached = 0; // reset cache.
 }
 
 
@@ -210,6 +212,18 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
 	 // for ( auto d : fXSection_vsX1[0] ) cout<<" | "<<d.first<<", "<<d.second;
 	 // cout<<endl;
       }
+
+      // radek
+      for(unsigned i = 0; i < NObsBin; ++i) {
+         //cout << "The basic cross section in bin "<<i <<" : " << XSection[i] << endl;                                                                                            
+         double sumMy=0;
+         for(auto &x :  fXSection_vsQ2[i]) {
+            sumMy += x.second;
+            x.second *= fdxPoms[ixp];
+         }
+      }
+      xsQ2[fxpom] = fXSection_vsQ2;
+
       if ( !fPrintxIPzIP ) logger.info>>".";
       fflush(stdout);
       interv+=fdxPoms[ixp];
@@ -242,7 +256,8 @@ vector<double> fastNLODiffReader::GetXFX(double xp, double muf) const {
    //
 
    // get pdf
-   double zpom = xp/fxpom;
+   double zpom = xp/(fxpom * fProtonE/920. );
+   //double zpom = xp/fxpom;
    vector < double > a(13);
    if (zpom > fzmin && zpom < fzmax) {
       // find x-node index

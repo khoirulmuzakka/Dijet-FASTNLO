@@ -196,6 +196,11 @@ void fastNLOTable::WriteTable() {
       logger.info["WriteTable"]<<"Filename ends with .gz, therefore enable compression." << endl;
       compress = true;
    }
+   // if ( ffilename.find(".taB")!=string::npos || ffilename.find(".TAB")!=string::npos )
+   // {
+   //    logger.info["WriteTable"]<<"Filename contains '.taB' or 'TAB', therefore enable binary output." << endl;
+   //    fastNLOTools::binary = true;
+   // }
 
    logger.info["WriteTable"]<<"Writing fastNLO table with " << GetNcontrib() << " theory contributions to file: " << ffilename << endl;
    std::ostream* table = OpenFileWrite(compress);
@@ -2406,7 +2411,7 @@ std::istream* fastNLOTable::OpenFileRead() {
 
    // check if filename ends with .gz
 #ifdef HAVE_LIBZ
-   std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in));
+   std::istream* strm = (istream*)(new zstr::ifstream(ffilename.c_str(),ios::in | std::ifstream::binary));
    if ( strm ) logger.info["OpenFileRead"]<<"Opened file "<<ffilename<<" successfully."<<endl;
    return strm;
 #else
@@ -2415,7 +2420,7 @@ std::istream* fastNLOTable::OpenFileRead() {
       logger.error["ReadHeader"]<<"Input file has a .gz file extension but zlib support is not enabled! Please unzip file first."<<endl;
       exit(1);
    }
-   std::istream* strm = (istream*)(new ifstream(ffilename.c_str(),ios::in));
+   std::istream* strm = (istream*)(new ifstream(ffilename.c_str(),ios::in | std::ifstream::binary));
    return strm;
 #endif /* HAVE_LIBZ */
 
@@ -2444,8 +2449,7 @@ std::ostream* fastNLOTable::OpenFileWrite(bool compress) {
 #else
    std::ostream* stream = (ostream*)(new std::ofstream(ffilename));
    if ( compress ) logger.info["OpenFileWrite"]<<"gz-compression requested, but compilation was performed without zlib."<<endl;
-#endif /* HAVE_LIBZ */
-
+#endif /* HAVE_LIBZ */   
    if (!stream->good()) {
       logger.error["OpenFileWrite"]<<"Cannot open file '"<<ffilename<<"' for writing. Aborting."<<endl;
       exit(2);

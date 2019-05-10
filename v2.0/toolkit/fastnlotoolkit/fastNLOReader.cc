@@ -1311,6 +1311,8 @@ void fastNLOReader::CalcCrossSection() {
    fXSection_vsX2.clear();
    fXSection_vsX1.resize(NObsBin);
    fXSection_vsX2.resize(NObsBin);
+   fXSection_vsQ2.clear();  //diffractive DIS
+   fXSection_vsQ2.resize(NObsBin); //diffractive DIS
    QScale.clear();
    QScale.resize(NObsBin);
 
@@ -1539,6 +1541,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
                   //double x1 = c->GetXNode1(i,x);
                   //double x2 = c->GetXNode2(i,x);
                   fXSection_vsX1[i][c->GetX1(i,x)] += xsci;
+                  fXSection_vsQ2[i][Q2] += xsci;
                   //fXSection_vsX2[i][x2] += xsci;
                }
             }

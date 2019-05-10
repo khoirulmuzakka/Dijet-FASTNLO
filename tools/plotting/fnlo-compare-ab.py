@@ -1,83 +1,123 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
-import argparse
-import fastnlo
-import glob, os, pylab, sys
+#
+# Make comparison plots between two predictions
+#
+# created by K. Rabbertz: 14.09.2018
+#
+#-----------------------------------------------------------------------
+#
+# Use matplotlib with Cairo offline backend for png, eps, or svg output
 import matplotlib as mpl
-import matplotlib.lines as mlines
-import matplotlib.patches as mpatches
+mpl.use('Cairo')
+import argparse, glob, os, pylab, re, sys
+from StringIO import StringIO
+import matplotlib.lines as mpllines
+import matplotlib.gridspec as gridspec
+import matplotlib.patches as mplpatches
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
-import numpy as np
-#import pandas as pd
-# from copy import deepcopy
+from matplotlib.ticker import (FormatStrFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
-from fastnlo import fastNLOLHAPDF
-from fastnlo import SetGlobalVerbosity
-import re
-from StringIO import StringIO
-#import warnings
-#warnings.filterwarnings("error")
+# numpy
+import numpy as np
+# pandas
+#import pandas as pd
+#from fnlo_parsers import FNLOCppReadOutputParser
+#from fnlo_parsers import FNLOYodaOutputParser
+# fastNLO
+#import fastnlo
+#from fastnlo import fastNLOLHAPDF
+#from fastnlo import SetGlobalVerbosity
 
-parser = argparse.ArgumentParser()
+# Redefine ScalarFormatter
+class ScalarFormatterForceFormat(ScalarFormatter):
+    def _set_format(self,vmin,vmax):  # Override function that finds format to use.
+        self.format = "%1.2f"  # Give format here
 
-parser.add_argument('-a','--afile', default='theory1.log', required=True,
-                    help='1st fastNLO result.')
-parser.add_argument('-b','--bfile', default='theory2.log', required=True,
-                    help='2nd fastNLO result.')
-parser.add_argument('-o', '--outfiles', default='fnlo-compare', required=False, type=str,
-                    help='Start of output filename for plots. ' 'Default: fnlo-compare')
+# Action class to allow comma-separated list in options
+class SplitArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values.split(','))
 
-#parse arguments
-args = vars(parser.parse_args())
-namesp = parser.parse_args()
+# Some global definitions
+_formats        = {'eps':0, 'png':1, 'svg':2}
+_debug          = False
 
-# Style settings
-# Location of matplotlibrc
-# print mpl.matplotlib_fname()
-# List active style settings
-# print mpl.rcParams
-# Needs matplotlib > 1.3
-# plt.style.use('ggplot')
-# plt.style.use('presentation')
-params = {'legend.fontsize': 'x-large',
-          'figure.figsize': (16, 12),
-          'axes.labelsize':  'x-large',
-          'axes.titlesize':  'x-large',
-          'xtick.labelsize': 'x-large',
-          'ytick.labelsize': 'x-large'}
-pylab.rcParams.update(params)
+########################################################################################################################
 
-# Input files
-afile = args['afile']+'.log'
-bfile = args['bfile']+'.log'
-astat = args['afile']+'.dat'
-bstat = args['bfile']+'.dat'
+def main():
+    # Style settings
+    # Location of matplotlibrc
+    # print mpl.matplotlib_fname()
+    # List active style settings
+    # print mpl.rcParams
+    # Needs matplotlib > 1.3
+    # plt.style.use('ggplot')
+    # plt.style.use('presentation')
+    params = {'legend.fontsize': 'x-large',
+              'figure.figsize': (16, 12),
+              'axes.labelsize':  'x-large',
+              'axes.titlesize':  'x-large',
+              #'axes.linewidth':  2, #increase default linewidth
+              'xtick.labelsize': 'x-large',
+              'ytick.labelsize': 'x-large'}
+    pylab.rcParams.update(params)
 
-# Output files
-outfil = args['outfiles']
+    # Define arguments & options
+    parser = argparse.ArgumentParser(epilog='',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # Positional arguments
+    #    parser.add_argument('file', type=str,
+    #                       help='Blafasel.')
+    # Optional arguments
+    parser.add_argument('-a','--afile', default=None, required=True,
+                        help='1st fastNLO result.')
+    parser.add_argument('-b','--bfile', default=None, required=True,
+                        help='2nd fastNLO result.')
+    parser.add_argument('-o', '--outfiles', default='fnlo-compare', required=False, type=str,
+                        help='Start of output filename for plots. ' 'Default: fnlo-compare')
 
-# Extract no. of columns from files
-print 'Reading no. of columns from 1st file ', afile
-cols = np.loadtxt(afile,comments=['#',' #','C','L'])
-nacol = cols.shape[1]
-print 'Found ',nacol,' columns'
-print 'Reading no. of columns from 2nd file ', bfile
-cols = np.loadtxt(bfile,comments=['#',' #','C','L'])
-nbcol = cols.shape[1]
-print 'Found ',nbcol,' columns'
-if nacol != nbcol:
-    print 'Different no. of columns found, aborted!'
-    exit(1)
-ncol = nacol
+    #parse arguments
+    args = vars(parser.parse_args())
+    namesp = parser.parse_args()
 
-# Read files columnwise
-if ncol == 9:
-    iobsa,bwa,id0a,xla,xua,xavea,xsa_lo,xsa_nlo,ka_nlo = np.loadtxt(afile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
-    iobsb,bwb,id0b,xlb,xub,xaveb,xsb_lo,xsb_nlo,kb_nlo = np.loadtxt(bfile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
-else:
-    print 'ncol different from 9 not yet implemented. Aborted!'
-    exit(2)
+    # Input files
+    afile = args['afile']+'.log'
+    bfile = args['bfile']+'.log'
+    astat = args['afile']+'.dat'
+    bstat = args['bfile']+'.dat'
+
+    # Output files
+    outfil = args['outfiles']
+
+
+
+    exit(0)
+
+    # Extract no. of columns from files
+    print 'Reading no. of columns from 1st file ', afile
+    cols = np.loadtxt(afile,comments=['#',' #','C','L'])
+    nacol = cols.shape[1]
+    print 'Found ',nacol,' columns'
+    print 'Reading no. of columns from 2nd file ', bfile
+    cols = np.loadtxt(bfile,comments=['#',' #','C','L'])
+    nbcol = cols.shape[1]
+    print 'Found ',nbcol,' columns'
+    if nacol != nbcol:
+        print 'Different no. of columns found, aborted!'
+        exit(1)
+        ncol = nacol
+
+    # Read files columnwise
+    if ncol == 9:
+        iobsa,bwa,id0a,xla,xua,xavea,xsa_lo,xsa_nlo,ka_nlo = np.loadtxt(afile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
+        iobsb,bwb,id0b,xlb,xub,xaveb,xsb_lo,xsb_nlo,kb_nlo = np.loadtxt(bfile,comments=['#',' #','C','L'],dtype=[('f0', int),('f1', float),('f2', int),('f3', float),('f4', float),('f5', float),('f6', float),('f7', float),('f8', float)],unpack=True)
+    else:
+        print 'ncol different from 9 not yet implemented. Aborted!'
+        exit(2)
+
+    exit(0)
+
 
 # Split columns according to no. of observable evaluations
 nvala = iobsa.size
@@ -161,3 +201,8 @@ for i in range(nrep):
     plt.savefig(fignam)
 
 exit(0)
+
+###################################################################################
+
+if __name__=="__main__":
+    main()
