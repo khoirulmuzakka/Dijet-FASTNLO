@@ -28,6 +28,7 @@
 #include "fastnlotk/fastNLOConstants.h"
 #include "fastnlotk/fastNLOInterpolCatmullRom.h"
 #include "fastnlotk/fastNLOTable.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCreate.h"
 #include "fastnlotk/fastNLOReader.h"
 #include "fastnlotk/Alphas.h"
@@ -57,32 +58,43 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! --- Print program purpose
-   yell << _CSEPSC << endl;
-   info["fnlo-tk-cppread"] << "Program to read fastNLO tables and derive" << endl;
-   info["fnlo-tk-cppread"] << "QCD cross sections using PDFs e.g. from LHAPDF" << endl;
-   yell << _SSEPSC << endl;
-   info["fnlo-tk-cppread"] << "For more explanations type:" << endl;
-   info["fnlo-tk-cppread"] << "./fnlo-tk-cppread -h" << endl;
-   yell << _CSEPSC << endl;
-
    //! ---  Parse commmand line
    char buffer[1024];
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-cppread"] << "fastNLO Cross-Section Calculator"<<endl;
-   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
+      yell << "" << endl;
+      yell << _CSEPSC << endl;
+      shout["fnlo-tk-cppread"] << "fastNLO Cross-Section Calculator"<<endl;
+      yell << _SSEPSC << endl;
       error["fnlo-tk-cppread"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-cppread"] << "For more explanations type:" << endl;
       shout["fnlo-tk-cppread"] << "./fnlo-tk-cppread -h" << endl;
+      shout["fnlo-tk-cppread"] << "For version number printout type:" << endl;
+      shout["fnlo-tk-cppread"] << "./fnlo-tk-cppread -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      if (tablename == "-v") {
+         fastNLOTools::PrintFastnloVersion();
+         return 0;
+      }
+      //! --- Print program purpose
+      yell << _CSEPSC << endl;
+      info["fnlo-tk-cppread"] << "Program to read fastNLO tables and derive" << endl;
+      info["fnlo-tk-cppread"] << "QCD cross sections using PDFs e.g. from LHAPDF" << endl;
+      yell << _SSEPSC << endl;
+      info["fnlo-tk-cppread"] << "For more explanations type:" << endl;
+      info["fnlo-tk-cppread"] << "./fnlo-tk-cppread -h" << endl;
+      info["fnlo-tk-cppread"] << "For version number printout type:" << endl;
+      info["fnlo-tk-cppread"] << "./fnlo-tk-cppread -v" << endl;
+      yell << _CSEPSC << endl;
+      yell << "" << endl;
       //! --- Usage info
       if (tablename == "-h") {
+         yell << _CSEPSC << endl;
+         info["fnlo-tk-cppread"] << "fastNLO Cross-Section Calculator"<<endl;
+         yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-cppread"] << "This program evaluates a fastNLO table for a set of specified options and" << endl;
          info["fnlo-tk-cppread"] << "prints out a table with detailed binning and cross-section information" << endl;
@@ -129,6 +141,9 @@ int main(int argc, char** argv) {
          yell  << _CSEPSC << endl;
          return 0;
       } else {
+         yell << _CSEPSC << endl;
+         shout["fnlo-tk-cppread"] << "fastNLO Cross-Section Calculator"<<endl;
+         yell << _SSEPSC << endl;
          shout["fnlo-tk-cppread"] << "Evaluating table: " << tablename << endl;
       }
    }

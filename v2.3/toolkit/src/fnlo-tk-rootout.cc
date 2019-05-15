@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include "fastnlotk/fastNLOLHAPDF.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/speaker.h"
 #ifdef WITH_ROOT
 //! Includes for filling ROOT histograms
@@ -42,34 +43,44 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! --- Print program purpose
-   yell << _CSEPSC << endl;
-   info["fnlo-tk-rootout"] << "Program to read fastNLO tables and write out" << endl;
-   info["fnlo-tk-rootout"] << "QCD cross sections into ROOT histograms" << endl;
-   yell << _SSEPSC << endl;
-   info["fnlo-tk-rootout"] << "For more explanations type:" << endl;
-   info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
-   yell << _CSEPSC << endl;
-
    //! --- Parse commmand line
    char buffer[1024];
    char titlel[1024];
    char titleu[1024];
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
-   yell << _SSEPSC << endl;
    string tablename;
    if (argc <= 1) {
+      yell << "" << endl;
+      yell << _CSEPSC << endl;
+      shout["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
+      yell << _SSEPSC << endl;
       error["fnlo-tk-rootout"] << "No fastNLO table specified!" << endl;
       shout["fnlo-tk-rootout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
+      shout["fnlo-tk-rootout"] << "For version number printout type:" << endl;
+      shout["fnlo-tk-rootout"] << "./fnlo-tk-rootout -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablename = (const char*) argv[1];
+      if (tablename == "-v") {
+         fastNLOTools::PrintFastnloVersion();
+         return 0;
+      }
+      //! --- Print program purpose
+      yell << _CSEPSC << endl;
+      info["fnlo-tk-rootout"] << "Program to read fastNLO tables and write out" << endl;
+      info["fnlo-tk-rootout"] << "QCD cross sections into ROOT histograms" << endl;
+      yell << _SSEPSC << endl;
+      info["fnlo-tk-rootout"] << "For more explanations type:" << endl;
+      info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -h" << endl;
+      info["fnlo-tk-rootout"] << "For version number printout type:" << endl;
+      info["fnlo-tk-rootout"] << "./fnlo-tk-rootout -v" << endl;
+      yell << _CSEPSC << endl;
       //! --- Usage info
       if (tablename == "-h") {
+         yell << _CSEPSC << endl;
+         info["fnlo-tk-rootout"] << "fastNLO ROOT Writer" << endl;
+         yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-rootout"] << "This program evaluates a fastNLO table and" << endl;
          info["fnlo-tk-rootout"] << "writes histograms with cross sections and scale or" << endl;
@@ -302,12 +313,13 @@ int main(int argc, char** argv) {
    //! Determine number and dimensioning of observable bins in table
    //   unsigned int NObsBin = fnlo.GetNObsBin();
    const int NDim = fnlo.GetNumDiffBin();
-   if (NDim < 1 || NDim > 2) {
+   if (NDim < 1 || NDim > 3) {
       error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
-      error["fnlo-tk-rootout"] << "Only up to two dimensions currently possible, aborted!" << endl;
+      error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
       exit(1);
    }
 
+   // TODO Why here?
    //! Get binning
    vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
 
@@ -341,9 +353,9 @@ int main(int argc, char** argv) {
    //! --- Existing ROOT file will be overwritten!
    TFile *rootfile = new TFile(RootFileName.c_str(),"RECREATE");
 
-   //  Initialize histogram counter
-   unsigned int nHist = 0;
+   //  Define histogram multiplicity and initialise histogram counter
    const unsigned int nMult = 3;
+   unsigned int nHist       = 0;
 
    //! --- Now loop over PDF sets
    for (unsigned int iPDF=0; iPDF<PDFFiles.size(); iPDF++) {
@@ -435,48 +447,64 @@ int main(int argc, char** argv) {
                yell << _SSEPSC << endl;
             }
 
-            //! --- Initialize dimension bin and continuous observable bin counter
+            //! --- Initialize dimension bin counter
             unsigned int NDimBins[NDim];
             NDimBins[0] = fnlo.GetNDim0Bins();
-            unsigned int nLoops      = 0;
-            unsigned int nHistBins   = 0;
-            //! --- 1D table
-            if (NDim == 1) {
-               nLoops  = NDim;
+
+            if ( iUnc==0 ) {
+               //! --- 1D
+               if (NDim == 1) { // One histogram only
+                  nHist = 1;
+               }
+               //! --- 2D
+               else if (NDim == 2) { // One histogram per 2nd dimension bin
+                  nHist = NDimBins[0];
+               }
+               //! --- 3D
+               else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
+                  for (unsigned int j=0; j<NDimBins[0]; j++) {
+                     nHist += fnlo.GetNDim1Bins(j);
+                  }
+               }
+               //! -- Not implemented
+               else {
+                  error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
+                  error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
+                  exit(1);
+               }
             }
-            //! --- 2D table
-            else if (NDim == 2) {
-               nLoops  = NDimBins[0];
-            }
-            //! --- 3D table not yet implemented
-            else {
-               error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
-               error["fnlo-tk-rootout"] << "Only up to two dimensions currently possible, aborted!" << endl;
-               exit(1);
-            }
+
             //! --- Book ROOT histos
-            TH1D *histo[nMult*nLoops];
-            //  Initialize observable bin counter
-            unsigned int iobs  = 0;
+            TH1D *histo[nMult*nHist];
 
-            //! Loop over bins in outer (1st) dimension (might be only one!)
-            for (unsigned int j=0; j<nLoops; j++) {
-
+            //! Loop over no. of histograms
+            unsigned int iobs = 0;
+            unsigned int i = 0;
+            unsigned int j = 0;
+            for (unsigned int ih=0; ih<nHist; ih++) {
+               //               cout << "AAAAA: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
+               unsigned int nHistBins = 0;
                //! --- 1D table
-               if (NDim == 1) {
+               if (NDim == 1) { // One histogram only
                   // No. of bins in differential distribution equals total no. of observable bins
                   nHistBins = NDimBins[0];
                }
                //! --- 2D table
-               else if (NDim == 2) {
+               else if (NDim == 2) { // One histogram per 2nd dimension bin
                   // No. of bins in differential distribution equals no. of observable bins in 2nd dimension
-                  NDimBins[1] = fnlo.GetNDim1Bins(j);
+                  NDimBins[1] = fnlo.GetNDim1Bins(i);
                   nHistBins = NDimBins[1];
                }
-               //! --- 3D table not yet implemented
+               //! --- 3D table
+               else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
+                  NDimBins[1] = fnlo.GetNDim1Bins(i);
+                  NDimBins[2] = fnlo.GetNDim2Bins(i,j);
+                  nHistBins = NDimBins[2];
+               }
+               //! ---  Not yet implemented
                else {
                   error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
-                  error["fnlo-tk-rootout"] << "Only up to two dimensions currently possible, aborted!" << endl;
+                  error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
                   exit(1);
                }
 
@@ -508,7 +536,7 @@ int main(int argc, char** argv) {
                // fastNLO numbering for ROOT histos
                int iScale = 1;
                int iProc  = 0;
-               int iDim0  = j+1;
+               int iDim0  = ih+1;
                int iOff   = 0;
                int iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
                char histno[9];
@@ -516,32 +544,49 @@ int main(int argc, char** argv) {
                if ( iUnc==0 ) {
                   // Cross section
                   sprintf(histno,"h%07i",iHist);
-                  histo[j+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-                  histo[j+iUnc]->SetContent(ycont);
-                  histo[j+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-                  histo[j+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
-                  nHist++;
+                  histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+                  histo[ih+iUnc]->SetContent(ycont);
+                  histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+                  histo[ih+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
                }
 
                // Lower uncertainty
                iOff  = iOffs[iUnc];
                iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
                sprintf(histno,"h%07i",iHist);
-               histo[j+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-               histo[j+iUnc]->SetContent(dylow);
-               histo[j+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-               histo[j+iUnc]->GetYaxis()->SetTitle(titlel);
-               nHist++;
+               histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+               histo[ih+iUnc]->SetContent(dylow);
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetYaxis()->SetTitle(titlel);
 
                // Upper uncertainty
                iOff  = iOffs[iUnc]+1;
                iHist = iOrder * 1000000 + iScale * 100000 + iProc * 10000 + iDim0 * 100 + iPDF * 10 + iOff;
                sprintf(histno,"h%07i",iHist);
-               histo[j+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
-               histo[j+iUnc]->SetContent(dyupp);
-               histo[j+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-               histo[j+iUnc]->GetYaxis()->SetTitle(titleu);
-               nHist++;
+               histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
+               histo[ih+iUnc]->SetContent(dyupp);
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetYaxis()->SetTitle(titleu);
+
+               if (NDim == 1 ) {
+                  iobs = 0;
+               } else if (NDim == 2) {
+                  i++;
+                  if (i == NDimBins[0]) {
+                     iobs = 0;
+                  }
+               } else {
+                  j++;
+                  if (j == NDimBins[1]) {
+                     i++;
+                     if (i == NDimBins[0]) {
+                        i = 0;
+                        iobs = 0;
+                     }
+                     j = 0;
+                  }
+               }
+               //               cout << "ZZZZZ: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
             }
          }
       }
