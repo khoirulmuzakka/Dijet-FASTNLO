@@ -3,16 +3,17 @@
 
 ##############################################
 #
-# Plotting of the scale dependence for each
+# Plot the scale dependence for each
 # observable bin
 #
 # Created by K. Rabbertz, 16.02.2019
 #
 #############################################
 #
-import argparse, glob, os, pylab, re, sys
+import argparse, glob, os, re, sys
 # Use matplotlib with Cairo offline backend for png, eps, or svg output
 import matplotlib as mpl
+#mpl.use('Agg')
 mpl.use('Cairo')
 import matplotlib.lines as mpllines
 import matplotlib.gridspec as gridspec
