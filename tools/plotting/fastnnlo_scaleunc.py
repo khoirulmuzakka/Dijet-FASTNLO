@@ -1,16 +1,15 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
 
-##############################################
+###########################################
 #
 # Plot the scale uncertainty
 #
 #
 # Created by B.Schillinger, 09.10.2018
 # Modified by K. Rabbertz, 31.10.2018
-# Last modified: 10.05.2019
 #
-#############################################
+###########################################
 #
 import argparse, glob, os, re, sys
 # Use matplotlib with Cairo offline backend for png, eps, or svg output
@@ -39,16 +38,17 @@ class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values.split(','))
 
-# Some global definitions for orders to show
+# Some global definitions
 _formats        = {'eps':0, 'png':1, 'svg':2}
-_text_to_order = {'LO':0, 'NLO':1, 'NNLO':2}
-_order_to_text = {0:'LO', 1:'NLO', 2:'NNLO'}
-_order_color   = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
-_scale_to_text = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
-                  5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
-                  10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
+_order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
+_order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
+_scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
+                   5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
+                   10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_debug          = False
 
-########################################################################################################################
+#####################################################################################
 
 
 # Function for plotting a list of orders into one figure
@@ -123,7 +123,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
         plt.close(fig)
 
 
-########################################################################################################################
+#####################################################################################
 
 def main():
         # Define arguments & options
@@ -137,17 +137,18 @@ def main():
         parser.add_argument('-f', '--filename', default=None, type=str,
                                 help='Output filename (optional).')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
-                            help='Comma-separated list of plot formats to use: eps, png, or both. If nothing is chosen, png is used.')
+                            help='Comma-separated list of plot formats to use: eps, png, svg. If nothing is chosen, png is used.')
         parser.add_argument('-m', '--member', default=0, type=int,
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If nothing is chosen, show all orders available in table.')
         parser.add_argument('-p', '--pdfset', default='CT14nlo',
                                 help='PDFset to evaluate fastNLO table.')
-        parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int, choices=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+        parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
+                            choices=range(16), metavar='[0-15]',
                             help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
         parser.add_argument('-v', '--verbose', action="store_true",
-                            help="Increase output verbosity")
+                            help="Increase output verbosity.")
 
         # Parse arguments
         args = vars(parser.parse_args())
