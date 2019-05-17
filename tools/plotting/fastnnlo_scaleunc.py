@@ -55,7 +55,7 @@ _debug          = False
 # The ratio is done always with respect to the first order appearing in the order_list
 # given e.g. via '-o NLO NNLO', i.e. the first evaluated cross section, here NLO,
 # that is stored in xs_all[0].
-def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, variation_type, given_filename, scale_name, formats):
+def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats):
         if variation_type=='Scale uncertainty (2P)':
                 vartype='2P'
         elif variation_type=='Scale uncertainty (6P)':
@@ -89,8 +89,9 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
         ax1.set_xlabel('%s' %xlabel)
         ax1.set_ylabel('XS with abs_scale_unc', rotation=90)
         ax1.legend(fontsize=10, numpoints=1)
-        ax1.text(0.02, 0.10, '%s' %variation_type, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.02, 0.05, '$\mu$ = %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.15, 'PDF set: %s' %pdfset, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.05, '%s' %variation_type, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.set_title('%s' %tablename)
 
 
@@ -217,13 +218,15 @@ def main():
 
                 ###################### Start EVALUATION with fastNLO library ###################################################
                 # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
+                # Take the general information (bin_bounds, labels, order_existence, etc.) from given pdfset.
                 fnlo = fastnlo.fastNLOLHAPDF(table, args['pdfset'], args['member'])
 
                 # Get labeling for the x-axis
                 # Dimensionality of the table:
                 ndim = fnlo.GetNumDiffBin()
                 if verb:
-                        print '[fastnnlo_scaleunc]: Dimensions:', ndim
+                        print '\n'
+                        print '[fastnnlo_scaleunc]: Table Dimensions: ', ndim
 
                 # Labels of all the dimensions:
                 labels = fnlo.GetDimLabels()
@@ -245,7 +248,7 @@ def main():
                 xmin = 0.95*min(bin_bounds.ravel())
                 xmax = 1.05*max(bin_bounds.ravel())
                 if verb:
-                        print '[fastnnlo_scaleunc]: xmin =', xmin, ', xmax =', xmax
+                        print '[fastnnlo_pdfunc]: xmin=%s, xmax=%s. \n' %(xmin, xmax)
 
                 # Preparing x-errors (via bin_bounds) --> x_errors[0, :] are initially negative (positive via -1*), x_errors[1, :] positive
                 x_errors = np.array([-1*(bin_bounds.T[0]-x_axis), bin_bounds.T[1]-x_axis])
@@ -256,9 +259,9 @@ def main():
                 lflex = fnlo.GetIsFlexibleScaleTable()
                 scale_name = 'scale1'
                 o_existence = [False, False, False]
-                cont_order = -1
+                cnt_order = -1
                 max_order  = 0
-                for i in [0, 1, 2]:
+                for i in range(3):
                         o_existence[i] = fnlo.SetContributionON(fastnlo.kFixedOrder, i, True)
                         if o_existence[i]:
                                 max_order = i
@@ -276,26 +279,26 @@ def main():
                                                 scl0 = fnlo.GetScaleDescription(i,0)
                                                 scl1 = fnlo.GetScaleDescription(i,1)
                                                 scale_name = _scale_to_text[scale_choice]+'_'+scl0+'_'+scl1
-                                if cont_order == i-1:
-                                        cont_order += 1
+                                if cnt_order == i-1:
+                                        cnt_order += 1
                 if verb:
-                        print '[fastnnlo_scaleunc]: Table has continuous orders up to', cont_order, 'and a maximal order of', max_order
+                        print '[fastnnlo_scaleunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
 
-                if iordmax > cont_order:
+                if iordmax > cnt_order:
                         print '[fastnnlo_scaleunc]: Invalid choice of orders. Aborted!'
-                        print '[fastnnlo_scaleunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cont_order
+                        print '[fastnnlo_scaleunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order
                         exit(1)
 
                 order_list = []
                 if args['order'] is None:
-                        for iord in range(cont_order+1):
+                        for iord in range(cnt_order+1):
                                 order_list.append(_order_to_text[iord])
                 else:
                         order_list = args['order']
 
                 print '[fastnnlo_scaleunc]: List of requested orders:', order_list
 
-                # For flexible-scale tables set scale to user choice (default is 1)
+                # For flexible-scale tables set scale to user choice (default is 0)
 
                 if lflex:
                         print '[fastnnlo_scaleunc]: Setting requested scale choice for flexible-scale table:', scale_choice
@@ -306,6 +309,8 @@ def main():
                                 print '[fastnnlo_scaleunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice
                         else:
                                 print '[fastnnlo_scaleunc]: No scale choice possible for fixed-scale table. Aborted!'
+                                print '[fastnnlo_scaleunc]: scale_choice = ', scale_choice
+                                exit(1)
 
                 # Now evaluate fastNLO table having a look at scale uncertainties
                 xs_list = [] #will contain total cross section for LO, NLO, NNLO (note: could also be handled via GetScaleUnertaintyVec()[0] )
@@ -369,7 +374,7 @@ def main():
 
                 ############################## Do the plotting ####################################################
 
-                plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, variation_type, given_filename, scale_name, formats)
+                plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats)
 
 if __name__ == '__main__':
         main()

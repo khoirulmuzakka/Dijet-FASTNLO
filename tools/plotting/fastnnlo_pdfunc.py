@@ -44,13 +44,16 @@ _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
 _order_hatch    = {'LO':'-', 'NLO':'//', 'NNLO':'\\'} ## just for testing
+_scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
+                   5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
+                   10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
 _debug          = False
 
 #####################################################################################
 
 
 # Plotting function to be elaborated
-def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, tablename, given_filename, x_axis, xmin, xmax):
+def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats):
 
         gs = gridspec.GridSpec(3,3)
         fig = plt.figure(figsize=(7,7))
@@ -98,7 +101,9 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                         ax1.set_xlabel('%s' %xlabel)
                         ax1.set_ylabel('XS with abs. pdf_unc', rotation=90)
                         ax1.legend(fontsize=10, numpoints=1)
-                        ax1.text(0.06, 0.06, '%s' %order_item, fontsize=12, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                        ax1.text(0.03, 0.15, 'Reference PDF: %s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                        ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                        ax1.text(0.03, 0.05, 'Order: %s' %order_item, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
                         ax1.set_title('%s' %tablename)
 
@@ -123,7 +128,6 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                                 ax2.add_patch(patches[p])
 
                         ax2.set_ylabel('rel. pdf_unc')
-                        ax2.text(0.02, 0.92, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax2.transAxes)
                         ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
                         fig.tight_layout()
@@ -176,8 +180,8 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
 
                                 ax.set_xlabel('%s'%xlabel)
                                 ax.set_ylabel('rel. pdf_unc')
-                                ax.text(0.02, 0.12, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
-                                ax.text(0.02, 0.06, 'Order: %s'%_order_to_text[order_index], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
+                                ax.text(0.03, 0.10, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
+                                ax.text(0.03, 0.05, 'Order: %s'%_order_to_text[order_index], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
 
                                 ax.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
@@ -200,7 +204,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                         ax3.set_ylabel('rel. pdf_unc')
                         ax3.set_ylim([0.82, None]) #to avoid problems with text
                         ax3.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
-                        ax3.text(0.02, 0.08, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
+                        ax3.text(0.03, 0.10, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
                         ax3.text(0.02, 0.02, 'PDF Set: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
                         ax3.legend()
 
@@ -247,7 +251,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                 ax1.set_xlabel('%s' %xlabel)
                 ax1.set_ylabel('XS with abs_pdf_unc', rotation=90)
                 ax1.legend(fontsize=10, numpoints=1)
-                ax1.text(0.02, 0.06, '%s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                ax1.text(0.03, 0.05, 'PDF set: %s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
                 ax1.set_title('%s' %tablename)
 
@@ -304,6 +308,9 @@ def main():
         parser.add_argument('-p', '--pdfset', required=False, nargs='?', type=str, action=SplitArgs,
                             default=['CT14nnlo'],
                             help='Comma-separated list of PDF sets to use.')
+        parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
+                            choices=range(16), metavar='[0-15]',
+                            help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
         parser.add_argument('-v', '--verbose', action='store_true',
                             help='Increase output verbosity.')
 
@@ -316,12 +323,6 @@ def main():
         print '[fastnnlo_pdfunc]: Analysing table list: '
         for file in files:
                 print '[fastnnlo_pdfunc]:   ', file
-
-        # Table name
-        #        tablename = os.path.splitext(os.path.basename(args['table']))[0]
-        #        tablename = os.path.splitext(tablename)[0] #to get rid of extension (.tab.gz or .tab)
-        #        print '\n'
-        #        print '[fastnnlo_pdfunc]: Analysing table:      ', tablename
 
         # PDF set name
         pdfsets = []
@@ -363,6 +364,9 @@ def main():
                 print '[fastnnlo_pdfunc]: Format list:', args['format']
                 exit(1)
 
+        # Scale choice
+        scale_choice = args['scale']
+
         # Verbosity
         verb = args['verbose']
 
@@ -373,9 +377,8 @@ def main():
                 tablename = os.path.splitext(os.path.basename(table))[0]
                 tablename = os.path.splitext(tablename)[0]
 
-
-
                 ###################### Start EVALUATION with fastNLO library ###################################################
+                # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
                 # Take the general information (bin_bounds, labels, order_existence, etc.) from first given pdfset.
                 fnlo = fastnlo.fastNLOLHAPDF(table, pdfsets[0], args['member'])
 
@@ -414,33 +417,63 @@ def main():
                         print '[fastnnlo_pdfunc]: x_errors: \n', x_errors, '\n'
 
                 # Check existence of orders in table
-                _order_existence = {} #dictionary that contains the input orders (int) and whether they exist or not (bool)
-                order_list = [] #list that will contain strings of orders to be investigated
-                if args['order'] is not None:
-                        for i in range(0, len(iorders)): #check existence for all input orders
-                        #append chosen order to dictionary for order existence (for instance: '0':'True' for existing LO)
-                        #remember that the input orders are unsorted and could therefore as well be [NNLO, LO]!
-                                _order_existence[iorders[i]]=fnlo.SetContributionON(fastnlo.kFixedOrder, iorders[i], True)
-                                if _order_existence[iorders[i]]==False:
-                                        sys.exit('[fastnnlo_pdfunc]: Chosen order %s is not available in given table. Aborted! \n'%_order_to_text[iorders[i]])
+                lflex = fnlo.GetIsFlexibleScaleTable()
+                scale_name = 'scale1'
+                o_existence = [False, False, False]
+                cnt_order = -1
+                max_order  = 0
+                for i in range(3):
+                        o_existence[i] = fnlo.SetContributionON(fastnlo.kFixedOrder, i, True)
+                        if o_existence[i]:
+                                max_order = i
+                                if not lflex:
+                                        if scale_choice != 0:
+                                                print '[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
+                                                print '[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.'
+                                                exit(1)
+                                        else:
+                                                scale_name = fnlo.GetScaleDescription(i,0)
                                 else:
-                                        order_list.append(_order_to_text[iorders[i]])
+                                        if scale_choice < 2:
+                                                scale_name = fnlo.GetScaleDescription(i,scale_choice)
+                                        else:
+                                                scl0 = fnlo.GetScaleDescription(i,0)
+                                                scl1 = fnlo.GetScaleDescription(i,1)
+                                                scale_name = _scale_to_text[scale_choice]+'_'+scl0+'_'+scl1
+                                if cnt_order == i-1:
+                                        cnt_order += 1
+                if verb:
+                        print '[fastnnlo_scaleunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
 
-                elif args['order'] is None:
-                        for i in [0, 1, 2]: #assuming we have no NNNLO tables yet, could of course be kept more general
-                                _order_existence[i]=fnlo.SetContributionON(fastnlo.kFixedOrder, i, True)
-                                if _order_existence[i]==False:
-                                        print '[fastnnlo_pdfunc]: Given table does not contain %s. \n'%_order_to_text[i]
-                                elif _order_existence[i]==True:
-                                        if verb: print '[fastnnlo_pdfunc]: Given table contains %s. \n'%_order_to_text[i]
-                                        order_list.append(_order_to_text[i])
-                                        iordmax=i #update highest existing order
+                if iordmax > cnt_order:
+                        print '[fastnnlo_scaleunc]: Invalid choice of orders. Aborted!'
+                        print '[fastnnlo_scaleunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order
+                        exit(1)
 
+                order_list = []
+                if args['order'] is None:
+                        for iord in range(cnt_order+1):
+                                order_list.append(_order_to_text[iord])
+                else:
+                        order_list = args['order']
 
-                print '[fastnnlo_pdfunc]: List of orders that will be investigated: ', order_list, '\n \n'
+                print '[fastnnlo_scaleunc]: List of requested orders:', order_list
 
+                # For flexible-scale tables set scale to user choice (default is 0)
 
-                ## Start individual evaluation for each of the given PDF sets
+                if lflex:
+                        print '[fastnnlo_scaleunc]: Setting requested scale choice for flexible-scale table:', scale_choice
+                        fnlo.SetMuRFunctionalForm(scale_choice)
+                        fnlo.SetMuFFunctionalForm(scale_choice)
+                else:
+                        if scale_choice == 0:
+                                print '[fastnnlo_scaleunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice
+                        else:
+                                print '[fastnnlo_scaleunc]: No scale choice possible for fixed-scale table. Aborted!'
+                                print '[fastnnlo_scaleunc]: scale_choice = ', scale_choice
+                                exit(1)
+
+                # Now evaluate fastNLO table for each of the given PDF sets
                 xs_list = [] #will contain for each given pdf the total cross section for LO, NLO, NNLO (or requested orders)
                 rel_unc_list = [] #list for relative pdf uncertainties (low, high) for each PDF in LO, NLO, NNLO
 
@@ -523,7 +556,7 @@ def main():
 
                                 ################################## Start PLOTTING of the pdf uncertainties ######################################################################
 
-                plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, tablename, given_filename, x_axis, xmin, xmax)
+                plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats)
 
 
         stop_time = timeit.default_timer()

@@ -15,8 +15,8 @@ import argparse, glob, os, re, sys
 import matplotlib as mpl
 #mpl.use('Agg')
 mpl.use('Cairo')
-import matplotlib.lines as mpllines
 import matplotlib.gridspec as gridspec
+import matplotlib.lines as mpllines
 import matplotlib.patches as mplpatches
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
@@ -44,14 +44,17 @@ _formats        = {'eps':0, 'png':1, 'svg':2}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_to_color = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
+_scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
+                   5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
+                   10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_debug          = False
 
-
-########################################################################################################################
+#####################################################################################
 
 
 # Function for plotting the mur scale dependence of a list of orders into one figure
 # Optionally, ratios are shown as subplot with respect to the first order given in the order list.
-def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, tablename, order_list, filename, scale_name, labels, ylabel, borders, ratio, formats, verb):
+def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, tablename, order_list, filename, scale_name, pdfset, labels, ylabel, borders, ratio, formats, verb):
         if ratio:
                 gs = gridspec.GridSpec(3,3)
                 fig = plt.figure(figsize=(7,7))
@@ -88,7 +91,8 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
         yfmt.set_powerlimits((0,0))
         ax1.yaxis.set_major_formatter(yfmt)
         plt.setp(ax1.get_xticklabels(), fontsize=12)
-        ax1.text(0.03, 0.04, '%s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.10, 'PDF set: %s' %pdfset, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.05, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         yt = 1.00
         for id in range(len(labels)):
             yt -= 0.05
@@ -155,7 +159,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
         plt.close(fig)
 
 
-########################################################################################################################
+#####################################################################################
 
 def main():
         # Define arguments & options
@@ -164,7 +168,8 @@ def main():
         parser.add_argument('table', type=str,
                             help='fastNLO table to be evaluated. This must be specified!')
         # Optional arguments
-        parser.add_argument('-b', '--binpower', default=3, type=int, choices=range(-5,6),
+        parser.add_argument('-b', '--binpower', default=3, type=int,
+                            choices=range(-5,6), metavar='[-5,5]',
                             help='Power b for binary log range 2^(-b) to 2^b of mur scale factor.')
         parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of NNLOJET datfile basenames with statistical uncertainties for each order to show. If nothing is chosen, statistical uncertainties are ignored.')
@@ -172,7 +177,8 @@ def main():
                             help='Set desired basename for output filenames instead of tablename.')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of plot formats to use: eps, png, or both. If nothing is chosen, png is used.')
-        parser.add_argument('-l', '--logpoints', default=7, type=int, choices=range(3,30),
+        parser.add_argument('-l', '--logpoints', default=7, type=int,
+                            choices=range(3,31), metavar='[3-30]',
                             help='Number of equidistant points in log_2(xmur) from 2^(-b) to 2^b.')
         parser.add_argument('-m', '--member', default=0, type=int,
                             help='Member of PDFset to use.')
@@ -182,8 +188,9 @@ def main():
                             help='PDFset to use with fastNLO table.')
         parser.add_argument('-r', '--ratio', action="store_true",
                             help="Include ratio subplot in figure.")
-        parser.add_argument('-s', '--scale', default=1, required=False, nargs='?', type=int, choices=[1,2],
-                            help='For flexible-scale tables define central scale choice for MuR and MuF via enum fastNLO::ScaleFunctionalForm ("1"=kScale1, "2"=kScale2). For fixed-scale tables this has no effect.')
+        parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
+                            choices=range(16), metavar='[0-15]',
+                            help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
         parser.add_argument('-v', '--verbose', action="store_true",
                             help="Increase output verbosity.")
         parser.add_argument('-x', '--xbin', default=-1, type=int,
@@ -350,12 +357,22 @@ def main():
                 o_existence[i] = fnlo.SetContributionON(fastnlo.kFixedOrder, i, True)
                 if o_existence[i]:
                         max_order = i
-                        if scale_choice == 1:
+                        if not lflex:
+                            if scale_choice != 0:
+                                print '[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
+                                print '[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.'
+                                exit(1)
+                            else:
                                 scale_name = fnlo.GetScaleDescription(i,0)
-                        elif lflex:
-                                scale_name = fnlo.GetScaleDescription(i,1)
+                        else:
+                            if scale_choice < 2:
+                                scale_name = fnlo.GetScaleDescription(i,scale_choice)
+                            else:
+                                scl0 = fnlo.GetScaleDescription(i,0)
+                                scl1 = fnlo.GetScaleDescription(i,1)
+                                scale_name = _scale_to_text[scale_choice]+'_'+scl0+'_'+scl1
                         if cnt_order == i-1:
-                                cnt_order += 1
+                            cnt_order += 1
         if verb:
                 print '[fastnnlo_scaledep]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
 
@@ -395,16 +412,16 @@ def main():
             dxsr.append(dxsr_dat)
         dxsr_cn = abs(np.array(dxsr))
 
-        # For flexible-scale tables set scale to user choice (default is 1)
+        # For flexible-scale tables set scale to user choice (default is 0)
         if lflex:
                 print '[fastnnlo_scaledep]: Setting requested scale choice for flexible-scale table:', scale_choice
-                fnlo.SetMuRFunctionalForm(scale_choice-1)
-                fnlo.SetMuFFunctionalForm(scale_choice-1)
+                fnlo.SetMuRFunctionalForm(scale_choice)
+                fnlo.SetMuFFunctionalForm(scale_choice)
         else:
-                if scale_choice == 1:
+                if scale_choice == 0:
                         print '[fastnnlo_scaledep]: Evaluating fixed-scale table. Scale choice must be', scale_choice
                 else:
-                        print '[fastnnlo_scaledep]: No scale choice other than 1 possible for fixed-scale table. Aborted!'
+                        print '[fastnnlo_scaledep]: No scale choice possible for fixed-scale table. Aborted!'
                         print '[fastnnlo_scaledep]: scale_choice = ', scale_choice
                         exit(1)
 
@@ -482,10 +499,15 @@ def main():
         else:
             basename = '%s-scaledep-%s.%s.%s' %(tablename, pdfset, ordernames[1:], scale_name)
 
+        # Without statistical uncertainties create zero array of proper dimensions here
+        if len(dxsr_cn)==0:
+            dxsr_cn = np.zeros((xs_cn.shape[0],xs_cn.shape[2]))
+        if _debug: print 'dxsr_cn',dxsr_cn
+
         for iobs in range(nobs):
             if xbin==-1 or xbin==iobs+1:
                 filename = '%s.bin%s' %(basename, str(iobs+1).zfill(2))
-                plotting(x_axis, xmin, xmax, iobs, xs_cn[:,:,iobs], xs_fl[:,:,iobs], xs_fu[:,:,iobs], dxsr_cn[:,iobs], xind, tablename, order_list, filename, scale_name, labels, ylabel, borders, ratio, formats, verb)
+                plotting(x_axis, xmin, xmax, iobs, xs_cn[:,:,iobs], xs_fl[:,:,iobs], xs_fu[:,:,iobs], dxsr_cn[:,iobs], xind, tablename, order_list, filename, scale_name, pdfset, labels, ylabel, borders, ratio, formats, verb)
 
 if __name__ == '__main__':
         main()
