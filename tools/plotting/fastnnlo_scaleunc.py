@@ -12,7 +12,7 @@
 ###########################################
 #
 import argparse, glob, os, re, sys
-# Use matplotlib with Cairo offline backend for png, eps, or svg output
+# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
 #mpl.use('Agg')
 mpl.use('Cairo')
@@ -39,7 +39,7 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 # Some global definitions
-_formats        = {'eps':0, 'png':1, 'svg':2}
+_formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
@@ -138,7 +138,7 @@ def main():
         parser.add_argument('-f', '--filename', default=None, type=str,
                                 help='Output filename (optional).')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
-                            help='Comma-separated list of plot formats to use: eps, png, svg. If nothing is chosen, png is used.')
+                            help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
         parser.add_argument('-m', '--member', default=0, type=int,
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,

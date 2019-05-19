@@ -12,7 +12,7 @@
 ###########################################
 #
 import argparse, glob, os, re, sys, timeit
-# Use matplotlib with Cairo offline backend for png, eps, or svg output
+# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
 #mpl.use('Agg')
 mpl.use('Cairo')
@@ -39,7 +39,7 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 # Some global definitions
-_formats        = {'eps':0, 'png':1, 'svg':2}
+_formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
@@ -140,11 +140,12 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         else:
                                 filename = '%s.pdfunc-%s.%s' %(tablename, order_item, pdfnames[1:])
 
-                        fig.savefig('%s.png' %filename)
-                        print '[fastnnlo_pdfunc]: %s plot saved as: %s.png' %(order_item, filename)
-                        plt.close()
+                        for fmt in formats:
+                            figname = '%s.%s' %(filename, fmt)
+                            fig.savefig(figname)
+                            print '[fastnnlo_pdfunc]: Plot saved as:', figname
+                        plt.close(fig)
 
-                plt.close()
                 # Summary plot if 3 orders have been looked at
                 if len(order_list)==3: #could adjust this to arbitrary length of order
                         gs2 = gridspec.GridSpec(2, 2)
@@ -218,9 +219,11 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                                 filename = '%s.pdfunc-summary.%s' %(given_filename, pdfnames[1:])
                         else:
                                 filename = '%s.pdfunc-summary.%s' %(tablename, pdfnames[1:])
-
-                        fig2.savefig('%s.png' %filename, bbox_inches='tight')
-                        print '[fastnnlo_pdfunc]: Summary plot saved as: %s.png' %filename
+                        for fmt in formats:
+                            figname = '%s.%s' %(filename, fmt)
+                            fig.savefig(figname)
+                            print '[fastnnlo_pdfunc]: Plot saved as:', figname
+                        plt.close(fig2)
 
                 else: print '[fastnnlo_pdfunc]: For less than 3 orders --> no summary plot produced.'
 
@@ -300,7 +303,7 @@ def main():
         parser.add_argument('-f', '--filename', default=None, type=str,
                                 help='Output filename (optional).')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
-                            help='Comma-separated list of plot formats to use: eps, png, svg. If nothing is chosen, png is used.')
+                            help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
         parser.add_argument('-m', '--member', default=0, type=int,
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
@@ -428,8 +431,8 @@ def main():
                                 max_order = i
                                 if not lflex:
                                         if scale_choice != 0:
-                                                print '[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
-                                                print '[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.'
+                                                print '[fastnnlo_pdfunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
+                                                print '[fastnnlo_pdfunc]: For fixed-scale tables only the default=0 is allowed.'
                                                 exit(1)
                                         else:
                                                 scale_name = fnlo.GetScaleDescription(i,0)
@@ -443,11 +446,11 @@ def main():
                                 if cnt_order == i-1:
                                         cnt_order += 1
                 if verb:
-                        print '[fastnnlo_scaleunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
+                        print '[fastnnlo_pdfunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
 
                 if iordmax > cnt_order:
-                        print '[fastnnlo_scaleunc]: Invalid choice of orders. Aborted!'
-                        print '[fastnnlo_scaleunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order
+                        print '[fastnnlo_pdfunc]: Invalid choice of orders. Aborted!'
+                        print '[fastnnlo_pdfunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order
                         exit(1)
 
                 order_list = []
@@ -457,20 +460,20 @@ def main():
                 else:
                         order_list = args['order']
 
-                print '[fastnnlo_scaleunc]: List of requested orders:', order_list
+                print '[fastnnlo_pdfunc]: List of requested orders:', order_list
 
                 # For flexible-scale tables set scale to user choice (default is 0)
 
                 if lflex:
-                        print '[fastnnlo_scaleunc]: Setting requested scale choice for flexible-scale table:', scale_choice
+                        print '[fastnnlo_pdfunc]: Setting requested scale choice for flexible-scale table:', scale_choice
                         fnlo.SetMuRFunctionalForm(scale_choice)
                         fnlo.SetMuFFunctionalForm(scale_choice)
                 else:
                         if scale_choice == 0:
-                                print '[fastnnlo_scaleunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice
+                                print '[fastnnlo_pdfunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice
                         else:
-                                print '[fastnnlo_scaleunc]: No scale choice possible for fixed-scale table. Aborted!'
-                                print '[fastnnlo_scaleunc]: scale_choice = ', scale_choice
+                                print '[fastnnlo_pdfunc]: No scale choice possible for fixed-scale table. Aborted!'
+                                print '[fastnnlo_pdfunc]: scale_choice = ', scale_choice
                                 exit(1)
 
                 # Now evaluate fastNLO table for each of the given PDF sets

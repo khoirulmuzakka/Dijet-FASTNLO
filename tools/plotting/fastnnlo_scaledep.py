@@ -11,7 +11,7 @@
 #############################################
 #
 import argparse, glob, os, re, sys
-# Use matplotlib with Cairo offline backend for png, eps, or svg output
+# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
 #mpl.use('Agg')
 mpl.use('Cairo')
@@ -40,7 +40,7 @@ class SplitArgs(argparse.Action):
         setattr(namespace, self.dest, values.split(','))
 
 # Some global definitions for orders to show
-_formats        = {'eps':0, 'png':1, 'svg':2}
+_formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_to_color = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
@@ -176,7 +176,7 @@ def main():
         parser.add_argument('-f', '--filename', default=None, type=str,
                             help='Set desired basename for output filenames instead of tablename.')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
-                            help='Comma-separated list of plot formats to use: eps, png, or both. If nothing is chosen, png is used.')
+                            help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
         parser.add_argument('-l', '--logpoints', default=7, type=int,
                             choices=range(3,31), metavar='[3-30]',
                             help='Number of equidistant points in log_2(xmur) from 2^(-b) to 2^b.')
@@ -359,8 +359,8 @@ def main():
                         max_order = i
                         if not lflex:
                             if scale_choice != 0:
-                                print '[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
-                                print '[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.'
+                                print '[fastnnlo_scaledep]: Invalid choice of scale = ', scale_choice, ' Aborted!'
+                                print '[fastnnlo_scaledep]: For fixed-scale tables only the default=0 is allowed.'
                                 exit(1)
                             else:
                                 scale_name = fnlo.GetScaleDescription(i,0)
