@@ -29,15 +29,15 @@ import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
 
-params = {'xtick.labelsize':'large',
-          'xtick.major.size': 5,
-          'xtick.major.width': 2,
-          'xtick.minor.size': 3.5,
-          'xtick.minor.width': 1,
-          'ytick.labelsize':'large',
-          'ytick.major.size': 5,
-          'mathtext.fontset':'cm'}
-pylab.rcParams.update(params)
+#params = {'xtick.labelsize':'large',
+#          'xtick.major.size': 5,
+#          'xtick.major.width': 2,
+#          'xtick.minor.size': 3.5,
+#          'xtick.minor.width': 1,
+#          'ytick.labelsize':'large',
+#          'ytick.major.size': 5,
+#          'mathtext.fontset':'cm'}
+#pylab.rcParams.update(params)
 
 #print 'a',mpl.get_configdir()
 #exit(1)
@@ -89,11 +89,11 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
 #        if verb: print '[fastnnlo_scaledep]: Texified labels:', tlabels
         # Label of last dimension
         last = labels[-1].split('_',1)[0]
-        xlabel = '%s' %last
+#        xlabel = '$\mu_R\,/\,%s$' %last
+        xlabel = '$\mu_R\,/\,\mu_0$'
         if verb:
                 print '[fastnnlo_scaledep]: x-label:', xlabel
-#        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-        ax1.set_xlabel(r'Blubber $x_y \mu$ %s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
         myxticks = [0.2, 0.5, 1.0, 2.0, 4.0, 8.0]
         ax1.set_xticks(myxticks)
         ax1.set_xticklabels(myxticks)
@@ -124,6 +124,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
         dxlr   = np.divide(dxl, xs_cn, out=np.ones_like(dxl), where=xs_cn!=0)
 
         handles = []
+        labels  = []
         for order in order_list:
                 iorder += 1
                 if xind[0] > -1:
@@ -132,15 +133,31 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
                 if xind[1] > -1:
                     dxstcn = np.multiply(dxsr_cn,xs_cn[:,xind[1]])
 
-                    ax1.errorbar(x_axis[xind[1]], xs_cn[iorder,xind[1]], yerr=dxstcn[iorder], elinewidth=1, linewidth=0.0, ms=12, color=_order_to_color[order], fmt='.', label=order)
+                    points = ax1.errorbar(x_axis[xind[1]], xs_cn[iorder,xind[1]], yerr=dxstcn[iorder], elinewidth=1, linewidth=0.0, ms=12, color=_order_to_color[order], fmt='.', label=order)
+                    handles.append(points)
+                    labels.append(order)
                 if xind[2] > -1:
                     dxstfu = np.multiply(dxsr_cn,xs_fu[:,xind[2]])
                     ax1.errorbar(x_axis[xind[2]], xs_fu[iorder,xind[2]], yerr=dxstfu[iorder], elinewidth=1, linewidth=0.0, ms=12, color=_order_to_color[order], fmt='.', label='_')
                 ax1.fill_between(x_axis, xs_min[iorder,:], xs_max[iorder,:], color=_order_to_color[order], alpha=0.5)
-                ax1.plot(x_axis, xs_cn[iorder,:], '-', color=_order_to_color[order], label=r'$\mu_F/\mu_0=1.0$')
-                ax1.plot(x_axis, xs_fl[iorder,:], '--', color=_order_to_color[order])
-                ax1.plot(x_axis, xs_fu[iorder,:], ':', color=_order_to_color[order])
-        ax1.legend(fontsize=10, numpoints=1)
+                linel, = ax1.plot(x_axis, xs_fl[iorder,:], '--', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=0.5$')
+                linec, = ax1.plot(x_axis, xs_cn[iorder,:], '-', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=1.0$')
+                lineu, = ax1.plot(x_axis, xs_fu[iorder,:], ':', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=2.0$')
+                if iorder==len(order_list)-1:
+                    handles.append(linel)
+                    handles.append(linec)
+                    handles.append(lineu)
+                    labels.append(r'$\mu_F\,/\,\mu_R=0.5$')
+                    labels.append(r'$\mu_F\,/\,\mu_R=1.0$')
+                    labels.append(r'$\mu_F\,/\,\mu_R=2.0$')
+
+        leg = ax1.legend(handles, labels, fontsize=10, numpoints=1)
+        # Set line colors in legend to black
+        ih = 0
+        for h in leg.legendHandles:
+            if (ih > 2): h.set_color('black')
+            ih+=1
+
 
         # Do subplot with ratios and relative muf uncertainties; denominator in ratio = first order in order_list
         if ratio:
