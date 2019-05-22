@@ -43,6 +43,10 @@ _formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
+_order_symbol   = {'LO':'^', 'NLO':'s', 'NNLO':'o'}
+_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+_symbols        = ['s', 'X', 'o', '^', 'v']
+_hatches        = ['', '//', '\\', '|', '-']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
@@ -81,13 +85,13 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
         xs_index = -1
         for order_item, shift in zip(order_list, shift_list):
                 xs_index += 1
-                ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=abs(abs_scale_unc[xs_index]), elinewidth=1, linewidth=0.0, ms=4, color=_order_color[order_item], fmt='.', label=order_item)
+                ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=abs(abs_scale_unc[xs_index]), elinewidth=1, linewidth=0.0, ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
 
         ax1.set_xlim([xmin, xmax])
         ax1.set_xscale('log', nonposx='clip')
         ax1.set_yscale('log', nonposy='clip')
-        ax1.set_xlabel('%s' %xlabel)
-        ax1.set_ylabel('XS with abs_scale_unc', rotation=90)
+        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
         ax1.legend(fontsize=10, numpoints=1)
         ax1.text(0.03, 0.15, 'PDF set: %s' %pdfset, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
@@ -105,9 +109,9 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
                 ordernames += '_%s' %item
                 ax2.semilogx(x_axis, xs_all[xs_index]/xs_all[0], ls='dashed', lw=1.0, color=_order_color[item], label=item)
                 ax2.fill_between(x_axis, (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 2, :],
-                                 (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], alpha=0.50)
-                ax2.set_ylabel('rel. scale unc')
+                                 (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
+        ax2.set_ylabel(r'Ratio to %s' %order_list[0])
         ax2.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted', linewidth=1.6, alpha=0.2)
         fig.tight_layout()
 

@@ -43,7 +43,9 @@ _formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
-_order_hatch    = {'LO':'-', 'NLO':'//', 'NNLO':'\\'} ## just for testing
+_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+_symbols        = ['s', 'X', 'o', '^', 'v']
+_hatches        = ['-', '//', '\\', '|', '.']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
@@ -63,13 +65,13 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
         if (len(pdfsets)>1): #one plot contains all chosen pdf sets for one specific order + summary plot if 3 orders in order_list
                 # Several PDFs will be plotted 'next to each other' --> need tiny shift to be displayed
                 if len(pdfsets)==2:
-                        shift_list=[0.99, 1.01]
+                        shift_list=[0.98, 1.02]
                 elif len(pdfsets)==3:
-                        shift_list=[0.98, 1.00, 1.02]
+                        shift_list=[0.96, 1.00, 1.04]
                 elif len(pdfsets)==4:
-                        shift_list=[0.97, 0.99, 1.01, 1.03]
+                        shift_list=[0.94, 0.98, 1.02, 1.06]
                 elif len(pdfsets)==5:
-                        shift_list=[0.96, 0.98, 1.00, 1.02, 1.04]
+                        shift_list=[0.92, 0.96, 1.00, 1.04, 1.08]
                 else:
                         print '[fastnnlo_pdfunc]: Too many PDFs to produce combined plot. Aborted!'
                         print '[fastnnlo_pdfunc]: Max. possible: 5. Number of given PDF Sets: %s'%len(pdfsets)
@@ -86,20 +88,21 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax1 = plt.subplot(gs[:-1,:])
 
                         print '[fastnnlo_pdfunc]: Producing %s plot.'%order_item
-                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
+#                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                         patches = [] #later needed for legend
 
                         pdf_index = 0
                         for pdf, shift in zip(pdfsets, shift_list): #go through all the pdfs
-                                c = next(color)
-                                ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]), elinewidth=1, linewidth=0.0, ms=4, color=c, fmt='.', label=pdf)
+#                                c = next(color)
+                                c = _colors[pdf_index]
+                                ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]), elinewidth=1, linewidth=0.0, ms=6, marker=_symbols[pdf_index], color=c, fmt='.', label=pdf)
                                 pdf_index += 1
 
                         ax1.set_xlim([xmin, xmax])
                         ax1.set_xscale('log', nonposx='clip')
                         ax1.set_yscale('log', nonposy='clip')
-                        ax1.set_xlabel('%s' %xlabel)
-                        ax1.set_ylabel('XS with abs. pdf_unc', rotation=90)
+                        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+                        ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mathrm{PDF})$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
                         ax1.legend(fontsize=10, numpoints=1)
                         ax1.text(0.03, 0.15, 'Reference PDF: %s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
                         ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
@@ -113,21 +116,21 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax2.set_xlim([xmin, xmax])
 
                         #ratioplot normalised to first given pdf.
-                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
+#                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                         for p in range(0, len(pdfsets)): #for pdf in pdfsets
-                                c = next(color)
+#                                c = next(color)
+                                c = _colors[p]
                                 # divide xs for each PDF by first given PDF (xs)
-                                ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=4, ls='dashed', linewidth=0.2,
-                                                color=c, label=pdfsets[p])
-
+                                ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.',
+                                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=c, label=pdfsets[p])
                                 ax2.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
-                                                (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
-                                                alpha=0.3)
+                                                 (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
+                                                 alpha=0.3, hatch=_hatches[p])
                                 #patch for current pdf (needed for labeling/legend)
                                 patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfsets[p], alpha=0.4))
                                 ax2.add_patch(patches[p])
 
-                        ax2.set_ylabel('rel. pdf_unc')
+                        ax2.set_ylabel(r'Ratio to ref. PDF')
                         ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
                         fig.tight_layout()
@@ -164,11 +167,11 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         patches = [] #later needed for legend
                         for ax, order in zip([ax0, ax1, ax2], order_list): #here it can happen, that NNLO is plotted in ax0, depending on content of order_list
                                 patches=[] #currently necessary, not needed if one only makes one legend for all axes
-                                color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
+#                                color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                                 for p in range(0, len(pdfsets)): #for pdf in pdfsets
-                                        c = next(color)
-                                        ax.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=4, ls='dashed', linewidth=0.2,
-                                                        color=c)#, label=pdfsets[p])
+#                                        c = next(color)
+                                        c = _colors[pdf_index]
+                                        ax.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=6, marker=_symbols[p] ,ls='dashed', linewidth=0.2, color=c)#, label=pdfsets[p])
                                         ax.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
                                                         (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
                                                         alpha=0.3)
@@ -180,7 +183,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                                         ax.add_patch(patches[p])
 
                                 ax.set_xlabel('%s'%xlabel)
-                                ax.set_ylabel('rel. pdf_unc')
+                                ax.set_ylabel(r'$\sigma \pm \Delta\sigma(\text{PDF})$')
                                 ax.text(0.03, 0.10, 'Reference PDF: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
                                 ax.text(0.03, 0.05, 'Order: %s'%_order_to_text[order_index], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
 
@@ -192,7 +195,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
 
                         order_index = 0
                         for order_item in order_list:
-                                ax3.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=4, ls='dashed', linewidth=0.2,
+                                ax3.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=6, ls='dashed', linewidth=0.2,
                                                 color=_order_color[order_item], label=order_item)
 
                                 ax3.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],
@@ -245,7 +248,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                 order_index = 0 #this is necessary because the orders in order_list are unsorted (order_index is not tied to specific order)
                 for order_item, shift in zip(order_list, shift_list):
                         ax1.errorbar(x_axis*shift, xs_chosen[0, order_index, :], yerr=abs(abs_pdf_unc[0, order_index, :, :]), elinewidth=1,
-                                        linewidth=0.0, ms=4, color=_order_color[order_item], fmt='.', label=order_item)
+                                        linewidth=0.0, ms=6, color=_order_color[order_item], fmt='.', label=order_item)
                         order_index += 1
 
                 ax1.set_xlim([xmin, xmax])
@@ -265,7 +268,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                 ordernames = ''
                 order_index = 0
                 for order_item in order_list:
-                        ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=4, ls='dashed', linewidth=0.2,
+                        ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=6, ls='dashed', linewidth=0.2,
                                         color=_order_color[order_item], label=order_item)
                         # divide xs fo each order by xs of first given order! (--> ratio)
                         ax2.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],

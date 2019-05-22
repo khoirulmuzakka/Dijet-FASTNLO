@@ -57,6 +57,9 @@ _formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_to_color = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
+_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+_symbols        = ['s', 'X', 'o', '^', 'v']
+_hatches        = ['', '//', '\\', '|', '-']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
@@ -139,7 +142,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
                 if xind[2] > -1:
                     dxstfu = np.multiply(dxsr_cn,xs_fu[:,xind[2]])
                     ax1.errorbar(x_axis[xind[2]], xs_fu[iorder,xind[2]], yerr=dxstfu[iorder], elinewidth=1, linewidth=0.0, ms=12, color=_order_to_color[order], fmt='.', label='_')
-                ax1.fill_between(x_axis, xs_min[iorder,:], xs_max[iorder,:], color=_order_to_color[order], alpha=0.5)
+                ax1.fill_between(x_axis, xs_min[iorder,:], xs_max[iorder,:], color=_order_to_color[order], hatch=_hatches[iorder], alpha=0.3)
                 linel, = ax1.plot(x_axis, xs_fl[iorder,:], '--', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=0.5$')
                 linec, = ax1.plot(x_axis, xs_cn[iorder,:], '-', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=1.0$')
                 lineu, = ax1.plot(x_axis, xs_fu[iorder,:], ':', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=2.0$')
@@ -179,7 +182,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
                         iorder += 1
                         ordernames += '_%s' %order
                         ax2.semilogx(x_axis, xs_cn[iorder,:]/xs_cn[0,:], ls='-', lw=1.0, color=_order_to_color[order], label=order)
-                        ax2.fill_between(x_axis, xs_min[iorder,:]/xs_cn[0,:], xs_max[iorder,:]/xs_cn[0,:], color=_order_to_color[order], alpha=0.50)
+                        ax2.fill_between(x_axis, xs_min[iorder,:]/xs_cn[0,:], xs_max[iorder,:]/xs_cn[0,:], color=_order_to_color[order], hatch=_hatches[iorder], alpha=0.30)
 
         fig.tight_layout()
 
