@@ -50,6 +50,8 @@ _hatches        = ['', '//', '\\', '|', '-']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_pdfbasenames   = ['ABM11', 'ABMP15', 'ABMP16', 'CJ12', 'CJ15', 'CT10', 'CT14', 'HERAPDF20', 'JR14',
+                   'MMHT2014', 'MSTW2008', 'NNPDF23', 'NNPDF30', 'NNPDF31']
 _debug          = False
 
 #####################################################################################
@@ -64,6 +66,10 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
                 vartype='2P'
         elif variation_type=='Scale uncertainty (6P)':
                 vartype='6P'
+
+        pdfnicename = 'Undefined'
+        for pdfn in _pdfbasenames:
+            if pdfn in pdfset: pdfnicename = pdfn
 
         gs = gridspec.GridSpec(3,3)
         fig = plt.figure(figsize=(7,7))
@@ -93,7 +99,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
         ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
         ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
         ax1.legend(fontsize=10, numpoints=1)
-        ax1.text(0.03, 0.15, 'PDF set: %s' %pdfset, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.15, 'PDF set: %s' %pdfnicename, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.text(0.03, 0.05, '%s' %variation_type, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.set_title('%s' %tablename)

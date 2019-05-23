@@ -63,6 +63,8 @@ _hatches        = ['', '//', '\\', '|', '-']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_pdfbasenames   = ['ABM11', 'ABMP15', 'ABMP16', 'CJ12', 'CJ15', 'CT10', 'CT14', 'HERAPDF20', 'JR14',
+                   'MMHT2014', 'MSTW2008', 'NNPDF23', 'NNPDF30', 'NNPDF31']
 _debug          = False
 
 #####################################################################################
@@ -71,6 +73,11 @@ _debug          = False
 # Function for plotting the mur scale dependence of a list of orders into one figure
 # Optionally, ratios are shown as subplot with respect to the first order given in the order list.
 def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, tablename, order_list, filename, scale_name, pdfset, labels, ylabel, borders, ratio, formats, verb):
+
+        pdfnicename = 'Undefined'
+        for pdfn in _pdfbasenames:
+            if pdfn in pdfset: pdfnicename = pdfn
+
         if ratio:
                 gs = gridspec.GridSpec(3,3)
                 fig = plt.figure(figsize=(7,7))
@@ -100,6 +107,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
         myxticks = [0.2, 0.5, 1.0, 2.0, 4.0, 8.0]
         ax1.set_xticks(myxticks)
         ax1.set_xticklabels(myxticks)
+        if ylabel=='Undefined': ylabel = r'$\sigma(\mu_R)$'
         ax1.set_ylabel(ylabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
         ax1.grid(None)
         ax1.ticklabel_format(axis='y',style='sci',scilimits=(0,0))
@@ -108,7 +116,7 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
         yfmt.set_powerlimits((0,0))
         ax1.yaxis.set_major_formatter(yfmt)
         plt.setp(ax1.get_xticklabels(), fontsize=12)
-        ax1.text(0.03, 0.10, 'PDF set: %s' %pdfset, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.10, 'PDF set: %s' %pdfnicename, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.text(0.03, 0.05, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         yt = 1.00
         for id in range(len(labels)):
@@ -143,16 +151,16 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, table
                     dxstfu = np.multiply(dxsr_cn,xs_fu[:,xind[2]])
                     ax1.errorbar(x_axis[xind[2]], xs_fu[iorder,xind[2]], yerr=dxstfu[iorder], elinewidth=1, linewidth=0.0, ms=12, color=_order_to_color[order], fmt='.', label='_')
                 ax1.fill_between(x_axis, xs_min[iorder,:], xs_max[iorder,:], color=_order_to_color[order], hatch=_hatches[iorder], alpha=0.3)
-                linel, = ax1.plot(x_axis, xs_fl[iorder,:], '--', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=0.5$')
-                linec, = ax1.plot(x_axis, xs_cn[iorder,:], '-', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=1.0$')
-                lineu, = ax1.plot(x_axis, xs_fu[iorder,:], ':', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_R=2.0$')
+                linel, = ax1.plot(x_axis, xs_fl[iorder,:], '--', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_0=0.5$')
+                linec, = ax1.plot(x_axis, xs_cn[iorder,:], '-', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_0=1.0$')
+                lineu, = ax1.plot(x_axis, xs_fu[iorder,:], ':', color=_order_to_color[order], label=r'$\mu_F\,/\,\mu_0=2.0$')
                 if iorder==len(order_list)-1:
                     handles.append(linel)
                     handles.append(linec)
                     handles.append(lineu)
-                    labels.append(r'$\mu_F\,/\,\mu_R=0.5$')
-                    labels.append(r'$\mu_F\,/\,\mu_R=1.0$')
-                    labels.append(r'$\mu_F\,/\,\mu_R=2.0$')
+                    labels.append(r'$\mu_F\,/\,\mu_0=0.5$')
+                    labels.append(r'$\mu_F\,/\,\mu_0=1.0$')
+                    labels.append(r'$\mu_F\,/\,\mu_0=2.0$')
 
         leg = ax1.legend(handles, labels, fontsize=10, numpoints=1)
         # Set line colors in legend to black

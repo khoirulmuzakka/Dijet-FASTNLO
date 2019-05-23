@@ -49,6 +49,8 @@ _hatches        = ['-', '//', '\\', '|', '.']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
                    5:'kLinearMean', 6:'kLinearSum', 7:'kScaleMax', 8:'kScaleMin', 9:'kProd',
                    10:'kS2plusS1half', 11: 'kPow4Sum', 12:'kWgtAvg', 13:'kS2plusS1fourth', 14:'kExpProd2', 15:'kExtern'}
+_pdfbasenames   = ['ABM11', 'ABMP15', 'ABMP16', 'CJ12', 'CJ15', 'CT10', 'CT14', 'HERAPDF20', 'JR14',
+                   'MMHT2014', 'MSTW2008', 'NNPDF23', 'NNPDF30', 'NNPDF31']
 _debug          = False
 
 #####################################################################################
@@ -56,6 +58,13 @@ _debug          = False
 
 # Plotting function to be elaborated
 def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats):
+
+        pdfnicenames = []
+        for pdf in pdfsets:
+            nicename = 'Undefined'
+            for pdfn in _pdfbasenames:
+                if pdfn in pdf: nicename = pdfn
+            pdfnicenames.append(nicename)
 
         gs = gridspec.GridSpec(3,3)
         fig = plt.figure(figsize=(7,7))
@@ -79,9 +88,9 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
 
                 order_index = 0 #necessary, because even though LO might not even be investigated, we need index 0, which could then correspond to NLO or NNLO
                 ordernames = ''
-                pdfnames = ''
+                pdffilenames = ''
                 for pdf in pdfsets:
-                        pdfnames += '_%s' %pdf
+                        pdffilenames += '_%s' %pdf
 
                 for order_item in order_list: #producing one plot per order (comparing all the given pdfs)
                         fig = plt.figure(figsize=(7,7))
@@ -92,7 +101,8 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         patches = [] #later needed for legend
 
                         pdf_index = 0
-                        for pdf, shift in zip(pdfsets, shift_list): #go through all the pdfs
+#                        for pdf, shift in zip(pdfsets, shift_list): #go through all the pdfs
+                        for pdf, shift in zip(pdfnicenames, shift_list): #go through all the pdfs
 #                                c = next(color)
                                 c = _colors[pdf_index]
                                 ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]), elinewidth=1, linewidth=0.0, ms=6, marker=_symbols[pdf_index], color=c, fmt='.', label=pdf)
@@ -104,7 +114,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
                         ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mathrm{PDF})$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
                         ax1.legend(fontsize=10, numpoints=1)
-                        ax1.text(0.03, 0.15, 'Reference PDF: %s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                        ax1.text(0.03, 0.15, 'Reference PDF: %s' %pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
                         ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
                         ax1.text(0.03, 0.05, 'Order: %s' %order_item, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
@@ -122,12 +132,12 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                                 c = _colors[p]
                                 # divide xs for each PDF by first given PDF (xs)
                                 ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.',
-                                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=c, label=pdfsets[p])
+                                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=c, label=pdfnicenames[p])
                                 ax2.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
                                                  (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
                                                  alpha=0.3, hatch=_hatches[p])
                                 #patch for current pdf (needed for labeling/legend)
-                                patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfsets[p], alpha=0.4))
+                                patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfnicenames[p], alpha=0.4))
                                 ax2.add_patch(patches[p])
 
                         ax2.set_ylabel(r'Ratio to ref. PDF')
@@ -139,9 +149,9 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ordernames += '_%s' %order_item
 
                         if given_filename is not None:
-                                filename = '%s.pdfunc-%s.%s' %(given_filename, order_item, pdfnames[1:])
+                                filename = '%s.pdfunc-%s.%s' %(given_filename, order_item, pdffilenames[1:])
                         else:
-                                filename = '%s.pdfunc-%s.%s' %(tablename, order_item, pdfnames[1:])
+                                filename = '%s.pdfunc-%s.%s' %(tablename, order_item, pdffilenames[1:])
 
                         for fmt in formats:
                             figname = '%s.%s' %(filename, fmt)
@@ -179,7 +189,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                                         ###if ax==ax0:
                                         ###     patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfsets[p], alpha=0.3))
                                         ###     ax.add_patch(patches[p])
-                                        patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfsets[p], alpha=0.3))
+                                        patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfnicenames[p], alpha=0.3))
                                         ax.add_patch(patches[p])
 
                                 ax.set_xlabel('%s'%xlabel)
@@ -209,7 +219,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax3.set_ylim([0.82, None]) #to avoid problems with text
                         ax3.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
                         ax3.text(0.03, 0.10, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
-                        ax3.text(0.02, 0.02, 'PDF Set: %s'%pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
+                        ax3.text(0.02, 0.02, 'PDF Set: %s'%pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
                         ax3.legend()
 
                         fig2.suptitle('%s'%tablename, fontsize=16)
@@ -219,9 +229,9 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ####gs2.tight_layout(fig2) #just testing
 
                         if given_filename is not None:
-                                filename = '%s.pdfunc-summary.%s' %(given_filename, pdfnames[1:])
+                                filename = '%s.pdfunc-summary.%s' %(given_filename, pdffilenames[1:])
                         else:
-                                filename = '%s.pdfunc-summary.%s' %(tablename, pdfnames[1:])
+                                filename = '%s.pdfunc-summary.%s' %(tablename, pdffilenames[1:])
                         for fmt in formats:
                             figname = '%s.%s' %(filename, fmt)
                             fig.savefig(figname)
@@ -257,7 +267,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                 ax1.set_xlabel('%s' %xlabel)
                 ax1.set_ylabel('XS with abs_pdf_unc', rotation=90)
                 ax1.legend(fontsize=10, numpoints=1)
-                ax1.text(0.03, 0.05, 'PDF set: %s' %pdfsets[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                ax1.text(0.03, 0.05, 'PDF set: %s' %pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
                 ax1.set_title('%s' %tablename)
 
