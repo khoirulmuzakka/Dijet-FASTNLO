@@ -60,25 +60,25 @@ ax.set_xlabel('%s' %_asmz_label, horizontalalignment='right', x=1.0, verticalali
 #xfmt.set_powerlimits((0,0))
 #ax.xaxis.set_major_formatter(xfmt)
 
-ypos = range(1,len(_asmz)+1)
-ax.text(_text_dlim, 18, 'Inclusive jets, NLO', fontsize='large', fontweight='bold')
-ax.text(_text_dlim, _ypos[-1], r'7 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large')
-ax.text(_text_dlim, _ypos[-2], r'7 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large')
-ax.text(_text_dlim, _ypos[-3], r'8 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large')
-ax.text(_text_dlim, _ypos[-4], r'8 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large')
-ax.text(_text_dlim, 13, 'Dijets, NLO', fontsize='large', fontweight='bold')
-ax.text(_text_dlim, _ypos[-5], r'8 TeV, $\left<p_\mathrm{1,2}\right>$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large')
-ax.text(_text_dlim, 11, '3-jets, NLO', fontsize='large', fontweight='bold')
-ax.text(_text_dlim, _ypos[-6], r'7 TeV, $M_3$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large')
-ax.text(_text_dlim, _ypos[-7], r'7 TeV, $R_{3/2}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large')
-ax.text(_text_dlim, _ypos[-8], r'8 TeV, $R_{3/2}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, prel.', fontsize='large')
-ax.text(_text_dlim,  7, r'top-antitop', fontsize='large', fontweight='bold')
-ax.text(_text_dlim, _ypos[-9], r'7 TeV, $\sigma_\mathrm{tot}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, NNLO+NNLL', fontsize='large')
-ax.text(_text_dlim, _ypos[-10], r'13 TeV, $\sigma_\mathrm{tot}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, NNLO', fontsize='large')
-ax.text(_text_dlim, _ypos[-11], r'13 TeV, $\sigma_\mathrm{diff}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, prel.', fontsize='large')
-ax.text(_text_dlim, _ypos[-12], r'13 TeV, $\sigma_\mathrm{diff}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF, prel.', fontsize='large')
-ax.text(_text_dlim, 2, '(Inner uncertainty: All except scale)', fontsize='small')
-ax.text(_text_dlim, 1, 'World average', fontsize='large')
+#_ypos = np.array(_ypos)-0.5
+ax.text(_text_dlim, 18, 'Inclusive jets, NLO', fontsize='large', fontweight='bold', va='center')
+ax.text(_text_dlim, _ypos[-1], r'7 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-2], r'7 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-3], r'8 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-4], r'8 TeV, $p_\mathrm{T}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large', va='center')
+ax.text(_text_dlim, 13, 'Dijets, NLO', fontsize='large', fontweight='bold', va='center')
+ax.text(_text_dlim, _ypos[-5], r'8 TeV, $\left<p_\mathrm{1,2}\right>$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF', fontsize='large', va='center')
+ax.text(_text_dlim, 11, '3-jets, NLO', fontsize='large', fontweight='bold', va='center')
+ax.text(_text_dlim, _ypos[-6], r'7 TeV, $M_3$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-7], r'7 TeV, $R_{3/2}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-8], r'8 TeV, $R_{3/2}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, prel.', fontsize='large', va='center')
+ax.text(_text_dlim,  7, r'top-antitop', fontsize='large', fontweight='bold', va='center')
+ax.text(_text_dlim, _ypos[-9], r'7 TeV, $\sigma_\mathrm{tot}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, NNLO+NNLL', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-10], r'13 TeV, $\sigma_\mathrm{tot}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, NNLO', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-11], r'13 TeV, $\sigma_\mathrm{diff}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$, NLO, prel.', fontsize='large', va='center')
+ax.text(_text_dlim, _ypos[-12], r'13 TeV, $\sigma_\mathrm{diff}$, $\alpha_\mathrm{s}(\mathrm{M}_\mathrm{Z})$+PDF, NLO, prel.', fontsize='large', va='center')
+ax.text(_text_dlim, 2, '(Inner uncertainty: All except scale)', fontsize='small', va='center')
+ax.text(_text_dlim, 1, 'World average [PDG 2016]', fontsize='large', va='center')
 
 xerr_oth = [_dasmz_oth_dn, _dasmz_oth_up]
 xerr_scl = [_dasmz_scl_dn, _dasmz_scl_up]
@@ -86,21 +86,12 @@ xerr_oth = np.array(xerr_oth)/10000.
 xerr_scl = np.array(xerr_scl)/10000.
 xerr_tot = np.sqrt(xerr_oth*xerr_oth+xerr_scl*xerr_scl)
 
-
 ax.errorbar(_asmz, _ypos, xerr=xerr_oth, marker='o', markersize=8, capsize=4, color='black', linestyle='none')
 ax.errorbar(_asmz, _ypos, xerr=xerr_tot, marker='', markersize=8, capsize=0, color='black', linestyle='none')
 ax.axvspan(_asmz[0]-xerr_tot[0,0], _asmz[0]+xerr_tot[1,0], color='gold')
 
-
-
-
-
-
-
-
-
-
-figname = 'asmz_cms.png'
-fig.savefig(figname)
+figname = 'asmz_cms'
+fig.savefig(figname+'.png')
+fig.savefig(figname+'.pdf')
 
 exit(0)
