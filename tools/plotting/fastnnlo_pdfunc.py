@@ -43,7 +43,9 @@ _formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
-_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+#_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+#_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
+_colors         = ['orange', 'green', 'purple', 'blue', 'brown']
 _symbols        = ['s', 'X', 'o', '^', 'v']
 _hatches        = ['-', '//', '\\', '|', '.']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
@@ -56,8 +58,13 @@ _debug          = False
 #####################################################################################
 
 
-# Plotting function to be elaborated
-def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats):
+# Function plotting cross sections for a list of PDF sets into one figure including PDF uncertainties
+# The ratio is done always with respect to the first PDF appearing in the pdfsets list
+# given e.g. via '-p CT14nnlo,MMHT2014nnlo68cl', i.e. the first evaluated cross section, here CT14nnlo,
+# that is stored in xs_all[0].
+# If multiple orders are requested, one plot per order is created.
+# Otherwise all orders are plotted into one figure.
+def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats, logx, logy):
 
         pdfnicenames = []
         for pdf in pdfsets:
@@ -97,18 +104,19 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax1 = plt.subplot(gs[:-1,:])
 
                         print '[fastnnlo_pdfunc]: Producing %s plot.'%order_item
-#                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                         patches = [] #later needed for legend
 
                         pdf_index = 0
 #                        for pdf, shift in zip(pdfsets, shift_list): #go through all the pdfs
                         for pdf, shift in zip(pdfnicenames, shift_list): #go through all the pdfs
-#                                c = next(color)
-                                c = _colors[pdf_index]
-                                ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]), elinewidth=1, linewidth=0.0, ms=6, marker=_symbols[pdf_index], color=c, fmt='.', label=pdf)
+                                ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]), elinewidth=1, linewidth=0.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
                                 pdf_index += 1
 
                         ax1.set_xlim([xmin, xmax])
+#                        if logx: ax1.set_xscale('log', nonposx='clip')
+#                        else: ax1.set_xscale('linear')
+#                        if logy: ax1.set_yscale('log', nonposy='clip')
+#                        else: ax1.set_yscale('linear')
                         ax1.set_xscale('log', nonposx='clip')
                         ax1.set_yscale('log', nonposy='clip')
                         ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
@@ -120,24 +128,19 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
 
                         ax1.set_title('%s' %tablename)
 
-
-
+                        # Ratio subplot with relative pdf uncertainties, denominator in ratio = first PDF in pdfsets list for requested order
                         ax2 = plt.subplot(gs[2, :])
                         ax2.set_xlim([xmin, xmax])
 
                         #ratioplot normalised to first given pdf.
-#                        color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                         for p in range(0, len(pdfsets)): #for pdf in pdfsets
-#                                c = next(color)
-                                c = _colors[p]
                                 # divide xs for each PDF by first given PDF (xs)
                                 ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.',
-                                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=c, label=pdfnicenames[p])
+                                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=_colors[p], label=pdfnicenames[p])
                                 ax2.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
-                                                 (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
+                                                 (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=_colors[p],
                                                  alpha=0.3, hatch=_hatches[p])
-                                #patch for current pdf (needed for labeling/legend)
-                                patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfnicenames[p], alpha=0.4))
+                                patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.4))
                                 ax2.add_patch(patches[p])
 
                         ax2.set_ylabel(r'Ratio to ref. PDF')
@@ -151,7 +154,7 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         if given_filename is not None:
                                 filename = '%s.pdfunc-%s.%s' %(given_filename, order_item, pdffilenames[1:])
                         else:
-                                filename = '%s.pdfunc-%s.%s' %(tablename, order_item, pdffilenames[1:])
+                                filename = '%s.pdfunc-%s.%s.%s' %(tablename, order_item, pdffilenames[1:], scale_name)
 
                         for fmt in formats:
                             figname = '%s.%s' %(filename, fmt)
@@ -177,19 +180,12 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         patches = [] #later needed for legend
                         for ax, order in zip([ax0, ax1, ax2], order_list): #here it can happen, that NNLO is plotted in ax0, depending on content of order_list
                                 patches=[] #currently necessary, not needed if one only makes one legend for all axes
-#                                color = iter(cm.rainbow(np.linspace(0,1,len(pdfsets))))
                                 for p in range(0, len(pdfsets)): #for pdf in pdfsets
-#                                        c = next(color)
-                                        c = _colors[pdf_index]
-                                        ax.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=6, marker=_symbols[p] ,ls='dashed', linewidth=0.2, color=c)#, label=pdfsets[p])
+                                        ax.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.', ms=6, marker=_symbols[p] ,ls='dashed', linewidth=0.2, color=_colors[p])
                                         ax.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
-                                                        (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=c,
+                                                        (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=_colors[p],
                                                         alpha=0.3)
-                                        #Alternative: create the patches only once (for ax0) --> use the same for ax1 and ax2
-                                        ###if ax==ax0:
-                                        ###     patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfsets[p], alpha=0.3))
-                                        ###     ax.add_patch(patches[p])
-                                        patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=c, label=pdfnicenames[p], alpha=0.3))
+                                        patches.append(mpl.patches.Rectangle((0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.3))
                                         ax.add_patch(patches[p])
 
                                 ax.set_xlabel('%s'%xlabel)
@@ -210,12 +206,12 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
 
                                 ax3.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],
                                                 (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-                                                alpha=0.46)#, hatch=_order_hatch[order_item])
+                                                alpha=0.46, hatch=_hatches[order_index])
 
                                 order_index += 1
                         ax3.set_title('%s'%pdfsets[0])
                         ax3.set_xlabel('%s'%xlabel)
-                        ax3.set_ylabel('rel. pdf_unc')
+                        ax3.set_ylabel(r'$\sigma \pm \Delta\sigma(\mathrm{PDF})$')
                         ax3.set_ylim([0.82, None]) #to avoid problems with text
                         ax3.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
                         ax3.text(0.03, 0.10, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
@@ -223,10 +219,6 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         ax3.legend()
 
                         fig2.suptitle('%s'%tablename, fontsize=16)
-
-
-                        ####gs2.tight_layout(fig2, rect=[0, 0.3, 1, 0.95]) #just testing
-                        ####gs2.tight_layout(fig2) #just testing
 
                         if given_filename is not None:
                                 filename = '%s.pdfunc-summary.%s' %(given_filename, pdffilenames[1:])
@@ -262,12 +254,18 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                         order_index += 1
 
                 ax1.set_xlim([xmin, xmax])
+#                if logx: ax1.set_xscale('log', nonposx='clip')
+#                else: ax1.set_xscale('linear')
+#                if logy: ax1.set_yscale('log', nonposy='clip')
+#                else: ax1.set_yscale('linear')
                 ax1.set_xscale('log', nonposx='clip')
                 ax1.set_yscale('log', nonposy='clip')
-                ax1.set_xlabel('%s' %xlabel)
-                ax1.set_ylabel('XS with abs_pdf_unc', rotation=90)
+                ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+                ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mathrm{PDF})$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
                 ax1.legend(fontsize=10, numpoints=1)
-                ax1.text(0.03, 0.05, 'PDF set: %s' %pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                ax1.text(0.03, 0.15, 'PDF set: %s' %pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+                ax1.text(0.03, 0.05, 'Ref. order: %s' %order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
                 ax1.set_title('%s' %tablename)
 
@@ -278,18 +276,15 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                 ordernames = ''
                 order_index = 0
                 for order_item in order_list:
-                        ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=6, ls='dashed', linewidth=0.2,
-                                        color=_order_color[order_item], label=order_item)
-                        # divide xs fo each order by xs of first given order! (--> ratio)
+                        ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.',
+                                     ms=6, ls='dashed', linewidth=0.2, color=_order_color[order_item], label=order_item)
                         ax2.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],
-                                        (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-                                        alpha=0.46)#, hatch=_order_hatch[order_item])
-
+                                         (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
+                                         alpha=0.3, hatch=_hatches[order_index])
                         order_index += 1
                         ordernames += '_%s' %order_item
 
-                ax2.set_ylabel('rel. pdf_unc')
-                ax2.text(0.02, 0.86, 'Reference order: %s'%order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax2.transAxes)
+                ax2.set_ylabel(r'Ratio to ref. order')
                 ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4, color='k', linestyle='dotted')
 
                 fig.tight_layout()
@@ -297,15 +292,19 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ta
                 if given_filename is not None:
                         filename = '%s.pdfunc-%s.%s' %(given_filename, pdfsets[0], ordernames[1:])
                 else:
-                        filename = '%s.pdfunc-%s.%s' %(tablename, pdfsets[0], ordernames[1:])
+                        filename = '%s.pdfunc-%s.%s.%s' %(tablename, pdfsets[0], ordernames[1:], scale_name)
 
-                fig.savefig('%s.png' %filename)
-                print '[fastnnlo_pdfunc]: Saved as: %s.png' %filename
+                for fmt in formats:
+                    figname = '%s.%s' %(filename, fmt)
+                    fig.savefig(figname)
+                    print '[fastnnlo_pdfunc]: Plot saved as:', figname
+                plt.close(fig)
 
 
 #####################################################################################
 
 def main():
+        # Start timer
         start_time = timeit.default_timer() #just for measuring wall clock time - not necessary
         # Define arguments & options
         parser = argparse.ArgumentParser(epilog='',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -317,6 +316,10 @@ def main():
                                 help='Output filename (optional).')
         parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
+        parser.add_argument('--logx', default=True, required=False, nargs=1, type=bool,
+                            help='Switch between linear and logarithmic x axis. NOT working yet!')
+        parser.add_argument('--logy', default=True, required=False, nargs=1, type=bool,
+                            help='Switch between linear and logarithmic y axis. NOT working yet!')
         parser.add_argument('-m', '--member', default=0, type=int,
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
@@ -379,6 +382,12 @@ def main():
                 print '[fastnnlo_pdfunc]: Illegal format specified, aborted!'
                 print '[fastnnlo_pdfunc]: Format list:', args['format']
                 exit(1)
+
+        # Logarithmic or linear x axis
+        logx = args['logx']
+
+        # Logarithmic or linear x axis
+        logy = args['logy']
 
         # Scale choice
         scale_choice = args['scale']
@@ -490,25 +499,20 @@ def main():
                                 exit(1)
 
                 # Now evaluate fastNLO table for each of the given PDF sets
-                xs_list = [] #will contain for each given pdf the total cross section for LO, NLO, NNLO (or requested orders)
-                rel_unc_list = [] #list for relative pdf uncertainties (low, high) for each PDF in LO, NLO, NNLO
+                xs_list = [] # will contain for each given pdf the total cross section for LO, NLO, NNLO (or requested orders)
+                rel_unc_list = [] # list for relative pdf uncertainties (low, high) for each PDF in LO, NLO, NNLO
 
                 # Outermost loop: go through all the given pdf sets
                 # Evaluate fastNLO table focusing on PDF uncertainties
                 for pdf in pdfsets:
-                        xs_list_tmp = [] #temporary xs list for single pdf
-                        rel_unc_list_tmp = [] #only temporary list. will be renewed for each pdf
+                        xs_list_tmp = [] # will contain total cross section for selected orders out of LO, NLO, NNLO for single pdf
+                        rel_unc_list_tmp = [] # list for relative PDF uncertainties (low, high) for selected orders
                         print '-----------------------------------------------------------------------------------------------'
                         print '#############################  %s  ########################################'%pdf
                         print '-----------------------------------------------------------------------------------------------'
                         print '[fastnnlo_pdfunc]: Calculate XS and uncertainty for %s \n'%pdf
                         fnlo = fastnlo.fastNLOLHAPDF(table, pdf, args['member'])
 
-
-                        # in earlier versions: calculated cross sections for ALL available orders (not only the selected ones!) and filled array xs_all
-                        # in this version: only calculate the cross section for the chosen orders, produce array xs_chosen.
-                        # This can cause the following situation: if order_list=[LO, NNLO], the nlo cross section won't be calculated at all!
-                        # Keep this in mind, for instance when printing xs_chosen!
                         for n in order_list:
                                 for j in range(0, iordmax+1):
                                         if j <= _text_to_order[n]:
@@ -523,13 +527,10 @@ def main():
                                 xs_list_tmp.append(fnlo.GetCrossSection())
 
                                 ### Get PDF uncertainties ###
-                                ## RELATIVE pdf uncertainty
-                                rel_pdf_unc_item = np.array(fnlo.GetPDFUncertaintyVec(fastnlo.kLHAPDF6)) #now calculated for order n
-                                ####rel_pdf_unc_item = np.ones((3,33))                  #####this is just for testing the plotting function without big calculation
-                                ####rel_pdf_unc_item[2,:]=(-1)*rel_pdf_unc_item[2,:]    #####only for testing
+                                rel_pdf_unc_item = np.array(fnlo.GetPDFUncertaintyVec(fastnlo.kLHAPDF6)) # Now calculated for order n
                                 rel_unc_list_tmp.append(rel_pdf_unc_item)
                                 if verb:
-                                        print '[fastnnlo_pdfunc]: Cross section in %s: \n'%n, np.array(xs_list_tmp)[-1], '\n' #print most recent xs
+                                        print '[fastnnlo_pdfunc]: \n'
                                         print '[fastnnlo_pdfunc]: Relative PDF uncertainty in %s: \n'%n
                                         print rel_pdf_unc_item, '\n' #has 3 entries: central value (xs), unc_high, unc_low
                                         print '-----------------------------------------------------------------------------------------------'
@@ -556,12 +557,12 @@ def main():
 
                 ## ABSOLUTE pdf uncertainty
                 num_pdfsets = np.size(xs_chosen, 0) #length of axis 0 in xs_chosen equals number of (investigated) pdfsets
-                num_orders = np.size(xs_chosen, 1) #length of axis 1 in xs_chosen equals number of (investigated) orders
+                num_orders  = np.size(xs_chosen, 1) #length of axis 1 in xs_chosen equals number of (investigated) orders
                 abs_pdf_unc = np.empty([num_pdfsets, num_orders, 2, len(x_axis)])
                 for p in range(0, num_pdfsets):
                         for k in range(0, num_orders): # k is order index
-                                abs_pdf_unc[p, k, 0, :] = rel_pdf_unc[p, k, 2, :]*xs_chosen[p, k, :] #absolute uncertainties downwards (low)
-                                abs_pdf_unc[p, k, 1, :] = rel_pdf_unc[p, k, 1, :]*xs_chosen[p, k, :] #absolute uncertainties upwards (high)
+                                abs_pdf_unc[p, k, 0, :] = rel_pdf_unc[p, k, 2, :]*xs_chosen[p, k, :] # absolute uncertainties downwards (low)
+                                abs_pdf_unc[p, k, 1, :] = rel_pdf_unc[p, k, 1, :]*xs_chosen[p, k, :] # absolute uncertainties upwards (high)
 
                 if verb:
                         print '[fastnnlo_pdfunc]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n'%(pdfsets, order_list)
@@ -572,7 +573,7 @@ def main():
 
                                 ################################## Start PLOTTING of the pdf uncertainties ######################################################################
 
-                plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats)
+                plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfsets, formats, logx, logy)
 
 
         stop_time = timeit.default_timer()

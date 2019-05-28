@@ -57,9 +57,9 @@ _debug          = False
 #####################################################################################
 
 
-# Function for plotting a list of orders into one figure
+# Function plotting cross sections for a list of orders into one figure including scale uncertainties
 # The ratio is done always with respect to the first order appearing in the order_list
-# given e.g. via '-o NLO NNLO', i.e. the first evaluated cross section, here NLO,
+# given e.g. via '-o NLO,NNLO', i.e. the first evaluated cross section, here NLO,
 # that is stored in xs_all[0].
 def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats):
         if variation_type=='Scale uncertainty (2P)':
@@ -124,7 +124,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
         if given_filename is not None:
                 filename = '%s.scaleunc-%s.%s.%s' %(given_filename, vartype, ordernames[1:], scale_name)
         else:
-                filename = '%s.scaleunc-%s.%s.%s' %(tablename, vartype, ordernames[1:], scale_name)
+                filename = '%s.scaleunc-%s.%s.%s.%s' %(tablename, vartype, ordernames[1:], pdfset, scale_name)
 
         for fmt in formats:
             figname = '%s.%s' %(filename, fmt)
@@ -137,6 +137,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
 #####################################################################################
 
 def main():
+        # Start timer
+        start_time = timeit.default_timer() #just for measuring wall clock time - not necessary
         # Define arguments & options
         parser = argparse.ArgumentParser(epilog='',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         # Positional arguments
@@ -323,8 +325,8 @@ def main():
                                 exit(1)
 
                 # Now evaluate fastNLO table having a look at scale uncertainties
-                xs_list = [] #will contain total cross section for LO, NLO, NNLO (note: could also be handled via GetScaleUnertaintyVec()[0] )
-                rel_unc_list = [] #list for relative scale uncertainties (low, high) for LO, NLO, NNLO
+                xs_list = [] # will contain total cross section for selected orders out of LO, NLO, NNLO
+                rel_unc_list = [] # list for relative scale uncertainties (low, high) for selected orders
                 for n in order_list:
                         for j in range(0, max_order+1):
                                 if j <= _text_to_order[n]:
@@ -346,7 +348,7 @@ def main():
                         ## RELATIVE scale uncertainty with chosen type of scale variation (symmetric or asymmetric)
                         # Up to NLO, it is possible to use HOPPET with fixed-scale tables
                         #                fnlo.UseHoppetScaleVariations(True)
-                        rel_scale_unc_item = np.array(fnlo.GetScaleUncertaintyVec(scale_var_type)) #calculate this already for all accessible orders in any case
+                        rel_scale_unc_item = np.array(fnlo.GetScaleUncertaintyVec(scale_var_type)) # Calculate this already for all accessible orders in any case
                         rel_unc_list.append(rel_scale_unc_item)
                         if verb:
                                 print '[fastnnlo_scaleunc]: \n'
