@@ -514,7 +514,7 @@ def main():
                         fnlo = fastnlo.fastNLOLHAPDF(table, pdf, args['member'])
 
                         for n in order_list:
-                                for j in range(0, iordmax+1):
+                                for j in range(0, max_order+1):
                                         if j <= _text_to_order[n]:
                                                 fnlo.SetContributionON(fastnlo.kFixedOrder, j, True)
                                         else:
