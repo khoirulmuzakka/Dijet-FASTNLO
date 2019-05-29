@@ -43,9 +43,9 @@ _formats        = {'eps':0, 'pdf':1, 'png':2, 'svg':3}
 _text_to_order  = {'LO':0, 'NLO':1, 'NNLO':2}
 _order_to_text  = {0:'LO', 1:'NLO', 2:'NNLO'}
 _order_color    = {'LO':'g', 'NLO':'b', 'NNLO':'r'}
-#_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+_colors         = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
 #_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
-_colors         = ['orange', 'green', 'purple', 'blue', 'brown']
+#_colors         = ['orange', 'green', 'purple', 'blue', 'brown']
 _symbols        = ['s', 'X', 'o', '^', 'v']
 _hatches        = ['-', '//', '\\', '|', '.']
 _scale_to_text  = {0:'kScale1', 1:'kScale2', 2:'kQuadraticSum', 3:'kQuadraticMean', 4:'kQuadraticSumOver4',
@@ -578,7 +578,7 @@ def main():
 
         stop_time = timeit.default_timer()
         timediff = stop_time-start_time
-        print 'Time: %s sec = %s min'%(timediff, round(timediff/60., 2))
+        print 'fastnnlo_pdfunc: Elapsed time: %s sec = %s min'%(timediff, round(timediff/60., 2))
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@
 #
 ###########################################
 #
-import argparse, glob, os, re, sys
+import argparse, glob, os, re, sys, timeit
 # Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
 #mpl.use('Agg')
@@ -387,6 +387,12 @@ def main():
                 ############################## Do the plotting ####################################################
 
                 plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats)
+
+
+                stop_time = timeit.default_timer()
+                timediff = stop_time-start_time
+                print 'fastnnlo_pdfunc: Elapsed time: %s sec = %s min'%(timediff, round(timediff/60., 2))
+
 
 if __name__ == '__main__':
         main()
