@@ -227,7 +227,7 @@ def main():
                             help='Member of PDFset to use.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If nothing is chosen, show all orders available in table.')
-        parser.add_argument('-p', '--pdfset', default='CT14nlo',
+        parser.add_argument('-p', '--pdfset', default='CT14nlo', type=str,
                             help='PDFset to use with fastNLO table.')
         parser.add_argument('-r', '--ratio', action="store_true",
                             help="Include ratio subplot in figure.")

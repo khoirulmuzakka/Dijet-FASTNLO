@@ -19,7 +19,7 @@ mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
-from matplotlib.ticker import (FormatStrFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
+from matplotlib.ticker import (FormatStrFormatter, LogFormatter, NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
 # numpy
 import numpy as np
@@ -61,7 +61,7 @@ _debug          = False
 # The ratio is done always with respect to the first order appearing in the order_list
 # given e.g. via '-o NLO,NNLO', i.e. the first evaluated cross section, here NLO,
 # that is stored in xs_all[0].
-def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats):
+def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfset, variation_type, formats):
         if variation_type=='Scale uncertainty (2P)':
                 vartype='2P'
         elif variation_type=='Scale uncertainty (6P)':
@@ -93,21 +93,39 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, t
                 xs_index += 1
                 ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=abs(abs_scale_unc[xs_index]), elinewidth=1, linewidth=0.0, ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
 
+        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
         ax1.set_xlim([xmin, xmax])
         ax1.set_xscale('log', nonposx='clip')
+        ax1.get_xaxis().set_minor_formatter(axfmt)
+#        ax1.get_xaxis().set_minor_formatter(NullFormatter())
         ax1.set_yscale('log', nonposy='clip')
-        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-        ax1.set_ylabel(r'$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
+#        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax1.set_ylabel(r'%s' %ylabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
         ax1.legend(fontsize=10, numpoints=1)
         ax1.text(0.03, 0.15, 'PDF set: %s' %pdfnicename, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.10, 'Scale: %s' %scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.05, '%s' %variation_type, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.set_title('%s' %tablename)
+        ax1.text(0.03, 0.08, 'Scale: %s' %nice_scale_name, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.03, '%s' %variation_type, horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.set_title('%s' %title, loc='left')
 
+#        Only for publication
+# H1
+#        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+# ZEUS
+#        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
         # Do subplot with ratios and relative scale uncertainties; denominator in ratio = first order in order_list
-        ax2 = plt.subplot(gs[2, :])
-        ax2.set_xlim([xmin, xmax])
+        ax2 = plt.subplot(gs[2, :], sharex = ax1)
+#        ax2.set_xlim([xmin, xmax])
+#        ax2.set_xscale('log', nonposx='clip')
+#        ax2.get_xaxis().set_minor_formatter(axfmt)
+#        ax2.set_yscale('log', nonposy='clip')
+        ax2.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax2.set_ylabel(r'$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
+#        ax2.legend(fontsize=10, numpoints=1)
+#        ax1.set_xticklabels([])
+#        ax1.set_xticks([])
+#        ax1.get_xaxis().set_visible(False)
+
         xs_index = -1
         ordernames = ''
         for item in order_list:
@@ -155,13 +173,21 @@ def main():
                                 help='Member of PDFset, default is 0.')
         parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
                             help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If nothing is chosen, show all orders available in table.')
-        parser.add_argument('-p', '--pdfset', default='CT14nlo',
+        parser.add_argument('-p', '--pdfset', default='CT14nlo', type=str,
                                 help='PDFset to evaluate fastNLO table.')
         parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
                             choices=range(16), metavar='[0-15]',
                             help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
+        parser.add_argument('--scalename', default=None, type=str,
+                                help='Replace default scale name by given string.')
+        parser.add_argument('--title', default=None, type=str,
+                                help='Replace table name as default title by given string.')
         parser.add_argument('-v', '--verbose', action="store_true",
                             help="Increase output verbosity.")
+        parser.add_argument('--xlabel', default=None, type=str,
+                                help='Replace x axis default label by given string.')
+        parser.add_argument('--ylabel', default=None, type=str,
+                                help='Replace y axis default label by given string.')
 
         # Parse arguments
         args = vars(parser.parse_args())
@@ -206,6 +232,9 @@ def main():
         # Scale choice
         scale_choice = args['scale']
 
+        # Scale name
+        nice_scale_name = args['scalename']
+
         # Given filename
         given_filename = args['filename']
 
@@ -217,6 +246,11 @@ def main():
                 print '[fastnnlo_scaleunc]: Illegal format specified, aborted!'
                 print '[fastnnlo_scaleunc]: Format list:', args['format']
                 exit(1)
+
+        # Plot labelling
+        nice_title  = args['title']
+        nice_xlabel = args['xlabel']
+        nice_ylabel = args['ylabel']
 
         # Verbosity
         verb = args['verbose']
@@ -245,10 +279,13 @@ def main():
                 if verb:
                         print '[fastnnlo_scaleunc]: Labels:', labels
 
-                # Label of first dimension:
+                # x label of first dimension from table:
                 xlabel = fnlo.GetDimLabel(0)
                 if verb:
                         print '[fastnnlo_scaleunc]: x-label:', xlabel
+
+                # Generic y label
+                ylabel = '$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$'
 
                 # Creating x-axis
                 bin_bounds = np.array(fnlo.GetObsBinsBounds(0))
@@ -386,7 +423,17 @@ def main():
 
                 ############################## Do the plotting ####################################################
 
-                plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, tablename, order_list, given_filename, scale_name, pdfset, variation_type, formats)
+                if nice_title is None:
+                    title = tablename
+                else:
+                    title = nice_title
+                if nice_scale_name is None:
+                    nice_scale_name = scale_name
+                if nice_xlabel is not None:
+                    xlabel = nice_xlabel
+                if nice_ylabel is not None:
+                    ylabel = nice_ylabel
+                plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfset, variation_type, formats)
 
 
                 stop_time = timeit.default_timer()
