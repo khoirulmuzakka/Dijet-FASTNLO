@@ -87,274 +87,109 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
         pdfnicenames.append(nicename)
 
     gs = gridspec.GridSpec(3, 3)
-    fig = plt.figure(figsize=(7, 7))
-    ax1 = plt.subplot(gs[:-1, :])
 
-    # Check whether only one PDF set is being looked at or several PDF sets.
-    if (len(pdfsets) > 1):  # one plot contains all chosen pdf sets for one specific order + summary plot if 3 orders in order_list
-            # Several PDFs will be plotted 'next to each other' --> need tiny shift to be displayed
-        if len(pdfsets) == 2:
-            shift_list = [0.98, 1.02]
-        elif len(pdfsets) == 3:
-            shift_list = [0.96, 1.00, 1.04]
-        elif len(pdfsets) == 4:
-            shift_list = [0.94, 0.98, 1.02, 1.06]
-        elif len(pdfsets) == 5:
-            shift_list = [0.92, 0.96, 1.00, 1.04, 1.08]
-        else:
-            print '[fastnnlo_pdfunc]: Too many PDFs to produce combined plot. Aborted!'
-            print '[fastnnlo_pdfunc]: Max. possible: 5. Number of given PDF Sets: %s' % len(
-                pdfsets)
-            sys.exit()
+    # For plotting various results, max = 5, 'next to each other', handling via shift from bincenter
+    if len(pdfsets) == 1:
+        shift_list = [1.00]
+    elif len(pdfsets) == 2:
+        shift_list = [0.985, 1.015]
+    elif len(pdfsets) == 3:
+        shift_list = [0.97, 1.00, 1.03]
+    elif len(pdfsets) == 4:
+        shift_list = [0.955, 0.985, 1.015, 1.045]
+    elif len(pdfsets) == 5:
+        shift_list = [0.94, 0.97, 1.00, 1.03, 1.06]
+    else:
+        print '[fastnnlo_pdfunc]: Too many PDFs to plot simultaneously. Aborted!'
+        print '[fastnnlo_pdfunc]: Current maximum is 5. The PDF list is', pdfsets
+        sys.exit()
 
-        order_index = 0  # necessary, because even though LO might not even be investigated, we need index 0, which could then correspond to NLO or NNLO
-        ordernames = ''
-        pdffilenames = ''
-        for pdf in pdfsets:
-            pdffilenames += '_%s' % pdf
+    # Plot all x section results in order_list
+    ord_index = -1
+    ordernames = ''
+    pdffilenames = ''
+    for pdf in pdfsets:
+        pdffilenames += '_%s' % pdf
 
-        # producing one plot per order (comparing all the given pdfs)
-        for order_item in order_list:
-            fig = plt.figure(figsize=(7, 7))
-            ax1 = plt.subplot(gs[:-1, :])
+    # Produce one plot per order with all PDFs
+    for order_item in order_list:
+        ord_index += 1
 
-            print '[fastnnlo_pdfunc]: Producing %s plot.' % order_item
-            patches = []  # later needed for legend
+        fig = plt.figure(figsize=(7, 7))
+        ax1 = plt.subplot(gs[:-1, :])
 
-            pdf_index = 0
-#                        for pdf, shift in zip(pdfsets, shift_list): #go through all the pdfs
-            for pdf, shift in zip(pdfnicenames, shift_list):  # go through all the pdfs
-                ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, order_index, :], yerr=abs(abs_pdf_unc[pdf_index, order_index, :, :]),
-                             elinewidth=1, linewidth=0.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
-                pdf_index += 1
+        print '[fastnnlo_pdfunc]: Producing %s plot.' % order_item
 
-            axfmt = LogFormatter(labelOnlyBase=False,
-                                 minor_thresholds=(2, 0.4))
-            ax1.set_xlim([xmin, xmax])
+        # Loop over PDF sets
+        pdf_index = -1
+        for pdf, shift in zip(pdfnicenames, shift_list):
+            pdf_index += 1
+            ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, ord_index, :], yerr=abs(abs_pdf_unc[pdf_index, ord_index, :, :]),
+                         elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
+
+        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
+        ax1.set_xlim([xmin, xmax])
 #                        if logx: ax1.set_xscale('log', nonposx='clip')
 #                        else: ax1.set_xscale('linear')
 #                        if logy: ax1.set_yscale('log', nonposy='clip')
 #                        else: ax1.set_yscale('linear')
-            ax1.set_xscale('log', nonposx='clip')
-            ax1.get_xaxis().set_minor_formatter(axfmt)
+        ax1.set_xscale('log', nonposx='clip')
+        ax1.get_xaxis().set_minor_formatter(axfmt)
 #                        ax1.get_xaxis().set_minor_formatter(NullFormatter())
-            ax1.set_yscale('log', nonposy='clip')
+        ax1.set_yscale('log', nonposy='clip')
 #                        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-            ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
-                           verticalalignment='top', y=1.0, rotation=90, labelpad=16)
-            ax1.legend(fontsize=10, numpoints=1)
-            ax1.text(0.03, 0.15, 'Reference PDF: %s' %
-                     pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-            ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
-                     verticalalignment='bottom', transform=ax1.transAxes)
-            ax1.text(0.03, 0.03, 'Order: %s' % order_item, horizontalalignment='left',
-                     verticalalignment='bottom', transform=ax1.transAxes)
-            ax1.set_title('%s' % title, loc='left')
+        ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
+                       verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+        ax1.legend(fontsize=10, numpoints=1)
+        ax1.text(0.03, 0.15, 'Reference PDF: %s' %
+                 pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
+                 verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.03, 'Order: %s' % order_item, horizontalalignment='left',
+                 verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.set_title('%s' % title, loc='left')
 
 #        Only for publication
 # H1
-            ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
-                     horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
+                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 # ZEUS
 #        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes
 
-            # Ratio subplot with relative pdf uncertainties, denominator in ratio = first PDF in pdfsets list for requested order
-            ax2 = plt.subplot(gs[2, :], sharex=ax1)
-#                        ax2.set_xlim([xmin, xmax])
-#                        ax2.set_xscale('log', nonposx='clip')
-            ax2.get_xaxis().set_minor_formatter(axfmt)
-            ax2.set_yscale('log', nonposy='clip')
-            ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
-                           x=1.0, verticalalignment='top', y=1.0)
-            ax2.set_ylabel(r'$\sigma \pm \Delta\sigma(\mu_R,\mu_F)$', horizontalalignment='right',
-                           x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=16)
-
-            # ratioplot normalised to first given pdf.
-            for p in range(0, len(pdfsets)):  # for pdf in pdfsets
-                # divide xs for each PDF by first given PDF (xs)
-                ax2.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :], '.',
-                             ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=_colors[p], label=pdfnicenames[p])
-                ax2.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
-                                 (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=_colors[p],
-                                 alpha=0.3, hatch=_hatches[p])
-                patches.append(mpl.patches.Rectangle(
-                    (0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.4))
-                ax2.add_patch(patches[p])
-
-            ax2.set_ylabel(r'Ratio to ref. PDF')
-            ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4,
-                        color='k', linestyle='dotted')
-
-            fig.tight_layout()
-
-            order_index += 1
-            ordernames += '_%s' % order_item
-
-            if given_filename is not None:
-                filename = '%s.pdfunc-%s.%s' % (given_filename,
-                                                order_item, pdffilenames[1:])
-            else:
-                filename = '%s.pdfunc-%s.%s.%s' % (tablename,
-                                                   order_item, pdffilenames[1:], scale_name)
-
-            for fmt in formats:
-                figname = '%s.%s' % (filename, fmt)
-                fig.savefig(figname)
-                print '[fastnnlo_pdfunc]: Plot saved as:', figname
-            plt.close(fig)
-
-        # Summary plot if 3 orders have been looked at
-        if len(order_list) == 3:  # could adjust this to arbitrary length of order
-            gs2 = gridspec.GridSpec(2, 2)
-            # for more whitespace between the subplots
-            gs2.update(wspace=0.4, hspace=0.4)
-            ##fig2 = plt.figure(figsize=(7,7))
-            # different size compared to other plots that are produced
-            fig2 = plt.figure(figsize=(12, 10))
-            ax0 = plt.subplot(gs2[0, 0])
-            ax1 = plt.subplot(gs2[0, 1])
-            ax2 = plt.subplot(gs2[1, 0])
-            ax3 = plt.subplot(gs2[1, 1])
-
-            # subplots containing ratioplot for each order (comparing all pdfs, ratio to first given pdf)
-            # and one subplot for first pdf (comparing all orders, ratio to 1st given order)
-            # for ax, order in zip([ax0, ax1, ax2], ['LO', 'NLO', 'NNLO']): #here ax0 will always contain LO, ax1 NLO and ax2 NNLO
-            order_index = 0  # to go through order_list item by item, keeping in mind that order_list is not sorted
-            patches = []  # later needed for legend
-            # here it can happen, that NNLO is plotted in ax0, depending on content of order_list
-            for ax, order in zip([ax0, ax1, ax2], order_list):
-                patches = []  # currently necessary, not needed if one only makes one legend for all axes
-                for p in range(0, len(pdfsets)):  # for pdf in pdfsets
-                    ax.semilogx(x_axis, xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :],
-                                '.', ms=6, marker=_symbols[p], ls='dashed', linewidth=0.2, color=_colors[p])
-                    ax.fill_between(x_axis, (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 2, :],
-                                    (xs_chosen[p, order_index, :]/xs_chosen[0, order_index, :])+rel_pdf_unc[p, order_index, 1, :], color=_colors[p],
-                                    alpha=0.3)
-                    patches.append(mpl.patches.Rectangle(
-                        (0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.3))
-                    ax.add_patch(patches[p])
-
-                ax.set_xlabel('%s' % xlabel)
-                ax.set_ylabel(r'$\sigma \pm \Delta\sigma(\text{PDF})$')
-                ax.text(0.03, 0.10, 'Reference PDF: %s' %
-                        pdfsets[0], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
-                ax.text(0.03, 0.05, 'Order: %s' %
-                        _order_to_text[order_index], horizontalalignment='left', verticalalignment='top', transform=ax.transAxes)
-
-                ax.axhline(y=1, xmin=0, xmax=1, linewidth=0.4,
-                           color='k', linestyle='dotted')
-
-                order_index += 1
-                ax.legend()
-            #plt.legend(handles=patches, mode='expand', bbox_to_anchor=(1.02, 1), loc='upper left') #'upper left' refers to the legend box ######
-
-            order_index = 0
-            for order_item in order_list:
-                ax3.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.', ms=6, ls='dashed', linewidth=0.2,
-                             color=_order_color[order_item], label=order_item)
-
-                ax3.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],
-                                 (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-                                 alpha=0.46, hatch=_hatches[order_index])
-
-                order_index += 1
-            ax3.set_title('%s' % pdfsets[0])
-            ax3.set_xlabel('%s' % xlabel)
-            ax3.set_ylabel(r'$\sigma \pm \Delta\sigma(\mathrm{PDF})$')
-            ax3.set_ylim([0.82, None])  # to avoid problems with text
-            ax3.axhline(y=1, xmin=0, xmax=1, linewidth=0.4,
-                        color='k', linestyle='dotted')
-            ax3.text(0.03, 0.10, 'Reference order: %s' %
-                     order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
-            ax3.text(0.02, 0.02, 'PDF Set: %s' %
-                     pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax3.transAxes)
-            ax3.legend()
-
-            fig2.suptitle('%s' % tablename, fontsize=16)
-
-            if given_filename is not None:
-                filename = '%s.pdfunc-summary.%s' % (
-                    given_filename, pdffilenames[1:])
-            else:
-                filename = '%s.pdfunc-summary.%s' % (
-                    tablename, pdffilenames[1:])
-            for fmt in formats:
-                figname = '%s.%s' % (filename, fmt)
-                fig.savefig(figname)
-                print '[fastnnlo_pdfunc]: Plot saved as:', figname
-            plt.close(fig2)
-
-        else:
-            print '[fastnnlo_pdfunc]: For less than 3 orders --> no summary plot produced.'
-
-    elif (len(pdfsets) == 1):  # plotting with given or default pdf, one plot contains all given/default orders
-        # For plotting several orders 'next to each other', handling via shift from bincenter
-        if len(order_list) == 1:
-            shift_list = [1.00]
-        elif len(order_list) == 2:
-            shift_list = [0.98, 1.02]
-        elif len(order_list) == 3:
-            shift_list = [0.98, 1.00, 1.02]
-        else:
-            print '[fastnnlo_pdfunc]: Too many orders to plot. Aborted!'
-            print '[fastnnlo_pdfunc]: Requested orders: %s' % order_list
-            sys.exit()
-
-        # this is necessary because the orders in order_list are unsorted (order_index is not tied to specific order)
-        order_index = 0
-        for order_item, shift in zip(order_list, shift_list):
-            ax1.errorbar(x_axis*shift, xs_chosen[0, order_index, :], yerr=abs(abs_pdf_unc[0, order_index, :, :]), elinewidth=1,
-                         linewidth=0.0, ms=6, color=_order_color[order_item], fmt='.', label=order_item)
-            order_index += 1
-
-        ax1.set_xlim([xmin, xmax])
-#                if logx: ax1.set_xscale('log', nonposx='clip')
-#                else: ax1.set_xscale('linear')
-#                if logy: ax1.set_yscale('log', nonposy='clip')
-#                else: ax1.set_yscale('linear')
-        ax1.set_xscale('log', nonposx='clip')
-        ax1.set_yscale('log', nonposy='clip')
-        ax1.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
-                       x=1.0, verticalalignment='top', y=1.0)
-        ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
-                       verticalalignment='top', y=1.0, rotation=90, labelpad=16)
-        ax1.legend(fontsize=10, numpoints=1)
-        ax1.text(0.03, 0.15, 'PDF set: %s' %
-                 pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.10, 'Scale: %s' % scale_name, horizontalalignment='left',
-                 verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.05, 'Ref. order: %s' %
-                 order_list[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-
-        ax1.set_title('%s' % tablename)
-
-        # Ratio subplot with relative pdf uncertainties, denominator in ratio = first order in order_list (not necessarly LO!)
+        # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
-        ax2.set_xlim([xmin, xmax])
+        ax2.get_xaxis().set_minor_formatter(axfmt)
+        ax2.set_yscale('linear', nonposy='clip')
+        ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
+                       x=1.0, verticalalignment='top', y=1.0)
 
-        ordernames = ''
-        order_index = 0
-        for order_item in order_list:
-            ax2.semilogx(x_axis, xs_chosen[0, order_index, :]/xs_chosen[0, 0, :], '.',
-                         ms=6, ls='dashed', linewidth=0.2, color=_order_color[order_item], label=order_item)
-            ax2.fill_between(x_axis, (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 2, :],
-                             (xs_chosen[0, order_index, :]/xs_chosen[0, 0, :])+rel_pdf_unc[0, order_index, 1, :], color=_order_color[order_item],
-                             alpha=0.3, hatch=_hatches[order_index])
-            order_index += 1
-            ordernames += '_%s' % order_item
+        patches = []  # Later needed for legend
+        for p in range(0, len(pdfsets)):
+            # Divide xs for each PDF by first given PDF (xs)
+            ax2.semilogx(x_axis, xs_chosen[p, ord_index, :]/xs_chosen[0, ord_index, :], '.',
+                         ms=6, marker=_symbols[p], ls='dashed', lw=1.0, color=_colors[p], label=pdfnicenames[p])
+            ax2.fill_between(x_axis, (xs_chosen[p, ord_index, :]/xs_chosen[0, ord_index, :])+rel_pdf_unc[p, ord_index, 2, :],
+                             (xs_chosen[p, ord_index, :]/xs_chosen[0,
+                                                                   ord_index, :])+rel_pdf_unc[p, ord_index, 1, :],
+                             color=_colors[p], alpha=0.3, hatch=_hatches[p])
+            patches.append(mpl.patches.Rectangle(
+                (0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.4))
+            ax2.add_patch(patches[p])
 
-        ax2.set_ylabel(r'Ratio to ref. order')
-        ax2.axhline(y=1, xmin=0, xmax=1, linewidth=0.4,
-                    color='k', linestyle='dotted')
+        ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='right',
+                       x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+        ax2.axhline(y=1, xmin=0, xmax=1, color='k',
+                    linestyle='dotted', linewidth=1.6, alpha=0.2)
 
         fig.tight_layout()
+        ordernames += '_%s' % order_item
 
         if given_filename is not None:
             filename = '%s.pdfunc-%s.%s' % (given_filename,
-                                            pdfsets[0], ordernames[1:])
+                                            order_item, pdffilenames[1:])
         else:
             filename = '%s.pdfunc-%s.%s.%s' % (tablename,
-                                               pdfsets[0], ordernames[1:], scale_name)
+                                               order_item, pdffilenames[1:], scale_name)
 
         for fmt in formats:
             figname = '%s.%s' % (filename, fmt)

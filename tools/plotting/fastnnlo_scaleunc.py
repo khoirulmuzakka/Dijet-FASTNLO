@@ -94,11 +94,11 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
     elif len(order_list) == 2:
         shift_list = [0.98, 1.02]
     elif len(order_list) == 3:
-        shift_list = [0.98, 1.00, 1.02]
+        shift_list = [0.96, 1.00, 1.04]
     else:
-        print '[fastnnlo_scaleunc]: List of items to plot too long. Aborted!'
-        print '[fastnnlo_scaleunc]: The order list is', order_list
-        exit(1)
+        print '[fastnnlo_scaleunc]: Too many orders to plot simultaneously. Aborted!'
+        print '[fastnnlo_scaleunc]: Current maximum is 3. The order list is', order_list
+        sys.exit(1)
 
     # Plot all x section results in order_list
     xs_index = -1
@@ -115,7 +115,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
     ax1.set_yscale('log', nonposy='clip')
 #        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
     ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
-                   verticalalignment='top', y=1.0, rotation=90, labelpad=16)
+                   verticalalignment='top', y=1.0, rotation=90, labelpad=24)
     ax1.legend(fontsize=10, numpoints=1)
     ax1.text(0.03, 0.15, 'PDF set: %s' % pdfnicename, horizontalalignment='left',
              verticalalignment='bottom', transform=ax1.transAxes)
@@ -131,12 +131,9 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
 # ZEUS
 #        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
-    # Do subplot with ratios and relative scale uncertainties; denominator in ratio = first order in order_list
+    # Ratio subplot with relative scale uncertainties; denominator in ratio = first order in order_list
     ax2 = plt.subplot(gs[2, :], sharex=ax1)
-#        ax2.set_xlim([xmin, xmax])
-#        ax2.set_xscale('log', nonposx='clip')
-#        ax2.get_xaxis().set_minor_formatter(axfmt)
-    ax2.set_yscale('log', nonposy='clip')
+    ax2.set_yscale('linear', nonposy='clip')
     ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
                    x=1.0, verticalalignment='top', y=1.0)
 #        ax2.legend(fontsize=10, numpoints=1)
@@ -154,7 +151,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
         ax2.fill_between(x_axis, (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 2, :],
                          (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
-    ax2.set_ylabel(r'Ratio to %s' % order_list[0])
+    ax2.set_ylabel(r'Ratio to %s' %
+                   order_list[0], x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=24)
     ax2.axhline(y=1, xmin=0, xmax=1, color='k',
                 linestyle='dotted', linewidth=1.6, alpha=0.2)
     fig.tight_layout()
