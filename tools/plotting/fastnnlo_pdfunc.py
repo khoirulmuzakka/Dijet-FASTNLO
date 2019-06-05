@@ -158,8 +158,8 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
 #        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
 #                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 # ZEUS
-        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
-                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+#        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
+#                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
         # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
