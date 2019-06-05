@@ -126,6 +126,10 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
             pdf_index += 1
             ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, ord_index, :], yerr=abs(abs_pdf_unc[pdf_index, ord_index, :, :]),
                          elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
+            ax1.fill_between(x_axis*shift, xs_chosen[pdf_index, ord_index, :] + xs_chosen[0, ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 2, :],
+                             xs_chosen[pdf_index, ord_index, :] + xs_chosen[0,
+                                                                            ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 1, :],
+                             color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
 
         axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
         ax1.set_xlim([xmin, xmax])
@@ -145,16 +149,17 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
                  pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
         ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
                  verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.03, 'Order: %s' % order_item, horizontalalignment='left',
+        ax1.text(0.03, 0.03, 'PDF uncertainty at %s' % order_item, horizontalalignment='left',
                  verticalalignment='bottom', transform=ax1.transAxes)
         ax1.set_title('%s' % title, loc='left')
 
 #        Only for publication
 # H1
-        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
-                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+#        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
+#                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 # ZEUS
-#        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes
+        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
+                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
         # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
@@ -176,8 +181,8 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
                 (0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.4))
             ax2.add_patch(patches[p])
 
-        ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='right',
-                       x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+        ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='center',
+                       x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
         ax2.axhline(y=1, xmin=0, xmax=1, color='k',
                     linestyle='dotted', linewidth=1.6, alpha=0.2)
 

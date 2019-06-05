@@ -106,6 +106,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
         xs_index += 1
         ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=abs(abs_scale_unc[xs_index]), elinewidth=1, linewidth=0.0,
                      ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
+        ax1.fill_between(x_axis*shift, xs_all[xs_index] + xs_all[0]*rel_scale_unc[xs_index, 2, :],
+                         xs_all[xs_index] + xs_all[0]*rel_scale_unc[xs_index, 1, :], color=_order_color[order_item], hatch=_hatches[xs_index], alpha=0.30)
 
     axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
     ax1.set_xlim([xmin, xmax])
@@ -127,9 +129,11 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
 
 #        Only for publication
 # H1
-#        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+#    ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
+#             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 # ZEUS
-#        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$', horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+    ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
+             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
     # Ratio subplot with relative scale uncertainties; denominator in ratio = first order in order_list
     ax2 = plt.subplot(gs[2, :], sharex=ax1)
@@ -152,7 +156,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
                          (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
     ax2.set_ylabel(r'Ratio to %s' %
-                   order_list[0], x=1.0, verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+                   order_list[0], horizontalalignment='center', x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
     ax2.axhline(y=1, xmin=0, xmax=1, color='k',
                 linestyle='dotted', linewidth=1.6, alpha=0.2)
     fig.tight_layout()
