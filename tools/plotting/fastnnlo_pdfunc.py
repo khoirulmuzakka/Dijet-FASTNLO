@@ -15,6 +15,7 @@ import argparse
 import glob
 import os
 import re
+import string
 import sys
 import timeit
 # Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
@@ -76,7 +77,7 @@ _debug = False
 # that is stored in xs_all[0].
 # If multiple orders are requested, one plot per order is created.
 # Otherwise all orders are plotted into one figure.
-def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfsets, formats, logx, logy):
+def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nostat, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfsets, formats, logx, logy):
 
     pdfnicenames = []
     for pdf in pdfsets:
@@ -124,11 +125,17 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
         pdf_index = -1
         for pdf, shift in zip(pdfnicenames, shift_list):
             pdf_index += 1
-            ax1.errorbar(x_axis*shift, xs_chosen[pdf_index, ord_index, :], yerr=abs(abs_pdf_unc[pdf_index, ord_index, :, :]),
+            yerror = 0*xs_all[pdf_index, ord_index, :]
+            if pdf_index == 0 and not nostat:
+                yerror = np.multiply(
+                    xs_all[pdf_index, ord_index, :], dxsr_cn[ord_index, :])
+            elif nostat:
+                yerror = abs(abs_pdf_unc[pdf_index, ord_index, :, :])
+            ax1.errorbar(x_axis*shift, xs_all[pdf_index, ord_index, :], yerr=yerror,
                          elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
-            ax1.fill_between(x_axis*shift, xs_chosen[pdf_index, ord_index, :] + xs_chosen[0, ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 2, :],
-                             xs_chosen[pdf_index, ord_index, :] + xs_chosen[0,
-                                                                            ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 1, :],
+            ax1.fill_between(x_axis*shift, xs_all[pdf_index, ord_index, :] + xs_all[0, ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 2, :],
+                             xs_all[pdf_index, ord_index, :] + xs_all[0,
+                                                                      ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 1, :],
                              color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
 
         axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
@@ -169,17 +176,24 @@ def plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, yl
                        x=1.0, verticalalignment='top', y=1.0)
 
         patches = []  # Later needed for legend
-        for p in range(0, len(pdfsets)):
+        for pdf_index in range(0, len(pdfsets)):
             # Divide xs for each PDF by first given PDF (xs)
-            ax2.semilogx(x_axis, xs_chosen[p, ord_index, :]/xs_chosen[0, ord_index, :], '.',
-                         ms=6, marker=_symbols[p], ls='dashed', lw=1.0, color=_colors[p], label=pdfnicenames[p])
-            ax2.fill_between(x_axis, (xs_chosen[p, ord_index, :]/xs_chosen[0, ord_index, :])+rel_pdf_unc[p, ord_index, 2, :],
-                             (xs_chosen[p, ord_index, :]/xs_chosen[0,
-                                                                   ord_index, :])+rel_pdf_unc[p, ord_index, 1, :],
-                             color=_colors[p], alpha=0.3, hatch=_hatches[p])
+            yerror = 0*xs_all[pdf_index, ord_index, :]
+            if pdf_index == 0 and not nostat:
+                yerror = np.multiply(
+                    xs_all[pdf_index, ord_index, :], dxsr_cn[ord_index, :])
+            ax2.errorbar(x_axis, xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :], yerr=yerror/xs_all[0, ord_index, :],
+                         elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
+#            else:
+#                ax2.semilogx(x_axis, xs_all[p, ord_index, :]/xs_all[0, ord_index, :], '.',
+#                             ms=6, marker=_symbols[p], ls='dashed', lw=1.0, color=_colors[p], label=pdfnicenames[p])
+            ax2.fill_between(x_axis, (xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :])+rel_pdf_unc[pdf_index, ord_index, 2, :],
+                             (xs_all[pdf_index, ord_index, :]/xs_all[0,
+                                                                     ord_index, :])+rel_pdf_unc[pdf_index, ord_index, 1, :],
+                             color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
             patches.append(mpl.patches.Rectangle(
-                (0, 0), 0, 0, color=_colors[p], label=pdfnicenames[p], alpha=0.4))
-            ax2.add_patch(patches[p])
+                (0, 0), 0, 0, color=_colors[pdf_index], label=pdfnicenames[pdf_index], alpha=0.4))
+            ax2.add_patch(patches[pdf_index])
 
         ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='center',
                        x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
@@ -216,6 +230,8 @@ def main():
     parser.add_argument('table', type=str, nargs='+',
                         help='Filename glob of fastNLO tables to be evaluated. This must be specified!')
     # Optional arguments
+    parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
+                        help='Comma-separated list of NNLOJET dat files with statistical uncertainties for each order to show. If set to "auto", dat files matching to table name are used. If nothing is chosen, statistical uncertainties are ignored.')
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Output filename (optional).')
     parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
@@ -283,6 +299,23 @@ def main():
         iordmax = max(iorders)
         print '[fastnnlo_pdfunc]: Evaluate table up to order(s)', args['order']
 
+    # Check existence of NNLOJET dat file for each order if desired
+    datfilenames = []
+    nostat = False
+    if args['datfiles'] is None:
+        nostat = True
+        print '[fastnnlo_pdfunc]: No statistical uncertainties requested.'
+    elif args['datfiles'][0] == 'auto':
+        print '[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.'
+    else:
+        for datfile in args['datfiles']:
+            lstat = os.path.isfile(datfile)
+            if lstat:
+                datfilenames.append(datfile)
+            else:
+                print '[fastnnlo_pdfunc]: Given file ', datfile, 'for statistical uncertainties not found, aborted!'
+                exit(1)
+
     # Given filename
     given_filename = args['filename']
 
@@ -340,10 +373,13 @@ def main():
         if verb:
             print '[fastnnlo_pdfunc]: Dimension Labels: ', dimlabels
 
-        # Label of first dimension:
+        # x label of first dimension from table:
         xlabel = fnlo.GetDimLabel(0)
         if verb:
             print '[fastnnlo_pdfunc]: x-label: ', xlabel
+
+        # Generic y label
+        ylabel = '$\sigma \pm \Delta\sigma(\mathrm{PDF})$'
 
         # Creating x-axis
         bin_bounds = np.array(fnlo.GetObsBinsBounds(0))
@@ -409,8 +445,37 @@ def main():
 
         print '[fastnnlo_pdfunc]: List of requested orders:', order_list
 
-        # For flexible-scale tables set scale to user choice (default is 0)
+        # Read in statistical uncertainty for each order if requested
+        dxsr_cn = []
+        sep = '.'
+        if not nostat:
+            if args['datfiles'][0] == 'auto':
+                for order in order_list:
+                    parts = tablename.split(sep)
+                    parts[1] = order
+                    datfile = sep.join(parts) + '.dat'
+                    datfilenames.append(datfile)
 
+            lstat = (len(datfilenames) > 0)
+            if lstat and len(datfilenames) != len(order_list):
+                print '[fastnnlo_pdfunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!'
+                exit(1)
+
+            dxsr = []
+            for fname in datfilenames:
+                print '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname
+                cols = np.loadtxt(fname, usecols=range(3, 5))
+                xs_dat = np.array(cols[:, 0])
+                dxs_dat = np.array(cols[:, 1])
+                dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
+                    dxs_dat), where=xs_dat != 0)
+                dxsr.append(dxsr_dat)
+            dxsr_cn = abs(np.array(dxsr))
+            # Empty list for use with next table in automatic mode
+            if args['datfiles'][0] == 'auto':
+                datfilenames = []
+
+        # For flexible-scale tables set scale to user choice (default is 0)
         if lflex:
             print '[fastnnlo_pdfunc]: Setting requested scale choice for flexible-scale table:', scale_choice
             fnlo.SetMuRFunctionalForm(scale_choice)
@@ -431,6 +496,7 @@ def main():
 
         # Outermost loop: go through all the given pdf sets
         # Evaluate fastNLO table focusing on PDF uncertainties
+        fnlo = fastnlo.fastNLOLHAPDF(table)
         for pdf in pdfsets:
             xs_list_tmp = []  # will contain total cross section for selected orders out of LO, NLO, NNLO for single pdf
             # list for relative PDF uncertainties (low, high) for selected orders
@@ -439,7 +505,8 @@ def main():
             print '#############################  %s  ########################################' % pdf
             print '-----------------------------------------------------------------------------------------------'
             print '[fastnnlo_pdfunc]: Calculate XS and uncertainty for %s \n' % pdf
-            fnlo = fastnlo.fastNLOLHAPDF(table, pdf, args['member'])
+            fnlo.SetLHAPDFFilename(pdf)
+            fnlo.SetLHAPDFMember(0)
 
             for n in order_list:
                 for j in range(0, max_order+1):
@@ -467,7 +534,7 @@ def main():
                     print '-----------------------------------------------------------------------------------------------'
             xs_list.append(xs_list_tmp)
             rel_unc_list.append(rel_unc_list_tmp)
-        xs_chosen = np.array(xs_list)
+        xs_all = np.array(xs_list)
         # Remember: both arrays here do only contain the CHOSEN orders! (or per default LO, NLO, (NNLO))
         rel_pdf_unc = np.array(rel_unc_list)
         #########                                                                                               #########
@@ -481,26 +548,26 @@ def main():
 
         if verb:
             print '[fastnnlo_pdfunc]: Cross section summary. '
-            print '[fastnnlo_pdfunc]: For each pdf %s xs_chosen contains XS corresponding to %s.' % (
+            print '[fastnnlo_pdfunc]: For each pdf %s xs_all contains XS corresponding to %s.' % (
                 pdfsets, order_list)
-            print xs_chosen, '\n \n'
-            print 'Size xs_chosen: ', np.shape(xs_chosen)  # test
+            print xs_all, '\n \n'
+            print 'Size xs_all: ', np.shape(xs_all)  # test
             print 'Size rel_pdf_unc: ', np.shape(rel_pdf_unc)  # test
 
         # ABSOLUTE pdf uncertainty
-        # length of axis 0 in xs_chosen equals number of (investigated) pdfsets
-        num_pdfsets = np.size(xs_chosen, 0)
-        # length of axis 1 in xs_chosen equals number of (investigated) orders
-        num_orders = np.size(xs_chosen, 1)
+        # length of axis 0 in xs_all equals number of (investigated) pdfsets
+        num_pdfsets = np.size(xs_all, 0)
+        # length of axis 1 in xs_all equals number of (investigated) orders
+        num_orders = np.size(xs_all, 1)
         abs_pdf_unc = np.empty([num_pdfsets, num_orders, 2, len(x_axis)])
         for p in range(0, num_pdfsets):
             for k in range(0, num_orders):  # k is order index
                 # absolute uncertainties downwards (low)
                 abs_pdf_unc[p, k, 0, :] = rel_pdf_unc[p,
-                                                      k, 2, :]*xs_chosen[p, k, :]
+                                                      k, 2, :]*xs_all[p, k, :]
                 # absolute uncertainties upwards (high)
                 abs_pdf_unc[p, k, 1, :] = rel_pdf_unc[p,
-                                                      k, 1, :]*xs_chosen[p, k, :]
+                                                      k, 1, :]*xs_all[p, k, :]
 
         if verb:
             print '[fastnnlo_pdfunc]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n' % (
@@ -520,7 +587,13 @@ def main():
         if nice_ylabel is not None:
             ylabel = nice_ylabel
 
-        plotting(x_axis, xmin, xmax, xs_chosen, rel_pdf_unc, abs_pdf_unc, xlabel, ylabel, title, tablename,
+        # Without statistical uncertainties create zero array of proper dimensions here
+        if len(dxsr_cn) == 0:
+            dxsr_cn = np.zeros((xs_all.shape[0], xs_all.shape[2]))
+        if _debug:
+            print 'dxsr_cn', dxsr_cn
+
+        plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nostat, xlabel, ylabel, title, tablename,
                  order_list, given_filename, scale_name, nice_scale_name, pdfsets, formats, logx, logy)
 
     stop_time = timeit.default_timer()

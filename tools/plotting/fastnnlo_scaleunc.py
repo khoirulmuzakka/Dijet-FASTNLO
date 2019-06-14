@@ -15,6 +15,7 @@ import argparse
 import glob
 import os
 import re
+import string
 import sys
 import timeit
 # Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
@@ -73,7 +74,7 @@ _debug = False
 # The ratio is done always with respect to the first order appearing in the order_list
 # given e.g. via '-o NLO,NNLO', i.e. the first evaluated cross section, here NLO,
 # that is stored in xs_all[0].
-def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfset, variation_type, formats):
+def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, nostat, xlabel, ylabel, title, tablename, order_list, given_filename, scale_name, nice_scale_name, pdfset, variation_type, formats):
     if variation_type == 'Scale uncertainty (2P)':
         vartype = '2P'
     elif variation_type == 'Scale uncertainty (6P)':
@@ -104,10 +105,16 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
     xs_index = -1
     for order_item, shift in zip(order_list, shift_list):
         xs_index += 1
-        ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=abs(abs_scale_unc[xs_index]), elinewidth=1, linewidth=0.0,
+        yerror = 0*xs_all[xs_index, :]
+        if not nostat:
+            yerror = np.multiply(
+                xs_all[xs_index, :], dxsr_cn[xs_index, :])
+        else:
+            yerror = abs(abs_scale_unc[xs_index])
+        ax1.errorbar(x_axis*shift, xs_all[xs_index], yerr=yerror, elinewidth=1, linewidth=0.0,
                      ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
-        ax1.fill_between(x_axis*shift, xs_all[xs_index] + xs_all[0]*rel_scale_unc[xs_index, 2, :],
-                         xs_all[xs_index] + xs_all[0]*rel_scale_unc[xs_index, 1, :], color=_order_color[order_item], hatch=_hatches[xs_index], alpha=0.30)
+        ax1.fill_between(x_axis*shift, xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 2, :],
+                         xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 1, :], color=_order_color[order_item], hatch=_hatches[xs_index], alpha=0.30)
 
     axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
     ax1.set_xlim([xmin, xmax])
@@ -149,9 +156,17 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, y
     ordernames = ''
     for item in order_list:
         xs_index += 1
+        yerror = 0*xs_all[xs_index, :]
+        if not nostat:
+            yerror = np.multiply(
+                xs_all[xs_index, :], dxsr_cn[xs_index, :])
+        else:
+            yerror = abs(abs_scale_unc[xs_index])
         ordernames += '_%s' % item
-        ax2.semilogx(x_axis, xs_all[xs_index]/xs_all[0], ls='dashed',
-                     lw=1.0, color=_order_color[item], label=item)
+        ax2.errorbar(x_axis, xs_all[xs_index]/xs_all[0], yerr=yerror/xs_all[0], elinewidth=1, linewidth=0.0,
+                     ms=6, marker=_order_symbol[item], color=_order_color[item], fmt='.', label=item)
+#        ax2.semilogx(x_axis, xs_all[xs_index]/xs_all[0], ls='dashed',
+#                     lw=1.0, color=_order_color[item], label=item)
         ax2.fill_between(x_axis, (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 2, :],
                          (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
@@ -191,6 +206,8 @@ def main():
     # Optional arguments
     parser.add_argument('-a', '--asymmetric', action="store_true",
                         help='If -a is chosen, use asymmetric (6P) scale variations; otherwise use symmetric ones (2P).')
+    parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
+                        help='Comma-separated list of NNLOJET dat files with statistical uncertainties for each order to show. If set to "auto", dat files matching to table name are used. If nothing is chosen, statistical uncertainties are ignored.')
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Output filename (optional).')
     parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
@@ -246,6 +263,23 @@ def main():
         iordmin = min(iorders)
         iordmax = max(iorders)
         print '[fastnnlo_scaleunc]: Evaluate table up to order(s)', args['order']
+
+    # Check existence of NNLOJET dat file for each order if desired
+    datfilenames = []
+    nostat = False
+    if args['datfiles'] is None:
+        nostat = True
+        print '[fastnnlo_pdfunc]: No statistical uncertainties requested.'
+    elif args['datfiles'][0] == 'auto':
+        print '[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.'
+    else:
+        for datfile in args['datfiles']:
+            lstat = os.path.isfile(datfile)
+            if lstat:
+                datfilenames.append(datfile)
+            else:
+                print '[fastnnlo_pdfunc]: Given file ', datfile, 'for statistical uncertainties not found, aborted!'
+                exit(1)
 
     # Type of scale variation (symmetric vs asymmetric)
     if args['asymmetric']:
@@ -378,6 +412,36 @@ def main():
 
         print '[fastnnlo_scaleunc]: List of requested orders:', order_list
 
+        # Read in statistical uncertainty for each order if requested
+        dxsr_cn = []
+        sep = '.'
+        if not nostat:
+            if args['datfiles'][0] == 'auto':
+                for order in order_list:
+                    parts = tablename.split(sep)
+                    parts[1] = order
+                    datfile = sep.join(parts) + '.dat'
+                    datfilenames.append(datfile)
+
+            lstat = (len(datfilenames) > 0)
+            if lstat and len(datfilenames) != len(order_list):
+                print '[fastnnlo_pdfunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!'
+                exit(1)
+
+            dxsr = []
+            for fname in datfilenames:
+                print '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname
+                cols = np.loadtxt(fname, usecols=range(3, 5))
+                xs_dat = np.array(cols[:, 0])
+                dxs_dat = np.array(cols[:, 1])
+                dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
+                    dxs_dat), where=xs_dat != 0)
+                dxsr.append(dxsr_dat)
+            dxsr_cn = abs(np.array(dxsr))
+            # Empty list for use with next table in automatic mode
+            if args['datfiles'][0] == 'auto':
+                datfilenames = []
+
         # For flexible-scale tables set scale to user choice (default is 0)
 
         if lflex:
@@ -473,7 +537,13 @@ def main():
         if nice_ylabel is not None:
             ylabel = nice_ylabel
 
-        plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, xlabel, ylabel, title, tablename,
+        # Without statistical uncertainties create zero array of proper dimensions here
+        if len(dxsr_cn) == 0:
+            dxsr_cn = np.zeros((xs_all.shape[0], xs_all.shape[1]))
+        if _debug:
+            print 'dxsr_cn', dxsr_cn
+
+        plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, nostat, xlabel, ylabel, title, tablename,
                  order_list, given_filename, scale_name, nice_scale_name, pdfset, variation_type, formats)
 
         stop_time = timeit.default_timer()

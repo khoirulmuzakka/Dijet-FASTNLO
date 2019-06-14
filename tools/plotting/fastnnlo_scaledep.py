@@ -14,6 +14,7 @@ import argparse
 import glob
 import os
 import re
+import string
 import sys
 # Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
@@ -253,7 +254,7 @@ def main():
                         choices=range(-5, 6), metavar='[-5,5]',
                         help='Power b for binary log range 2^(-b) to 2^b of mur scale factor.')
     parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
-                        help='Comma-separated list of NNLOJET datfile basenames with statistical uncertainties for each order to show. If nothing is chosen, statistical uncertainties are ignored.')
+                        help='Comma-separated list of NNLOJET dat files with statistical uncertainties for each order to show. If set to "auto", dat files matching to table name are used. If nothing is chosen, statistical uncertainties are ignored.')
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Set desired basename for output filenames instead of tablename.')
     parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
@@ -289,6 +290,8 @@ def main():
     args = vars(parser.parse_args())
 
     # List of table names
+    # (shell expansion provides a blank-separated list for 'files',
+    #  e.g. when using '*' in the table names)
     files = args['table']
     print '\n'
     print '[fastnnlo_scaledep]: Analysing table list: '
@@ -321,14 +324,15 @@ def main():
     datfilenames = []
     if args['datfiles'] is None:
         print '[fastnnlo_scaledep]: No statistical uncertainties requested.'
+    elif args['datfiles'][0] == 'auto':
+        print '[fastnnlo_scaledep]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.'
     else:
-        for dat in args['datfiles']:
-            fname = dat+'.dat'
-            lstat = os.path.isfile(fname)
+        for datfile in args['datfiles']:
+            lstat = os.path.isfile(datfile)
             if lstat:
-                datfilenames.append(fname)
+                datfilenames.append(datfile)
             else:
-                print '[fastnnlo_scaledep]: Given file ', fname, 'for statistical uncertainties not found, aborted!'
+                print '[fastnnlo_scaledep]: Given file ', datfile, 'for statistical uncertainties not found, aborted!'
                 exit(1)
 
     # Scale choice
@@ -377,8 +381,13 @@ def main():
     for table in files:
         print '[fastnnlo_scaledep]: Analysing table: ', table
         # Get rid of extensions (.tab.gz or .tab)
-        tablename = os.path.splitext(os.path.basename(table))[0]
-        tablename = os.path.splitext(tablename)[0]
+        # Replace .tab or .tab.gz with .dat to also load NNLOJET results
+        #tablename = os.path.splitext(os.path.basename(table))[0]
+        #tablename = os.path.splitext(tablename)[0]
+        if table.endswith('.tab.gz'):
+            tablename = string.replace(table, '.tab.gz', '', 1)
+        elif table.endswith('.tab'):
+            tablename = string.replace(table, '.tab', '', 1)
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -517,20 +526,34 @@ def main():
         print '[fastnnlo_scaledep]: List of requested orders:', order_list
 
         # Read in statistical uncertainty for each order if requested
-        dxsr = []
-        lstat = (len(datfilenames) > 0)
-        if lstat and len(datfilenames) != len(order_list):
-            print '[fastnnlo_scaledep]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!'
-            exit(1)
-        for fname in datfilenames:
-            print '[fastnnlo_scaledep]: Taking statistical uncertainties from', fname
-            cols = np.loadtxt(fname, usecols=range(3, 5))
-            xs_dat = np.array(cols[:, 0])
-            dxs_dat = np.array(cols[:, 1])
-            dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
-                dxs_dat), where=xs_dat != 0)
-            dxsr.append(dxsr_dat)
-        dxsr_cn = abs(np.array(dxsr))
+        dxsr_cn = []
+        sep = '.'
+        if args['datfiles'] is not None:
+            if args['datfiles'][0] == 'auto':
+                for order in order_list:
+                    parts = tablename.split(sep)
+                    parts[1] = order
+                    datfile = sep.join(parts) + '.dat'
+                    datfilenames.append(datfile)
+
+            lstat = (len(datfilenames) > 0)
+            if lstat and len(datfilenames) != len(order_list):
+                print '[fastnnlo_scaledep]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!'
+                exit(1)
+
+            dxsr = []
+            for fname in datfilenames:
+                print '[fastnnlo_scaledep]: Taking statistical uncertainties from', fname
+                cols = np.loadtxt(fname, usecols=range(3, 5))
+                xs_dat = np.array(cols[:, 0])
+                dxs_dat = np.array(cols[:, 1])
+                dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
+                    dxs_dat), where=xs_dat != 0)
+                dxsr.append(dxsr_dat)
+            dxsr_cn = abs(np.array(dxsr))
+            # Empty list for use with next table in automatic mode
+            if args['datfiles'][0] == 'auto':
+                datfilenames = []
 
         # For flexible-scale tables set scale to user choice (default is 0)
         if lflex:
