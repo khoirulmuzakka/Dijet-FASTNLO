@@ -179,17 +179,16 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         for pdf_index in range(0, len(pdfsets)):
             # Divide xs for each PDF by first given PDF (xs)
             yerror = 0*xs_all[pdf_index, ord_index, :]
-            if pdf_index == 0 and not nostat:
+            if not nostat:
                 yerror = np.multiply(
                     xs_all[pdf_index, ord_index, :], dxsr_cn[ord_index, :])
+            else:
+                yerror = abs(abs_pdf_unc[pdf_index, ord_index, :, :])
             ax2.errorbar(x_axis, xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :], yerr=yerror/xs_all[0, ord_index, :],
                          elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
-#            else:
-#                ax2.semilogx(x_axis, xs_all[p, ord_index, :]/xs_all[0, ord_index, :], '.',
-#                             ms=6, marker=_symbols[p], ls='dashed', lw=1.0, color=_colors[p], label=pdfnicenames[p])
-            ax2.fill_between(x_axis, (xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :])+rel_pdf_unc[pdf_index, ord_index, 2, :],
-                             (xs_all[pdf_index, ord_index, :]/xs_all[0,
-                                                                     ord_index, :])+rel_pdf_unc[pdf_index, ord_index, 1, :],
+            ax2.fill_between(x_axis, (xs_all[pdf_index, ord_index, :]*(1+rel_pdf_unc[pdf_index, ord_index, 2, :])/xs_all[0, ord_index, :]),
+                             (xs_all[pdf_index, ord_index, :]*(1+rel_pdf_unc[pdf_index,
+                                                                             ord_index, 1, :])/xs_all[0, ord_index, :]),
                              color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
             patches.append(mpl.patches.Rectangle(
                 (0, 0), 0, 0, color=_colors[pdf_index], label=pdfnicenames[pdf_index], alpha=0.4))

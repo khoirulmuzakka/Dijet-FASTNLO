@@ -165,10 +165,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         ordernames += '_%s' % item
         ax2.errorbar(x_axis, xs_all[xs_index]/xs_all[0], yerr=yerror/xs_all[0], elinewidth=1, linewidth=0.0,
                      ms=6, marker=_order_symbol[item], color=_order_color[item], fmt='.', label=item)
-#        ax2.semilogx(x_axis, xs_all[xs_index]/xs_all[0], ls='dashed',
-#                     lw=1.0, color=_order_color[item], label=item)
-        ax2.fill_between(x_axis, (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 2, :],
-                         (xs_all[xs_index]/xs_all[0])+rel_scale_unc[xs_index, 1, :], color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
+        ax2.fill_between(x_axis, (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 2, :])/xs_all[0]),
+                         (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 1, :])/xs_all[0]), color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
     ax2.set_ylabel(r'Ratio to %s' %
                    order_list[0], horizontalalignment='center', x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
