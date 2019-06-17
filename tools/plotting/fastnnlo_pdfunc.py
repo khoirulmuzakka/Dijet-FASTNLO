@@ -178,14 +178,25 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         patches = []  # Later needed for legend
         for pdf_index in range(0, len(pdfsets)):
             # Divide xs for each PDF by first given PDF (xs)
+            # Do not show error bars
             yerror = 0*xs_all[pdf_index, ord_index, :]
-            if not nostat:
-                yerror = np.multiply(
-                    xs_all[pdf_index, ord_index, :], dxsr_cn[ord_index, :])
+            mymarker = _symbols[pdf_index]
+            mymksize = 4
+            if nostat:
+                # Error bars = PDF uncertainty
+                #            yerror = abs(abs_pdf_unc[pdf_index, ord_index, :, :])
+                #            mymksize = 4
+                # No error bars, only small symbols
+                yerror = 1*yerror
+                #                mymarker = '.'
             else:
-                yerror = abs(abs_pdf_unc[pdf_index, ord_index, :, :])
-            ax2.errorbar(x_axis, xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :], yerr=yerror/xs_all[0, ord_index, :],
-                         elinewidth=1, linewidth=1.0, ms=6, marker=_symbols[pdf_index], color=_colors[pdf_index], fmt='.', label=pdf)
+                # Error bars = statistical uncertainty if known
+                # Only show for first PDF
+                if pdf_index == 0:
+                    yerror = np.multiply(
+                        xs_all[pdf_index, ord_index, :], dxsr_cn[ord_index, :])
+            ax2.errorbar(x_axis, xs_all[pdf_index, ord_index, :]/xs_all[0, ord_index, :], yerr=yerror/xs_all[0, ord_index, :], barsabove=True,
+                         elinewidth=1, linewidth=1.0, ms=mymksize, marker=mymarker, color=_colors[pdf_index], fmt='.', label=pdf)
             ax2.fill_between(x_axis, (xs_all[pdf_index, ord_index, :]*(1+rel_pdf_unc[pdf_index, ord_index, 2, :])/xs_all[0, ord_index, :]),
                              (xs_all[pdf_index, ord_index, :]*(1+rel_pdf_unc[pdf_index,
                                                                              ord_index, 1, :])/xs_all[0, ord_index, :]),
@@ -208,7 +219,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         else:
             filename = '%s.pdfunc-%s.%s.%s' % (tablename,
                                                order_item, pdffilenames[1:], scale_name)
-
+            if not nostat:
+                filename = filename+'.stat'
         for fmt in formats:
             figname = '%s.%s' % (filename, fmt)
             fig.savefig(figname)
@@ -495,7 +507,6 @@ def main():
 
         # Outermost loop: go through all the given pdf sets
         # Evaluate fastNLO table focusing on PDF uncertainties
-        fnlo = fastnlo.fastNLOLHAPDF(table)
         for pdf in pdfsets:
             xs_list_tmp = []  # will contain total cross section for selected orders out of LO, NLO, NNLO for single pdf
             # list for relative PDF uncertainties (low, high) for selected orders

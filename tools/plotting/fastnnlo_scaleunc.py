@@ -156,15 +156,24 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
     ordernames = ''
     for item in order_list:
         xs_index += 1
+        # Do not show error bars
         yerror = 0*xs_all[xs_index, :]
-        if not nostat:
+        mymarker = _order_symbol[item]
+        mymksize = 4
+        if nostat:
+            # Error bars = scale uncertainty
+            #            yerror = abs(abs_scale_unc[xs_index])
+            #            mymksize = 4
+            # No error bars, only small symbols
+            yerror = 1*yerror
+            #            mymarker = '.'
+        else:
+            # Error bars = statistical uncertainty if known
             yerror = np.multiply(
                 xs_all[xs_index, :], dxsr_cn[xs_index, :])
-        else:
-            yerror = abs(abs_scale_unc[xs_index])
         ordernames += '_%s' % item
-        ax2.errorbar(x_axis, xs_all[xs_index]/xs_all[0], yerr=yerror/xs_all[0], elinewidth=1, linewidth=0.0,
-                     ms=6, marker=_order_symbol[item], color=_order_color[item], fmt='.', label=item)
+        ax2.errorbar(x_axis, xs_all[xs_index]/xs_all[0], yerr=yerror/xs_all[0], barsabove=True, elinewidth=1, linewidth=0.0,
+                     ms=mymksize, marker=mymarker, color=_order_color[item], fmt='.', label=item)
         ax2.fill_between(x_axis, (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 2, :])/xs_all[0]),
                          (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 1, :])/xs_all[0]), color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
@@ -180,6 +189,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
     else:
         filename = '%s.scaleunc-%s.%s.%s.%s' % (
             tablename, vartype, ordernames[1:], pdfset, scale_name)
+        if not nostat:
+            filename = filename+'.stat'
 
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)
