@@ -153,12 +153,10 @@ for file in [logfile]:
     print 'Reading from fastNLO log file ', file
     # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
     with open(file, 'r') as f:
-        data = re.sub(r'\s*[#CL].*', '', f.read())
+        # C for CT, L for LHAPDF, N for NNPDF
+        # TODO: Find a better solution!
+        data = re.sub(r'\s*[#CLN].*', '', f.read())
         all_contrib = np.genfromtxt(StringIO(data), usecols=(ordcol,))
-        ##print "type of 'all_contrib'", type(all_contrib)
-        ##print "size of 'all_contrib'", np.shape(all_contrib)
-        ##print "length of all_contrib", len(all_contrib)
-        ##print "all_contrib: \n", all_contrib
         # Calculate number of scale variations (default nscl=1, see above)
         nscl = len(all_contrib)/nobs
         print "nscl", nscl
@@ -175,7 +173,6 @@ for i in range(nscl):
     dxs_nnlo.append(xs_all[:,2*i+4]/1000)
 
 xs_fnll = np.array(xs_fnll)
-##print "xs_fnll", xs_fnll
 
 r_fl2nn  = np.divide(xs_fnll, xs_nnlo, out=np.ones_like(xs_fnll), where=xs_nnlo!=0)
 a_fl2nn  = np.divide(xs_fnll-xs_nnlo, xs_fnll+xs_nnlo, out=np.zeros_like(xs_fnll), where=xs_nnlo!=0) + 1.
