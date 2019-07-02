@@ -410,7 +410,7 @@ def Read_logfile(fnlologs, fscl, seeds, nobs): #takes list of logfiles and fscl,
         else:
             print 'NNLOJET and fastNLO result correctly matched. seed is ', seeds[nlog]
 
-        xs_tmp = np.loadtxt(fnlolog,usecols=(6,),comments=['#',' #','C','L'])
+        xs_tmp = np.loadtxt(fnlolog,usecols=(6,),comments=['#',' #','C','L','N'])
         #print "xs_tmp \n", xs_tmp
 
         indi = (fscl-1)*nobs #skip lines of lower fscl
