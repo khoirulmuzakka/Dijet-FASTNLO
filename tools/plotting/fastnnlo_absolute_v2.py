@@ -153,7 +153,7 @@ for file in [logfile]:
     print 'Reading from fastNLO log file ', file
     # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
     with open(file, 'r') as f:
-        data = re.sub(r'\s*[#CL].*', '', f.read())
+        data = re.sub(r'\s*[#CLN].*', '', f.read())
         all_contrib = np.genfromtxt(StringIO(data),usecols=(ordcol,))
         # Calculate number of scale variations (default nscl=1, see above)
         nscl = len(all_contrib)/nobs

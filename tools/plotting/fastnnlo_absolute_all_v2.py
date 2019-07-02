@@ -172,9 +172,9 @@ ordcol = { 'LO': 6, 'NLO': 7, 'NNLO': 8 }
 # Skip all lines starting with "#", "C", or "L" as first non-whitespace character
 ### why don't we start these lines (C, L...) also with a "#" ???
 # Read first nobs values for central scale result
-'''
+
 with open(log0file, 'r') as f:
-    data = re.sub(r'\s*[#CL].*', '', f.read())
+    data = re.sub(r'\s*[#CLN].*', '', f.read())
     lo   = np.genfromtxt(StringIO(data),usecols=ordcol['LO'],)
     nlo  = np.genfromtxt(StringIO(data),usecols=ordcol['NLO'],)
     nnlo = np.genfromtxt(StringIO(data),usecols=ordcol['NNLO'],)
@@ -193,7 +193,7 @@ xs_fnnlo  = np.array(xs_fnnlo)
 print "xs_flo: \n", xs_flo
 print "xs_fnlo: \n", xs_fnlo
 print "xs_fnnlo: \n", xs_fnnlo
-'''
+
 
 # K factors
 kn_nlo  = np.divide(xs_nlo, xs_lo, out=np.ones_like(xs_nlo), where=xs_lo!=0)
