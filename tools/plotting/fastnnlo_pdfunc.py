@@ -101,8 +101,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
     elif len(pdfsets) == 5:
         shift_list = [0.94, 0.97, 1.00, 1.03, 1.06]
     else:
-        print '[fastnnlo_pdfunc]: Too many PDFs to plot simultaneously. Aborted!'
-        print '[fastnnlo_pdfunc]: Current maximum is 5. The PDF list is', pdfsets
+        print('[fastnnlo_pdfunc]: Too many PDFs to plot simultaneously. Aborted!')
+        print('[fastnnlo_pdfunc]: Current maximum is 5. The PDF list is', pdfsets)
         sys.exit()
 
     # Plot all x section results in order_list
@@ -119,7 +119,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         fig = plt.figure(figsize=(7, 7))
         ax1 = plt.subplot(gs[:-1, :])
 
-        print '[fastnnlo_pdfunc]: Producing %s plot.' % order_item
+        print('[fastnnlo_pdfunc]: Producing %s plot.' % order_item)
 
         # Loop over PDF sets
         pdf_index = -1
@@ -138,14 +138,15 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
                                                                       ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 1, :],
                              color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
 
-        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
+        # 'minor_thresholds' needs matplotlib > 1.5.0
+        #        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
         ax1.set_xlim([xmin, xmax])
 #                        if logx: ax1.set_xscale('log', nonposx='clip')
 #                        else: ax1.set_xscale('linear')
 #                        if logy: ax1.set_yscale('log', nonposy='clip')
 #                        else: ax1.set_yscale('linear')
         ax1.set_xscale('log', nonposx='clip')
-        ax1.get_xaxis().set_minor_formatter(axfmt)
+        #        ax1.get_xaxis().set_minor_formatter(axfmt)
 #                        ax1.get_xaxis().set_minor_formatter(NullFormatter())
         ax1.set_yscale('log', nonposy='clip')
 #                        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
@@ -224,7 +225,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         for fmt in formats:
             figname = '%s.%s' % (filename, fmt)
             fig.savefig(figname)
-            print '[fastnnlo_pdfunc]: Plot saved as:', figname
+            print('[fastnnlo_pdfunc]: Plot saved as:', figname)
         plt.close(fig)
 
 
@@ -277,54 +278,54 @@ def main():
 
     # List of table names
     files = args['table']
-    print '\n'
-    print '[fastnnlo_pdfunc]: Analysing table list: '
+    print('\n')
+    print('[fastnnlo_pdfunc]: Analysing table list: ')
     for file in files:
-        print '[fastnnlo_pdfunc]:   ', file
+        print('[fastnnlo_pdfunc]:   ', file)
 
     # PDF set name
     pdfsets = []
     if args['pdfset'] is None:
         pdfsets = ['CT14nnlo']
-        print '[fastnnlo_pdfunc]: Using default PDF set: ', pdfsets[0]
+        print('[fastnnlo_pdfunc]: Using default PDF set: ', pdfsets[0])
     else:
         for pdf in args['pdfset']:
             pdfsets.append(pdf)
-        print '[fastnnlo_pdfunc]: Using PDF set(s): ', pdfsets
+        print('[fastnnlo_pdfunc]: Using PDF set(s): ', pdfsets)
 
     # Orders to be shown
     iorders = []
     iordmin = _text_to_order['LO']
     iordmax = _text_to_order['NNLO']
     if args['order'] is None:
-        print '[fastnnlo_pdfunc]: Evaluate table up to highest available order.'
+        print('[fastnnlo_pdfunc]: Evaluate table up to highest available order.')
     else:
         for ord in args['order']:
             if _text_to_order.has_key(ord):
                 iorders.append(_text_to_order[ord])
             else:
-                print '[fastnnlo_pdfunc]: Illegal order specified, aborted!'
-                print '[fastnnlo_pdfunc]: Order list:', args['order']
+                print('[fastnnlo_pdfunc]: Illegal order specified, aborted!')
+                print('[fastnnlo_pdfunc]: Order list:', args['order'])
                 exit(1)
         iordmin = min(iorders)
         iordmax = max(iorders)
-        print '[fastnnlo_pdfunc]: Evaluate table up to order(s)', args['order']
+        print('[fastnnlo_pdfunc]: Evaluate table up to order(s)', args['order'])
 
     # Check existence of NNLOJET dat file for each order if desired
     datfilenames = []
     nostat = False
     if args['datfiles'] is None:
         nostat = True
-        print '[fastnnlo_pdfunc]: No statistical uncertainties requested.'
+        print('[fastnnlo_pdfunc]: No statistical uncertainties requested.')
     elif args['datfiles'][0] == 'auto':
-        print '[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.'
+        print('[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.')
     else:
         for datfile in args['datfiles']:
             lstat = os.path.isfile(datfile)
             if lstat:
                 datfilenames.append(datfile)
             else:
-                print '[fastnnlo_pdfunc]: Given file ', datfile, 'for statistical uncertainties not found, aborted!'
+                print('[fastnnlo_pdfunc]: Given file ', datfile, 'for statistical uncertainties not found, aborted!')
                 exit(1)
 
     # Given filename
@@ -336,8 +337,8 @@ def main():
         formats = ['png']
     for fmt in formats:
         if not _formats.has_key(fmt):
-            print '[fastnnlo_pdfunc]: Illegal format specified, aborted!'
-            print '[fastnnlo_pdfunc]: Format list:', args['format']
+            print('[fastnnlo_pdfunc]: Illegal format specified, aborted!')
+            print('[fastnnlo_pdfunc]: Format list:', args['format'])
             exit(1)
 
     # Logarithmic or linear x axis
@@ -362,7 +363,7 @@ def main():
 
     # Loop over table list
     for table in files:
-        print '[fastnnlo_pdfunc]: Analysing table: ', table
+        print('[fastnnlo_pdfunc]: Analysing table: ', table)
         # Get rid of extensions (.tab.gz or .tab)
         tablename = os.path.splitext(os.path.basename(table))[0]
         tablename = os.path.splitext(tablename)[0]
@@ -376,18 +377,18 @@ def main():
         # Dimensionality of the table:
         ndim = fnlo.GetNumDiffBin()
         if verb:
-            print '\n'
-            print '[fastnnlo_pdfunc]: Table Dimensions: ', ndim
+            print('\n')
+            print('[fastnnlo_pdfunc]: Table Dimensions: ', ndim)
 
         # Labels of all the dimensions:
         dimlabels = fnlo.GetDimLabels()
         if verb:
-            print '[fastnnlo_pdfunc]: Dimension Labels: ', dimlabels
+            print('[fastnnlo_pdfunc]: Dimension Labels: ', dimlabels)
 
         # x label of first dimension from table:
         xlabel = fnlo.GetDimLabel(0)
         if verb:
-            print '[fastnnlo_pdfunc]: x-label: ', xlabel
+            print('[fastnnlo_pdfunc]: x-label: ', xlabel)
 
         # Generic y label
         ylabel = '$\sigma \pm \Delta\sigma(\mathrm{PDF})$'
@@ -395,21 +396,21 @@ def main():
         # Creating x-axis
         bin_bounds = np.array(fnlo.GetObsBinsBounds(0))
         if verb:
-            print '[fastnnlo_pdfunc]: bin_bounds.T: \n', bin_bounds.T, '\n'
-            print '[fastnnlo_pdfunc]: bin_bounds.flatten(): \n', bin_bounds.flatten(), '\n'
+            print('[fastnnlo_pdfunc]: bin_bounds.T: \n', bin_bounds.T, '\n')
+            print('[fastnnlo_pdfunc]: bin_bounds.flatten(): \n', bin_bounds.flatten(), '\n')
 
         x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / \
             2.  # this is a list of bin centers
         xmin = 0.95*min(bin_bounds.ravel())
         xmax = 1.05*max(bin_bounds.ravel())
         if verb:
-            print '[fastnnlo_pdfunc]: xmin=%s, xmax=%s. \n' % (xmin, xmax)
+            print('[fastnnlo_pdfunc]: xmin=%s, xmax=%s. \n' % (xmin, xmax))
 
         # Preparing x-errors (via bin_bounds) --> x_errors[0, :] are initially negative (positive via -1*), x_errors[1, :] positive
         x_errors = np.array(
             [-1*(bin_bounds.T[0]-x_axis), bin_bounds.T[1]-x_axis])
         if verb:
-            print '[fastnnlo_pdfunc]: x_errors: \n', x_errors, '\n'
+            print('[fastnnlo_pdfunc]: x_errors: \n', x_errors, '\n')
 
         # Check existence of orders in table
         lflex = fnlo.GetIsFlexibleScaleTable()
@@ -424,8 +425,8 @@ def main():
                 max_order = i
                 if not lflex:
                     if scale_choice != 0:
-                        print '[fastnnlo_pdfunc]: Invalid choice of scale = ', scale_choice, ' Aborted!'
-                        print '[fastnnlo_pdfunc]: For fixed-scale tables only the default=0 is allowed.'
+                        print('[fastnnlo_pdfunc]: Invalid choice of scale = ', scale_choice, ' Aborted!')
+                        print('[fastnnlo_pdfunc]: For fixed-scale tables only the default=0 is allowed.')
                         exit(1)
                     else:
                         scale_name = fnlo.GetScaleDescription(i, 0)
@@ -440,11 +441,11 @@ def main():
                 if cnt_order == i-1:
                     cnt_order += 1
         if verb:
-            print '[fastnnlo_pdfunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order
+            print('[fastnnlo_pdfunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order)
 
         if iordmax > cnt_order:
-            print '[fastnnlo_pdfunc]: Invalid choice of orders. Aborted!'
-            print '[fastnnlo_pdfunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order
+            print('[fastnnlo_pdfunc]: Invalid choice of orders. Aborted!')
+            print('[fastnnlo_pdfunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order)
             exit(1)
 
         order_list = []
@@ -454,7 +455,7 @@ def main():
         else:
             order_list = args['order']
 
-        print '[fastnnlo_pdfunc]: List of requested orders:', order_list
+        print('[fastnnlo_pdfunc]: List of requested orders:', order_list)
 
         # Read in statistical uncertainty for each order if requested
         dxsr_cn = []
@@ -469,12 +470,12 @@ def main():
 
             lstat = (len(datfilenames) > 0)
             if lstat and len(datfilenames) != len(order_list):
-                print '[fastnnlo_pdfunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!'
+                print('[fastnnlo_pdfunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!')
                 exit(1)
 
             dxsr = []
             for fname in datfilenames:
-                print '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname
+                print('[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
                 cols = np.loadtxt(fname, usecols=range(3, 5))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
@@ -488,15 +489,15 @@ def main():
 
         # For flexible-scale tables set scale to user choice (default is 0)
         if lflex:
-            print '[fastnnlo_pdfunc]: Setting requested scale choice for flexible-scale table:', scale_choice
+            print('[fastnnlo_pdfunc]: Setting requested scale choice for flexible-scale table:', scale_choice)
             fnlo.SetMuRFunctionalForm(scale_choice)
             fnlo.SetMuFFunctionalForm(scale_choice)
         else:
             if scale_choice == 0:
-                print '[fastnnlo_pdfunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice
+                print('[fastnnlo_pdfunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice)
             else:
-                print '[fastnnlo_pdfunc]: No scale choice possible for fixed-scale table. Aborted!'
-                print '[fastnnlo_pdfunc]: scale_choice = ', scale_choice
+                print('[fastnnlo_pdfunc]: No scale choice possible for fixed-scale table. Aborted!')
+                print('[fastnnlo_pdfunc]: scale_choice = ', scale_choice)
                 exit(1)
 
         # Now evaluate fastNLO table for each of the given PDF sets
@@ -511,10 +512,10 @@ def main():
             xs_list_tmp = []  # will contain total cross section for selected orders out of LO, NLO, NNLO for single pdf
             # list for relative PDF uncertainties (low, high) for selected orders
             rel_unc_list_tmp = []
-            print '-----------------------------------------------------------------------------------------------'
-            print '#############################  %s  ########################################' % pdf
-            print '-----------------------------------------------------------------------------------------------'
-            print '[fastnnlo_pdfunc]: Calculate XS and uncertainty for %s \n' % pdf
+            print('-----------------------------------------------------------------------------------------------')
+            print('#############################  %s  ########################################' % pdf)
+            print('-----------------------------------------------------------------------------------------------')
+            print('[fastnnlo_pdfunc]: Calculate XS and uncertainty for %s \n' % pdf)
             fnlo.SetLHAPDFFilename(pdf)
             fnlo.SetLHAPDFMember(0)
 
@@ -525,8 +526,8 @@ def main():
                     else:
                         fnlo.SetContributionON(fastnlo.kFixedOrder, j, False)
                 if verb:
-                    print '[fastnnlo_pdfunc]: Calculate XS for order: %s' % n
-                    print '[fastnnlo_pdfunc]: ---- ---- ---- ---- ---- ---- ---- \n'
+                    print('[fastnnlo_pdfunc]: Calculate XS for order: %s' % n)
+                    print('[fastnnlo_pdfunc]: ---- ---- ---- ---- ---- ---- ---- \n')
 
                 fnlo.CalcCrossSection()
                 xs_list_tmp.append(fnlo.GetCrossSection())
@@ -536,12 +537,12 @@ def main():
                     fastnlo.kLHAPDF6))  # Now calculated for order n
                 rel_unc_list_tmp.append(rel_pdf_unc_item)
                 if verb:
-                    print '[fastnnlo_pdfunc]: \n'
-                    print '[fastnnlo_pdfunc]: Relative PDF uncertainty in %s: \n' % n
+                    print('[fastnnlo_pdfunc]: \n')
+                    print('[fastnnlo_pdfunc]: Relative PDF uncertainty in %s: \n' % n)
                     # has 3 entries: central value (xs), unc_high, unc_low
-                    print rel_pdf_unc_item, '\n'
-                    print '-----------------------------------------------------------------------------------------------'
-                    print '-----------------------------------------------------------------------------------------------'
+                    print(rel_pdf_unc_item, '\n')
+                    print('-----------------------------------------------------------------------------------------------')
+                    print('-----------------------------------------------------------------------------------------------')
             xs_list.append(xs_list_tmp)
             rel_unc_list.append(rel_unc_list_tmp)
         xs_all = np.array(xs_list)
@@ -557,12 +558,11 @@ def main():
         ########                                                                                                #########
 
         if verb:
-            print '[fastnnlo_pdfunc]: Cross section summary. '
-            print '[fastnnlo_pdfunc]: For each pdf %s xs_all contains XS corresponding to %s.' % (
-                pdfsets, order_list)
-            print xs_all, '\n \n'
-            print 'Size xs_all: ', np.shape(xs_all)  # test
-            print 'Size rel_pdf_unc: ', np.shape(rel_pdf_unc)  # test
+            print('[fastnnlo_pdfunc]: Cross section summary. ')
+            print('[fastnnlo_pdfunc]: For each pdf %s xs_all contains XS corresponding to %s.' % (pdfsets, order_list))
+            print(xs_all, '\n \n')
+            print('Size xs_all: ', np.shape(xs_all))  # test
+            print('Size rel_pdf_unc: ', np.shape(rel_pdf_unc))  # test
 
         # ABSOLUTE pdf uncertainty
         # length of axis 0 in xs_all equals number of (investigated) pdfsets
@@ -580,9 +580,8 @@ def main():
                                                       k, 1, :]*xs_all[p, k, :]
 
         if verb:
-            print '[fastnnlo_pdfunc]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n' % (
-                pdfsets, order_list)
-            print abs_pdf_unc, '\n'
+            print('[fastnnlo_pdfunc]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n' % (pdfsets, order_list))
+            print(abs_pdf_unc, '\n')
 
         ############################## Do the plotting ####################################################
 
@@ -601,15 +600,14 @@ def main():
         if len(dxsr_cn) == 0:
             dxsr_cn = np.zeros((xs_all.shape[0], xs_all.shape[2]))
         if _debug:
-            print 'dxsr_cn', dxsr_cn
+            print('dxsr_cn', dxsr_cn)
 
         plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nostat, xlabel, ylabel, title, tablename,
                  order_list, given_filename, scale_name, nice_scale_name, pdfsets, formats, logx, logy)
 
     stop_time = timeit.default_timer()
     timediff = stop_time-start_time
-    print 'fastnnlo_pdfunc: Elapsed time: %s sec = %s min' % (
-        timediff, round(timediff/60., 2))
+    print('fastnnlo_pdfunc: Elapsed time: %s sec = %s min' % (timediff, round(timediff/60., 2)))
 
 
 if __name__ == '__main__':
