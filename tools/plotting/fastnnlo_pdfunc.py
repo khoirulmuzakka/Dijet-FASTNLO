@@ -56,10 +56,11 @@ _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
 _order_color = {'LO': 'g', 'NLO': 'b', 'NNLO': 'r'}
-_colors = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
+#_colors = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
 #_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
-#_colors         = ['orange', 'green', 'purple', 'blue', 'brown']
-_symbols = ['s', 'X', 'o', '^', 'v']
+_colors         = ['orange', 'green', 'purple', 'blue', 'brown']
+#_symbols = ['s', 'X', 'o', '^', 'v']
+_symbols = ['s', 'x', 'o', '^', 'v']
 _hatches = ['-', '//', '\\', '|', '.']
 _scale_to_text = {0: 'kScale1', 1: 'kScale2', 2: 'kQuadraticSum', 3: 'kQuadraticMean', 4: 'kQuadraticSumOver4',
                   5: 'kLinearMean', 6: 'kLinearSum', 7: 'kScaleMax', 8: 'kScaleMin', 9: 'kProd',
@@ -171,7 +172,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
 
         # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
-        ax2.get_xaxis().set_minor_formatter(axfmt)
+#        ax2.get_xaxis().set_minor_formatter(axfmt)
         ax2.set_yscale('linear', nonposy='clip')
         ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
                        x=1.0, verticalalignment='top', y=1.0)
