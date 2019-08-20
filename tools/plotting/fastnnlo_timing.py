@@ -2,7 +2,9 @@
 #-*- coding:utf-8 -*-
 import datetime
 from datetime import timedelta
-import glob, os, pylab, sys
+import glob
+import os
+import sys
 import numpy as np
 import re
 from StringIO import StringIO
@@ -10,9 +12,11 @@ from StringIO import StringIO
 ################################################################################
 # Define method for histogram statistics
 ################################################################################
+
+
 def hist_stats(x, weights, axis=None):
 
-# Fill proper np.array in case only the number 1. is given as weight
+    # Fill proper np.array in case only the number 1. is given as weight
     try:
         iter(weights)
     except TypeError:
@@ -27,9 +31,9 @@ def hist_stats(x, weights, axis=None):
     _std = np.sqrt(_var)
 
 # Useful sums for weighted quantities
-    sumw   = np.sum(weights, axis=axis)
-    sumw2  = np.sum(weights * weights, axis=axis)
-    sumwx  = np.sum(weights * x, axis=axis)
+    sumw = np.sum(weights, axis=axis)
+    sumw2 = np.sum(weights * weights, axis=axis)
+    sumwx = np.sum(weights * x, axis=axis)
     sumwx2 = np.sum(weights * x * x, axis=axis)
 
 # Weighted mean and reliability weighted sample variance
@@ -49,13 +53,15 @@ def hist_stats(x, weights, axis=None):
             if sumw[i] == 0:
                 _wvar.append(np.nan)
             else:
-                _wvar.append((sumwx2[i] - sumwx[i]*sumwx[i]/sumw[i]) / (sumw[i] - sumw2[i]/sumw[i]))
+                _wvar.append(
+                    (sumwx2[i] - sumwx[i]*sumwx[i]/sumw[i]) / (sumw[i] - sumw2[i]/sumw[i]))
 
     _wstd = np.sqrt(_wvar)
 
 # Median and half interquartile distance
     _med = np.median(x, axis=axis)
-    _med_err = np.subtract(*np.percentile(x, [75, 25], axis=axis, interpolation='linear'))/2.
+    _med_err = np.subtract(
+        *np.percentile(x, [75, 25], axis=axis, interpolation='linear'))/2.
 
 # Minimum & maximum
     _min = np.min(x, axis=axis)
@@ -74,12 +80,15 @@ def hist_stats(x, weights, axis=None):
 ################################################################################
 # Define method to chop off microseconds from time differences
 ################################################################################
+
+
 def chop_msec(delta):
     return delta - datetime.timedelta(microseconds=delta.microseconds)
 ################################################################################
 
+
 # Default arguments
-njobs = 100 # No. of jobs to evaluate
+njobs = 100  # No. of jobs to evaluate
 
 # Get from cmdline argument
 print 'Number of arguments:', len(sys.argv), 'arguments.'
@@ -92,12 +101,13 @@ mykeys = []
 myvals = []
 
 # Evaluate job info and vars files
-ikeys = [ 'EVENTS', 'TIME', 'TIMESTAMP_EXECUTION_START', 'TIMESTAMP_EXECUTION_DONE', 'OUTPUT_FILE_0_SIZE' ]
-okeys = [ 'Subprocess_', '# jobs_', '# events_[Mev.]', 'Tot. time_[h]', 'Tot. output_[GB]',
-          'Ev./job_', 'Ev./hour_', '_min',
-          '_-stddev', '<time/job>_hh:mm:ss', '_+stddev',
-          '_-iqd/2', '{time/job}_hh:mm:ss', '_+iqd/2',
-          '_max', 'Output/job_[MB]', 'Memory/job_[GB]' ]
+ikeys = ['EVENTS', 'TIME', 'TIMESTAMP_EXECUTION_START',
+         'TIMESTAMP_EXECUTION_DONE', 'OUTPUT_FILE_0_SIZE']
+okeys = ['Subprocess_', '# jobs_', '# events_[Mev.]', 'Tot. time_[h]', 'Tot. output_[GB]',
+         'Ev./job_', 'Ev./hour_', '_min',
+         '_-stddev', '<time/job>_hh:mm:ss', '_+stddev',
+         '_-iqd/2', '{time/job}_hh:mm:ss', '_+iqd/2',
+         '_max', 'Output/job_[MB]', 'Memory/job_[GB]']
 jobdirs = glob.glob('output/job_*')
 njob = 0
 for jobdir in jobdirs:
@@ -105,7 +115,7 @@ for jobdir in jobdirs:
     jobnr = jobdir.split('_')[1]
     jobinfo = jobdir+'/'+'job.info'
     jobvars = jobdir+'/'+'job_'+jobnr+'.var'
-    if njob<11:
+    if njob < 11:
         print 'Examining job info file ', jobinfo, ' and job var file ', jobvars
     else:
         print '.',
@@ -123,9 +133,11 @@ for jobdir in jobdirs:
             myline = line.split(' ')[1]
             name, var = myline.partition("=")[::2]
             myvars[name.strip()] = var.strip()
-        
-    mykey = [ myinfo["JOBID"], myvars["CHN"].strip('"'), myvars["REG"].strip('"'), myvars["L"] ]
-    myval = [ int(myvars[ikeys[0]].strip('"')), int(myinfo[ikeys[1]]), int(myinfo[ikeys[2]]), int(myinfo[ikeys[3]]), int(myinfo[ikeys[4]]) ]
+
+    mykey = [myinfo["JOBID"], myvars["CHN"].strip(
+        '"'), myvars["REG"].strip('"'), myvars["L"]]
+    myval = [int(myvars[ikeys[0]].strip('"')), int(myinfo[ikeys[1]]), int(
+        myinfo[ikeys[2]]), int(myinfo[ikeys[3]]), int(myinfo[ikeys[4]])]
     mykeys.append(mykey)
     myvals.append(myval)
 
@@ -135,8 +147,8 @@ for jobdir in jobdirs:
 mykeys = np.array(mykeys)
 myvals = np.array(myvals)
 
-mysps = np.array([  "LO",   "R",   "V", "RR", "RR",  "RV", "VV" ])
-myrgs = np.array([ "all", "all", "all",  "a",  "b", "all", "all" ])
+mysps = np.array(["LO",   "R",   "V", "RR", "RR",  "RV", "VV"])
+myrgs = np.array(["all", "all", "all",  "a",  "b", "all", "all"])
 myones = np.ones_like(myvals)
 okeysa = [i.split('_')[0] for i in okeys]
 okeysb = [i.split('_')[1] for i in okeys]
@@ -150,7 +162,7 @@ print head1
 print head2
 print '#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
 for i in range(mysps.size):
-    spbl = (mykeys[:,1]==mysps[i]) * (mykeys[:,2]==myrgs[i])
+    spbl = (mykeys[:, 1] == mysps[i]) * (mykeys[:, 2] == myrgs[i])
     mysum = myvals[spbl].sum(axis=0)
     mycnt = myones[spbl].sum(axis=0)
 
@@ -169,14 +181,22 @@ for i in range(mysps.size):
 # Timing statistics
         col = myvals[:, [1]][spbl]
         _timing_stats = hist_stats(col, weights=1., axis=0)
-        stats[okeys[7]]  = chop_msec(timedelta(seconds=_timing_stats['mini'][0]))
-        stats[okeys[8]]  = chop_msec(timedelta(seconds=(_timing_stats['mean'][0] - _timing_stats['stddev'][0])))
-        stats[okeys[9]]  = chop_msec(timedelta(seconds=_timing_stats['mean'][0]))
-        stats[okeys[10]] = chop_msec(timedelta(seconds=(_timing_stats['mean'][0] + _timing_stats['stddev'][0])))
-        stats[okeys[11]] = chop_msec(timedelta(seconds=(_timing_stats['median'][0] - _timing_stats['iqd2'][0])))
-        stats[okeys[12]] = chop_msec(timedelta(seconds=_timing_stats['median'][0]))
-        stats[okeys[13]] = chop_msec(timedelta(seconds=(_timing_stats['median'][0] + _timing_stats['iqd2'][0])))
-        stats[okeys[14]] = chop_msec(timedelta(seconds=_timing_stats['maxi'][0]))
+        stats[okeys[7]] = chop_msec(
+            timedelta(seconds=_timing_stats['mini'][0]))
+        stats[okeys[8]] = chop_msec(
+            timedelta(seconds=(_timing_stats['mean'][0] - _timing_stats['stddev'][0])))
+        stats[okeys[9]] = chop_msec(
+            timedelta(seconds=_timing_stats['mean'][0]))
+        stats[okeys[10]] = chop_msec(
+            timedelta(seconds=(_timing_stats['mean'][0] + _timing_stats['stddev'][0])))
+        stats[okeys[11]] = chop_msec(
+            timedelta(seconds=(_timing_stats['median'][0] - _timing_stats['iqd2'][0])))
+        stats[okeys[12]] = chop_msec(
+            timedelta(seconds=_timing_stats['median'][0]))
+        stats[okeys[13]] = chop_msec(
+            timedelta(seconds=(_timing_stats['median'][0] + _timing_stats['iqd2'][0])))
+        stats[okeys[14]] = chop_msec(
+            timedelta(seconds=_timing_stats['maxi'][0]))
         stats[okeys[15]] = mysum[4]/mycnt[0]/1024**2
         stats[okeys[16]] = 'not av.:-('
 
@@ -185,7 +205,7 @@ for i in range(mysps.size):
         for key in okeys:
             stats[key] = str(stats[key])
             out.append(stats[key])
-            
+
         line = fmt.format(*out)
         print line
 print '#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'

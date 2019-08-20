@@ -24,7 +24,6 @@ import matplotlib.gridspec as gridspec
 import matplotlib.lines as mpllines
 import matplotlib.patches as mplpatches
 import matplotlib.pyplot as plt
-import matplotlib.pylab as pylab
 from matplotlib.ticker import (
     FormatStrFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
@@ -43,9 +42,9 @@ from fastnlo import SetGlobalVerbosity
 #          'ytick.labelsize':'large',
 #          'ytick.major.size': 5,
 #          'mathtext.fontset':'cm'}
-# pylab.rcParams.update(params)
+# mpl.rcParams.update(params)
 
-#print('a',mpl.get_configdir())
+# print('a',mpl.get_configdir())
 # exit(1)
 
 # Redefine ScalarFormatter
@@ -332,7 +331,8 @@ def main():
             if lstat:
                 datfilenames.append(datfile)
             else:
-                print('[fastnnlo_scaledep]: Given file ', datfile, 'for statistical uncertainties not found, aborted!')
+                print('[fastnnlo_scaledep]: Given file ', datfile,
+                      'for statistical uncertainties not found, aborted!')
                 exit(1)
 
     # Scale choice
@@ -433,13 +433,15 @@ def main():
                     else:
                         Dim2BinBounds = fnlo.GetDim2BinBounds(i0, i1)
                         if verb:
-                            print('[fastnnlo_scaledep]: Dim2BinBounds', Dim2BinBounds)
+                            print('[fastnnlo_scaledep]: Dim2BinBounds',
+                                  Dim2BinBounds)
                         for i2 in range(len(Dim2BinBounds)):
                             if ndim == 3:
                                 borders.append(
                                     [Dim0BinBounds[i0], Dim1BinBounds[i1], Dim2BinBounds[i2]])
                             else:
-                                print('[fastnnlo_scaledep]: Invalid no. of dimensions. Aborted!')
+                                print(
+                                    '[fastnnlo_scaledep]: Invalid no. of dimensions. Aborted!')
                                 print('[fastnnlo_scaledep]: ndim = ', ndim)
                                 exit(1)
 
@@ -486,8 +488,10 @@ def main():
                 max_order = i
                 if not lflex:
                     if scale_choice != 0:
-                        print('[fastnnlo_scaledep]: Invalid choice of scale = ', scale_choice, ' Aborted!')
-                        print('[fastnnlo_scaledep]: For fixed-scale tables only the default=0 is allowed.')
+                        print(
+                            '[fastnnlo_scaledep]: Invalid choice of scale = ', scale_choice, ' Aborted!')
+                        print(
+                            '[fastnnlo_scaledep]: For fixed-scale tables only the default=0 is allowed.')
                         exit(1)
                     else:
                         scale_name = fnlo.GetScaleDescription(i, 0)
@@ -502,7 +506,8 @@ def main():
                 if cnt_order == i-1:
                     cnt_order += 1
         if verb:
-            print('[fastnnlo_scaledep]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order)
+            print('[fastnnlo_scaledep]: Table has continuous orders up to',
+                  cnt_order, 'and a maximal order of', max_order)
 
         # If nothing requested, set to cnt_order for fixed-scale tables and max_order for flex-scale tables
         if args['order'] is None:
@@ -511,8 +516,10 @@ def main():
             else:
                 iordmax = cnt_order
                 if iordmax < 0:
-                    print('[fastnnlo_scaledep]: Noncontinuous order availability for fixed-scale table. Aborted!')
-                    print('[fastnnlo_scaledep]: Fixed-scale tables require presence of all orders to allow scale variations.')
+                    print(
+                        '[fastnnlo_scaledep]: Noncontinuous order availability for fixed-scale table. Aborted!')
+                    print(
+                        '[fastnnlo_scaledep]: Fixed-scale tables require presence of all orders to allow scale variations.')
                     print('[fastnnlo_scaledep]: Available orders are:', o_existence)
                     exit(1)
         order_list = []
@@ -543,7 +550,8 @@ def main():
 
             dxsr = []
             for fname in datfilenames:
-                print('[fastnnlo_scaledep]: Taking statistical uncertainties from', fname)
+                print(
+                    '[fastnnlo_scaledep]: Taking statistical uncertainties from', fname)
                 cols = np.loadtxt(fname, usecols=range(3, 5))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
@@ -557,14 +565,17 @@ def main():
 
         # For flexible-scale tables set scale to user choice (default is 0)
         if lflex:
-            print('[fastnnlo_scaledep]: Setting requested scale choice for flexible-scale table:', scale_choice)
+            print(
+                '[fastnnlo_scaledep]: Setting requested scale choice for flexible-scale table:', scale_choice)
             fnlo.SetMuRFunctionalForm(scale_choice)
             fnlo.SetMuFFunctionalForm(scale_choice)
         else:
             if scale_choice == 0:
-                print('[fastnnlo_scaledep]: Evaluating fixed-scale table. Scale choice must be', scale_choice)
+                print(
+                    '[fastnnlo_scaledep]: Evaluating fixed-scale table. Scale choice must be', scale_choice)
             else:
-                print('[fastnnlo_scaledep]: No scale choice possible for fixed-scale table. Aborted!')
+                print(
+                    '[fastnnlo_scaledep]: No scale choice possible for fixed-scale table. Aborted!')
                 print('[fastnnlo_scaledep]: scale_choice = ', scale_choice)
                 exit(1)
 
@@ -585,8 +596,10 @@ def main():
                     fnlo.SetContributionON(fastnlo.kFixedOrder, j, False)
                 if verb:
                     print('[fastnnlo_scaledep]: \n')
-                    print('[fastnnlo_scaledep]: Calculate XS for order: %s' % n, '\n')
-                    print('[fastnnlo_scaledep]: ----  ----  ----  ----  ----  ----  ----  ----')
+                    print(
+                        '[fastnnlo_scaledep]: Calculate XS for order: %s' % n, '\n')
+                    print(
+                        '[fastnnlo_scaledep]: ----  ----  ----  ----  ----  ----  ----  ----')
 
             xsfl = []
             xs = []
@@ -621,8 +634,10 @@ def main():
             if verb:
                 print('[fastnnlo_scaledep]: \n')
                 print('[fastnnlo_scaledep]: Relative scale uncertainty in %s: \n' % n)
-                print('---------------------------------------------------------------------------------------')
-                print('---------------------------------------------------------------------------------------')
+                print(
+                    '---------------------------------------------------------------------------------------')
+                print(
+                    '---------------------------------------------------------------------------------------')
 
         xs_cn = np.array(xss)
         xs_fl = np.array(xsfls)

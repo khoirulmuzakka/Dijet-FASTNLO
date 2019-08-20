@@ -12,9 +12,9 @@
 ###########################################
 #
 #import matplotlib
-#print(matplotlib.__version__)
-#print(matplotlib.__file__)
-#exit(0)
+# print(matplotlib.__version__)
+# print(matplotlib.__file__)
+# exit(0)
 #
 import argparse
 import glob
@@ -29,7 +29,6 @@ import matplotlib as mpl
 mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-import matplotlib.pylab as pylab
 from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
                                NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
@@ -121,7 +120,6 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
                      ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
         ax1.fill_between(x_axis*shift, xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 2, :],
                          xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 1, :], color=_order_color[order_item], hatch=_hatches[xs_index], alpha=0.30)
-
 
     # 'minor_thresholds' needs matplotlib > 1.5.0
     #    axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
@@ -295,7 +293,8 @@ def main():
             if lstat:
                 datfilenames.append(datfile)
             else:
-                print('[fastnnlo_pdfunc]: Given file ', datfile, 'for statistical uncertainties not found, aborted!')
+                print('[fastnnlo_pdfunc]: Given file ', datfile,
+                      'for statistical uncertainties not found, aborted!')
                 exit(1)
 
     # Type of scale variation (symmetric vs asymmetric)
@@ -369,7 +368,8 @@ def main():
         bin_bounds = np.array(fnlo.GetObsBinsBounds(0))
         if verb:
             print('[fastnnlo_scaleunc]: bin_bounds.T: \n', bin_bounds.T, '\n')
-            print('[fastnnlo_scaleunc]: bin_bounds.flatten()', bin_bounds.flatten(), '\n')
+            print('[fastnnlo_scaleunc]: bin_bounds.flatten()',
+                  bin_bounds.flatten(), '\n')
 
         x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / \
             2.  # this is a list of bin centers
@@ -397,8 +397,10 @@ def main():
                 max_order = i
                 if not lflex:
                     if scale_choice != 0:
-                        print('[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!')
-                        print('[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.')
+                        print(
+                            '[fastnnlo_scaleunc]: Invalid choice of scale = ', scale_choice, ' Aborted!')
+                        print(
+                            '[fastnnlo_scaleunc]: For fixed-scale tables only the default=0 is allowed.')
                         exit(1)
                     else:
                         scale_name = fnlo.GetScaleDescription(i, 0)
@@ -413,11 +415,13 @@ def main():
                 if cnt_order == i-1:
                     cnt_order += 1
         if verb:
-            print('[fastnnlo_scaleunc]: Table has continuous orders up to', cnt_order, 'and a maximal order of', max_order)
+            print('[fastnnlo_scaleunc]: Table has continuous orders up to',
+                  cnt_order, 'and a maximal order of', max_order)
 
         if iordmax > cnt_order:
             print('[fastnnlo_scaleunc]: Invalid choice of orders. Aborted!')
-            print('[fastnnlo_scaleunc]: Highest order requested is', _order_to_text[iordmax], 'but orders are available only up to', cnt_order)
+            print('[fastnnlo_scaleunc]: Highest order requested is',
+                  _order_to_text[iordmax], 'but orders are available only up to', cnt_order)
             exit(1)
 
         order_list = []
@@ -447,7 +451,8 @@ def main():
 
             dxsr = []
             for fname in datfilenames:
-                print('[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
+                print(
+                    '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
                 cols = np.loadtxt(fname, usecols=range(3, 5))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
@@ -462,14 +467,17 @@ def main():
         # For flexible-scale tables set scale to user choice (default is 0)
 
         if lflex:
-            print('[fastnnlo_scaleunc]: Setting requested scale choice for flexible-scale table:', scale_choice)
+            print(
+                '[fastnnlo_scaleunc]: Setting requested scale choice for flexible-scale table:', scale_choice)
             fnlo.SetMuRFunctionalForm(scale_choice)
             fnlo.SetMuFFunctionalForm(scale_choice)
         else:
             if scale_choice == 0:
-                print('[fastnnlo_scaleunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice)
+                print(
+                    '[fastnnlo_scaleunc]: Evaluating fixed-scale table. Scale choice must be', scale_choice)
             else:
-                print('[fastnnlo_scaleunc]: No scale choice possible for fixed-scale table. Aborted!')
+                print(
+                    '[fastnnlo_scaleunc]: No scale choice possible for fixed-scale table. Aborted!')
                 print('[fastnnlo_scaleunc]: scale_choice = ', scale_choice)
                 exit(1)
 
@@ -486,14 +494,17 @@ def main():
             if verb:
                 print('[fastnnlo_scaleunc]: \n')
                 print('[fastnnlo_scaleunc]: Calculate XS for order: %s' % n, '\n')
-                print('[fastnnlo_scaleunc]: ----  ----  ----  ----  ----  ----  ----  ----')
+                print(
+                    '[fastnnlo_scaleunc]: ----  ----  ----  ----  ----  ----  ----  ----')
             fnlo.CalcCrossSection()
             xs_list.append(fnlo.GetCrossSection())
 
             ### Get scale uncertainties ###
             if verb:
-                print('[fastnnlo_scaleunc]: Used scale factor MuF: ', fnlo.GetScaleFactorMuF())
-                print('[fastnnlo_scaleunc]: Used scale factor MuR: ', fnlo.GetScaleFactorMuR(), '\n')
+                print('[fastnnlo_scaleunc]: Used scale factor MuF: ',
+                      fnlo.GetScaleFactorMuF())
+                print('[fastnnlo_scaleunc]: Used scale factor MuR: ',
+                      fnlo.GetScaleFactorMuR(), '\n')
                 print('[fastnnlo_scaleunc]: Calculate scale uncertainties \n')
             # RELATIVE scale uncertainty with chosen type of scale variation (symmetric or asymmetric)
             # Up to NLO, it is possible to use HOPPET with fixed-scale tables
@@ -507,8 +518,10 @@ def main():
                 print('[fastnnlo_scaleunc]: Relative scale uncertainty in %s: \n' % n)
                 # 3 entries: central value (xs), unc_low, unc_high
                 print(rel_scale_unc_item, '\n')
-                print('---------------------------------------------------------------------------------------')
-                print('---------------------------------------------------------------------------------------')
+                print(
+                    '---------------------------------------------------------------------------------------')
+                print(
+                    '---------------------------------------------------------------------------------------')
 
         xs_all = np.array(xs_list)
         rel_scale_unc = np.array(rel_unc_list)
@@ -537,7 +550,8 @@ def main():
                 xs_all[k]  # absolute uncertainties upwards (high)
 
         if verb:
-            print('[fastnnlo_scaleunc]: Absolute Scale uncertainties downwards, upwards (order by order): \n')
+            print(
+                '[fastnnlo_scaleunc]: Absolute Scale uncertainties downwards, upwards (order by order): \n')
             print(abs_scale_unc, '\n')
 
         ############################## Do the plotting ####################################################
@@ -564,7 +578,8 @@ def main():
 
         stop_time = timeit.default_timer()
         timediff = stop_time-start_time
-        print('fastnnlo_pdfunc: Elapsed time: %s sec = %s min' % (timediff, round(timediff/60., 2)))
+        print('fastnnlo_pdfunc: Elapsed time: %s sec = %s min' %
+              (timediff, round(timediff/60., 2)))
 
 
 if __name__ == '__main__':
