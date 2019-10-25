@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 #
 # Make statistical evaluation plots of ensemble of one-to-one comparisons
@@ -25,10 +25,10 @@ from matplotlib.ticker import (
 import numpy as np
 # from copy import deepcopy
 from matplotlib import cm
-from fastnlo import fastNLOLHAPDF
-from fastnlo import SetGlobalVerbosity
+#from fastnlo import fastNLOLHAPDF
+#from fastnlo import SetGlobalVerbosity
 import re
-from StringIO import StringIO
+from io import StringIO
 #import warnings
 # warnings.filterwarnings("error")
 
@@ -57,7 +57,7 @@ def main():
     # parse arguments
     args = vars(parser.parse_args())
     namesp = parser.parse_args()
-    print "Plots for all scale variations chosen? -->", args['variation']
+    print("Plots for all scale variations chosen? -->", args['variation'])
 
     ################################################################################
     # Style settings
@@ -80,9 +80,9 @@ def main():
     #
     # Start
     #
-    print "\n###########################################################################################"
-    print "# fastnnlo_approxtest.py: Plot statistical evaluation of fastNLO interpolation quality"
-    print "###########################################################################################\n"
+    print("\n###########################################################################################")
+    print("# fastnnlo_approxtest.py: Plot statistical evaluation of fastNLO interpolation quality")
+    print("###########################################################################################\n")
 
     #
     # Default arguments             ##probably not anymore necessary
@@ -100,16 +100,16 @@ def main():
     datfile = args['datfile']
     wgtfile = args['weightfile']
     fscl = args['fscl']
-    print "fscl chosen by user: ", fscl
+    print("fscl chosen by user: ", fscl)
     # arguments
-    print "Given datfile: ", datfile  # , '\n'
+    print("Given datfile: ", datfile)  # , '\n'
     datbase = os.path.basename(datfile)
     datargs = datbase.split(".")  # array containing filename-parts
-    print "Given weightfile: ", wgtfile  # , '\n'
+    print("Given weightfile: ", wgtfile)  # , '\n'
 
     # arguments from datfile
-    print 'arguments in datfile name: ', len(datargs)
-    print "datargs: ", datargs, '\n'
+    print('arguments in datfile name: ', len(datargs))
+    print("datargs: ", datargs, '\n')
     if len(datargs) == 4:
         proc, jobn, obsv, ext = datargs
     elif len(datargs) == 5:
@@ -117,12 +117,12 @@ def main():
     elif len(datargs) == 6:
         proc, jobn, kinn, obsv, seed, ext = datargs
 
-    print 'proc: ', proc
-    print 'jobn: ', jobn
-    print 'kinn: ', kinn
-    print 'obsv: ', obsv
-    print 'seed: ', seed
-    print '\n'
+    print('proc: ', proc)
+    print('jobn: ', jobn)
+    print('kinn: ', kinn)
+    print('obsv: ', obsv)
+    print('seed: ', seed)
+    print('\n')
 
     # Extract order/contribution from job type (substring before first '-')
     order = jobn.split('-')[0]
@@ -140,7 +140,7 @@ def main():
 
     datfiles = glob.glob(datglob)
     if not datfiles:
-        print >> sys.stderr, 'No NNLOJET dat files matching', datglob, 'found, aborted!'
+        print('No NNLOJET dat files matching', datglob, 'found, aborted!', file=sys.stderr)
         sys.exit(1)
     datfiles.sort()
 
@@ -174,32 +174,33 @@ def main():
             "No valid value for fscl chosen. Possible integers from fscl=1 up to fscl=7 .")
 
     if xs_nnlo is not None:
-        print "shape of xs_nnlo: ", np.shape(xs_nnlo)
+        print("shape of xs_nnlo: ", np.shape(xs_nnlo))
     if xs_nnlo_list is not None:
-        print "shape of xs_nnlo_list", np.shape(xs_nnlo_list)
+        print("shape of xs_nnlo_list", np.shape(xs_nnlo_list))
 
     # Read weights per file per bin from Alex
     wgtnams = np.genfromtxt(wgtfile, dtype=None, usecols=0)
     wgttmps = np.loadtxt(wgtfile, usecols=(list(range(1, nobs+1))))
     ntmp = len(wgtnams)
     # Combine to key-value tuple ( name, weights[] ) and sort according to key=name
-    wgttup = zip(wgtnams, wgttmps)
+    wgttup = list(zip(wgtnams, wgttmps))
     wgttup.sort(key=lambda row: (row[0]))
     # Unzip again
-    allnames, allweights = zip(*wgttup)
-    print 'datfile names in weightfile: \n', np.array(allnames), '\n'
+    allnames, allweights = list(zip(*wgttup))
+    print('datfile names in weightfile: \n', np.array(allnames), '\n')
 
     #print 'datfiles array: \n', np.array(datfiles), '\n'
     #print "weights..", weights
     for dfile in datfiles:  # does not have to be changed, as choice of fscl makes no difference here
         newna = './'+order+'/'+os.path.basename(dfile)
         indexlin = allnames.index(newna)
-        print 'Weight file line no. ', indexlin, ' is for ', allnames[indexlin]
+        print('Weight file line no. ', indexlin,
+              ' is for ', allnames[indexlin])
         weights.append(allweights[indexlin])
         nlin += 1
     weights = np.array(weights)
 
-    print '\n', 'Using %s weight lines.' % nlin
+    print('\n', 'Using %s weight lines.' % nlin)
     #print '\n','weights-array: \n', weights,'\n'
 
     # Evaluate cross sections from fastNLO tables
@@ -228,7 +229,7 @@ def main():
     for dfile in datfiles:
         log_list.append(dfile[:-(len(ext)+1)]+'.log')
     fnlologs = np.array(log_list)
-    print 'fnlologs: \n', fnlologs, '\n'
+    print('fnlologs: \n', fnlologs, '\n')
 
     ############### adjusted to new logfiles (check if -v true or false) #########
     fnlologs.sort()
@@ -244,7 +245,8 @@ def main():
 
     # Check on identical file numbers, either for table or log files and weight lines
     if ndat == nlog == nlin and ndat*nlog*nlin != 0:
-        print 'OK: Have equal number of dat files, fastNLO results, and weight lines: ndat = ', ndat, ', nlog = ', nlog, ', nlin = ', nlin
+        print('OK: Have equal number of dat files, fastNLO results, and weight lines: ndat = ',
+              ndat, ', nlog = ', nlog, ', nlin = ', nlin)
     else:
         #    sys.exit('ERROR: No matching file found or file number mismatch! ndat = '+str(ndat)+', ntab = '+str(ntab))
         sys.exit('ERROR: No matching file found or file number mismatch! ndat = ' +
@@ -254,11 +256,11 @@ def main():
     info_values = (weights, nobs, ndat, nlin, proc, jobn, order, obsv, args)
 
     # Use plotting function:
-    print "\n"
+    print("\n")
     if xs_fnll is not None:  # should be calculated already, in case only one fscl is investigated
         Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values)
         # plot here and save the two plots
-        print "Plotting done. (fscl=%s)" % fscl
+        print("Plotting done. (fscl=%s)" % fscl)
     elif xs_fnll_list is not None:  # that list exists if all fscl from 1 to 7 are considered, otherwise it is None
         r_f2nl_list = []
         a_f2nl_list = []
@@ -268,7 +270,7 @@ def main():
 
             # plot here and save plots
             Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values)
-            print "Plotting done for fscl= %s" % fscl
+            print("Plotting done for fscl= %s" % fscl)
 
     exit(0)
     # what are these plots like?
@@ -276,14 +278,14 @@ def main():
 
         if i_bin > 0:
             exit(2222)
-        print 'NNLOJET cross sections'
+        print('NNLOJET cross sections')
         bin_dists(nnlo, 'NNLOJET', r'$\sigma$ [pb]', 'blue', 'violet')
-        print 'fastNLO cross sections'
+        print('fastNLO cross sections')
         bin_dists(fnlo, 'fastNLO', r'$\sigma$ [pb]', 'blue', 'violet')
-        print 'Ratios'
+        print('Ratios')
         bin_dists(ratios, 'Ratio', 'fastNLO/NNLOJET', 'blue', 'violet', True,
                   rmed_f2nl[i_bin]-10.*riqd_f2nl[i_bin], rmed_f2nl[i_bin]+10.*riqd_f2nl[i_bin])
-        print 'Asymmetries'
+        print('Asymmetries')
         bin_dists(asyms, 'Asymmetry', '(fastNLO-NNLOJET)/(fastNLO+NNLOJET)', 'blue', 'violet',
                   True, amed_f2nl[i_bin]-10.*aiqd_f2nl[i_bin], amed_f2nl[i_bin]+10.*aiqd_f2nl[i_bin])
 
@@ -370,10 +372,10 @@ def Read_XS(datfiles, fscl):  # takes list of datfiles (different seeds) and fsc
     # default maximum number of datfiles
     nmax = 99999
 
-    print "Reading datfiles for fscl=%s ." % fscl
+    print("Reading datfiles for fscl=%s ." % fscl)
     ixscol = 3 + 2 * (fscl-1)
     for datfile in datfiles:
-        print 'Datfile no. ', ndat, ' is ', datfile
+        print('Datfile no. ', ndat, ' is ', datfile)
         if ndat == 0:
             xl.append(np.loadtxt(datfile, usecols=(0,)))
             xu.append(np.loadtxt(datfile, usecols=(2,)))
@@ -385,14 +387,14 @@ def Read_XS(datfiles, fscl):  # takes list of datfiles (different seeds) and fsc
         ndat += 1
         if ndat == nmax:
             break
-    print 'Using ', ndat, 'dat files.'
+    print('Using ', ndat, 'dat files.')
     xl = np.array(xl)
     xu = np.array(xu)
     xs_nnlo = np.array(xs_nnlo)/1000.  # Conversion of fb to pb
 
     # Determine no. of observable bins
     nobs = xl.size
-    print 'Number of observable bins: ', nobs, '\n'
+    print('Number of observable bins: ', nobs, '\n')
     return xl, xu, ndat, xs_nnlo, nobs, seeds
 ################### End of function ###########################################
 ###############################################################################
@@ -409,12 +411,14 @@ def Read_logfile(fnlologs, fscl, seeds, nobs):  # takes list of logfiles and fsc
     nmax = 99999
     xs_fnll = []
     for fnlolog in fnlologs:
-        print 'fastNLO file no. ', nlog, ' is ', fnlolog
+        print('fastNLO file no. ', nlog, ' is ', fnlolog)
         if not seeds[nlog] in fnlolog:
-            print 'Mismatch in result sort order between NNLOJET and fastNLO. Aborted!'
-            print 'seeds[', nlog, '] = ', seeds[nlog], ', fastNLO file = ', fnlolog
+            print('Mismatch in result sort order between NNLOJET and fastNLO. Aborted!')
+            print('seeds[', nlog, '] = ', seeds[nlog],
+                  ', fastNLO file = ', fnlolog)
         else:
-            print 'NNLOJET and fastNLO result correctly matched. seed is ', seeds[nlog]
+            print(
+                'NNLOJET and fastNLO result correctly matched. seed is ', seeds[nlog])
 
         xs_tmp = np.loadtxt(fnlolog, usecols=(
             6,), comments=['#', ' #', 'C', 'L', 'N'])
@@ -427,7 +431,7 @@ def Read_logfile(fnlologs, fscl, seeds, nobs):  # takes list of logfiles and fsc
         nlog += 1
         if nlog == nmax:
             break
-    print 'Using ', nlog, 'pre-evaluated table files.'
+    print('Using ', nlog, 'pre-evaluated table files.')
     xs_fnll = np.array(xs_fnll)
     return xs_fnll, nlog
 ############### End of function to read logfile ###############################
@@ -487,9 +491,9 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values):
     plt.fill_between([0.0, 34.0], 0.999, 1.001, color='black', alpha=0.1)
     # plt.text(33.6,1.00085,u'+1‰')
     # plt.text(33.7,0.99885,u'–1‰')
-    plt.text(nobs+1.1, +1.00085, u'+1‰')
+    plt.text(nobs+1.1, +1.00085, '+1‰')
     # location flexible adjusted to plotting range
-    plt.text(nobs+1.1, +0.99885, u'–1‰')
+    plt.text(nobs+1.1, +0.99885, '–1‰')
 
     dx = 1./3.
     xa = np.arange(1-dx, nobs-dx+1.e-6)
@@ -553,9 +557,9 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values):
     plt.fill_between([0.0, 34.0], -0.001, 0.001, color='black', alpha=0.1)
     # plt.text(33.6,+0.00085,u'+1‰')
     # plt.text(33.7,-0.00115,u'–1‰')
-    plt.text(nobs+1.1, +0.00085, u'+1‰')
+    plt.text(nobs+1.1, +0.00085, '+1‰')
     # location flexible adjusted to plotting range
-    plt.text(nobs+1.1, -0.00115, u'–1‰')
+    plt.text(nobs+1.1, -0.00115, '–1‰')
 
     dx = 1./3.
     xa = np.arange(1-dx, nobs-dx+1.e-6)
