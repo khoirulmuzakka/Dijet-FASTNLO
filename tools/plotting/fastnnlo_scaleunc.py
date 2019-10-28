@@ -8,14 +8,11 @@
 #
 # Created by B.Schillinger, 09.10.2018
 # Modified by K. Rabbertz, 31.10.2018
+# Prepared for python3 by K. Rabbertz, 28.10.2019
 #
 ###########################################
 #
-#import matplotlib
-# print(matplotlib.__version__)
-# print(matplotlib.__file__)
-# exit(0)
-#
+from __future__ import print_function
 import argparse
 import glob
 import os
@@ -23,10 +20,12 @@ import re
 import string
 import sys
 import timeit
-# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
+# If necessary, set offline backend
+# Use e.g. Agg on Centos 7 of bms3; otherwise get error: No module named 'tkinter' ...
 # mpl.use('Agg')
-mpl.use('Cairo')
+# If necessary, use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
+# mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
@@ -35,22 +34,20 @@ from matplotlib import cm
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grid
+# TODO: Currently installed only for python2!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
 
 
 # Redefine ScalarFormatter
-
-
 class ScalarFormatterForceFormat(ScalarFormatter):
     # Override function that finds format to use.
     def _set_format(self, vmin, vmax):
         self.format = "%1.2f"  # Give format here
 
+
 # Action class to allow comma-separated list in options
-
-
 class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values.split(','))
@@ -234,7 +231,7 @@ def main():
     parser.add_argument('-p', '--pdfset', default='CT14nlo', type=str,
                         help='PDFset to evaluate fastNLO table.')
     parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
-                        choices=range(16), metavar='[0-15]',
+                        choices=list(range(16)), metavar='[0-15]',
                         help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
     parser.add_argument('--scalename', default=None, type=str,
                         help='Replace default scale name by given string.')
@@ -269,7 +266,7 @@ def main():
         print('[fastnnlo_scaleunc]: Evaluate table up to highest available order.')
     else:
         for ord in args['order']:
-            if _text_to_order.has_key(ord):
+            if ord in _text_to_order:
                 iorders.append(_text_to_order[ord])
             else:
                 print('[fastnnlo_scaleunc]: Illegal order specified, aborted!')
@@ -319,7 +316,7 @@ def main():
     if formats is None:
         formats = ['png']
     for fmt in formats:
-        if not _formats.has_key(fmt):
+        if fmt not in _formats:
             print('[fastnnlo_scaleunc]: Illegal format specified, aborted!')
             print('[fastnnlo_scaleunc]: Format list:', args['format'])
             exit(1)
@@ -331,6 +328,9 @@ def main():
 
     # Verbosity
     verb = args['verbose']
+    if verb:
+        print('[fastnnlo_scaleunc]: Using matplotlib version ', mpl.__version__)
+        print('                     from location ', mpl.__file__)
 
     # Loop over table list
     for table in files:
@@ -453,7 +453,7 @@ def main():
             for fname in datfilenames:
                 print(
                     '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
-                cols = np.loadtxt(fname, usecols=range(3, 5))
+                cols = np.loadtxt(fname, usecols=list(range(3, 5)))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
                 dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
