@@ -1,16 +1,15 @@
 #!/usr/bin/env python2
 #-*- coding:utf-8 -*-
-
-###########################################
+#
+########################################################################
 #
 # Plot the scale uncertainty
-#
 #
 # Created by B.Schillinger, 09.10.2018
 # Modified by K. Rabbertz, 31.10.2018
 # Prepared for python3 by K. Rabbertz, 28.10.2019
 #
-###########################################
+########################################################################
 #
 from __future__ import print_function
 import argparse
@@ -33,7 +32,7 @@ from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
 from matplotlib import cm
 # numpy
 import numpy as np
-# fastNLO for direct evaluation of interpolation grid
+# fastNLO for direct evaluation of interpolation grids
 # TODO: Currently installed only for python2!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
@@ -203,7 +202,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
     plt.close(fig)
 
 
-#####################################################################################
+########################################################################
 
 def main():
     # Start timer

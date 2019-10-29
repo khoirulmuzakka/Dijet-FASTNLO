@@ -1,64 +1,56 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 #-*- coding:utf-8 -*-
+#
+########################################################################
 #
 # Make statistical evaluation plots of ensemble of one-to-one comparisons
 # between fastNLO interpolation tables and NNLOJET original results
 #
-# Version:
+# Created by K. Rabbertz: 13.07.2017
+# Modified by B. Schillinger: 04.09.2018
+# Converted to Python3 by K. Rabbertz: 28.10.2019 
 #
-# created by K. Rabbertz: 13.07.2017
-# modified by B. Schillinger: 04.09.2018
+########################################################################
 #
-#-----------------------------------------------------------------------
-#
+from __future__ import print_function
 import argparse
 import glob
 import os
+import re
 import sys
+import timeit
 import matplotlib as mpl
-# mpl.use('Agg')
+# If necessary, set offline backend
+# Use e.g. Agg on Centos 7 of bms3; otherwise get error: No module named 'tkinter' ...
+mpl.use('Agg')
+# If necessary, use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
+# mpl.use('Cairo')
 import matplotlib.lines as mlines
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-from matplotlib.ticker import (
-    MultipleLocator, FormatStrFormatter, AutoMinorLocator)  # for xticks
+from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
+                               NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
+from matplotlib import cm
+# numpy
 import numpy as np
 # from copy import deepcopy
-from matplotlib import cm
+# fastNLO for direct evaluation of interpolation grids
+# TODO: Currently installed only for python2!
+#import fastnlo
 #from fastnlo import fastNLOLHAPDF
 #from fastnlo import SetGlobalVerbosity
-import re
+#
 from io import StringIO
-#import warnings
-# warnings.filterwarnings("error")
 
+
+# Some global definitions
+_formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
+_debug = False
+_nmax = 99999 # Default maximum number of files to evaluate
+
+########################################################################
 
 def main():
-    parser = argparse.ArgumentParser()
-
-    # add arguments
-    parser.add_argument('-d', '--datfile', default='file.dat', required=True, nargs='?',
-                        help='.dat file for evaluation. All other matching .dat files that '
-                        'only differ in seed no. will be evaluated as well.')
-    parser.add_argument('-w', '--weightfile', default='weight.txt', required=True, nargs='?',
-                        help='.txt file containing weights.')
-    parser.add_argument('-v', '--variation', action='store_true',  # boolean value, True if -v chosen
-                        help='If option is chosen: Plotting for all scale variations.'
-                        'Otherwise (per default): Produce only central scale plots.'
-                        'If specific scale is chosen via -f <int>, this option (-v) is ignored.')
-
-    parser.add_argument('-f', '--fscl', nargs='?', type=int, required=False,
-                        help='Possible choices: int from fscl=1 to fscl=7.')
-
-    parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
-                        help='Customise the first part of the output filename.'
-                        'Default: Same structure as datfile name.')
-
-    # parse arguments
-    args = vars(parser.parse_args())
-    namesp = parser.parse_args()
-    print("Plots for all scale variations chosen? -->", args['variation'])
-
     ################################################################################
     # Style settings
     # Location of matplotlibrc
@@ -77,6 +69,38 @@ def main():
               'ytick.labelsize': 'x-large'}
     mpl.rcParams.update(params)
 
+    # Start timer
+    # just for measuring wall clock time - not necessary
+    start_time = timeit.default_timer()
+
+    # Define arguments & options
+    parser = argparse.ArgumentParser(
+        epilog='', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    # Positional arguments TODO This should replace --datfile in the future 
+    #    parser.add_argument('file.dat', type=str, nargs='+',
+    #                        help='Filename glob of NNLOJET dat files to be evaluated. This must be specified!')
+    # Optional arguments
+    parser.add_argument('-d', '--datfile', default='file.dat', required=True, nargs='?',
+                        help='Filename glob of NNLOJET dat files to be evaluated. '
+                        'The . separated name parts define further settings. '
+                        'The globbing looks for all files that only differ in seed number '
+                        'from datfile e.g. a.b.c.d.s1.dat, where s1 means any seed s1????')
+    parser.add_argument('-w', '--weightfile', default='weight.txt', required=True, nargs='?',
+                        help='NNLOJET .txt file containing weights for each datfile and '
+                        'observable bin.')
+# TODO: Use 0 to indicate all scales
+    parser.add_argument('-f', '--fscl', default=1, required=False, nargs='?', type=int,
+                        choices=list(range(1,8)), metavar='[1-7]',
+                        help='Scale combination fscl for mu_r, mu_f to be used in comparison.')                   # TODO: Use -v for verbose
+    parser.add_argument('-v', '--variation', action='store_true',  # boolean value, True if -v chosen
+                        help='If option is chosen: Plotting for all scale variations.'
+                        'Otherwise (per default): Produce only central scale plots.'
+                        'If specific scale is chosen via -f <int>, this option (-v) is ignored.')
+    parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
+                        help='Customise the first part of the output filename.'
+                        'Default: Same structure as datfile name.')
+
+
     #
     # Start
     #
@@ -85,44 +109,34 @@ def main():
     print("###########################################################################################\n")
 
     #
-    # Default arguments             ##probably not anymore necessary
-    #
-    proc = '1jet'
-    jobn = 'LO-CMS7'
-    kinn = 'vBa'
-    obsv = 'fnl2332d_xptji_y1'
-    nmax = 99999
-    fscl = 1
-
-    #
     # Parse arguments
     #
+    args = vars(parser.parse_args())
+    namesp = parser.parse_args()
     datfile = args['datfile']
-    wgtfile = args['weightfile']
-    fscl = args['fscl']
-    print("fscl chosen by user: ", fscl)
-    # arguments
-    print("Given datfile: ", datfile)  # , '\n'
+    print("[fastnnlo_approxtest]: Given datfile: ", datfile)
     datbase = os.path.basename(datfile)
-    datargs = datbase.split(".")  # array containing filename-parts
-    print("Given weightfile: ", wgtfile)  # , '\n'
-
-    # arguments from datfile
-    print('arguments in datfile name: ', len(datargs))
-    print("datargs: ", datargs, '\n')
-    if len(datargs) == 4:
-        proc, jobn, obsv, ext = datargs
-    elif len(datargs) == 5:
-        proc, jobn, kinn, obsv, ext = datargs
-    elif len(datargs) == 6:
+    datargs = datbase.split(".")  # Array containing filename-parts
+    # Arguments derived from datfile
+    ndargs = len(datargs)
+    if ndargs != 6:
+        sys.exit('[fastnnlo_approxtest]: ERROR! Illegal no. of datfile arguments extracted! len(datargs) = ' + str(ndargs))
+    else:
         proc, jobn, kinn, obsv, seed, ext = datargs
-
-    print('proc: ', proc)
-    print('jobn: ', jobn)
-    print('kinn: ', kinn)
-    print('obsv: ', obsv)
-    print('seed: ', seed)
-    print('\n')
+    print('[fastnnlo_approxtest]: Process (e.g. 1jet)                      is: ', proc)
+    print('[fastnnlo_approxtest]: Job name (e.g. LO-CMS-ak05)              is: ', jobn)
+    print('[fastnnlo_approxtest]: Integration label (e.g. vBa)             is: ', kinn)
+    print('[fastnnlo_approxtest]: Observable name (e.g. fnl2332d_xptji_y1) is: ', obsv)
+    print('[fastnnlo_approxtest]: Seed number glob (e.g. s1)               is: ', seed)
+    print('[fastnnlo_approxtest]: File extension (Should be dat)           is: ', ext)
+    wgtfile = args['weightfile']
+    print('[fastnnlo_approxtest]: Given weightfile: ', wgtfile)
+    fscl   = args['fscl']
+    print('[fastnnlo_approxtest]: Scale combination chosen for mu_r, mu_f: ', fscl)
+    sclvar = args['variation']
+    if sclvar:
+        print('[fastnnlo_approxtest]: Loop over all scale combinations for mu_r, mu_f: ', sclvar)
+        fscl = None
 
     # Extract order/contribution from job type (substring before first '-')
     order = jobn.split('-')[0]
@@ -154,7 +168,7 @@ def main():
     if fscl in np.arange(1, 8, 1):  # if valid fscl is chosen via -f <int>
         xl, xu, ndat, xs_nnlo, nobs, seeds = Read_XS(datfiles, fscl)
     elif fscl is None:  # option -f not used
-        if (args['variation'] == True):  # evaluate all 7 scale variations (central + 6 others)
+        if (sclvar == True):  # evaluate all 7 scale variations (central + 6 others)
             xs_nnlo_list = []  # will become a list of arrays
             for fscl in np.arange(1, 8, 1):
                 # take bin bounds from first iteration (fscl=1), they stay the same
@@ -179,8 +193,9 @@ def main():
         print("shape of xs_nnlo_list", np.shape(xs_nnlo_list))
 
     # Read weights per file per bin from Alex
-    wgtnams = np.genfromtxt(wgtfile, dtype=None, usecols=0)
+    wgtnams = np.genfromtxt(wgtfile, dtype=str, usecols=0)
     wgttmps = np.loadtxt(wgtfile, usecols=(list(range(1, nobs+1))))
+    print("wgttmps",wgttmps)
     ntmp = len(wgtnams)
     # Combine to key-value tuple ( name, weights[] ) and sort according to key=name
     wgttup = list(zip(wgtnams, wgttmps))
@@ -191,8 +206,10 @@ def main():
 
     #print 'datfiles array: \n', np.array(datfiles), '\n'
     #print "weights..", weights
+    print ("allnames",allnames)
     for dfile in datfiles:  # does not have to be changed, as choice of fscl makes no difference here
         newna = './'+order+'/'+os.path.basename(dfile)
+        print("newna",newna)
         indexlin = allnames.index(newna)
         print('Weight file line no. ', indexlin,
               ' is for ', allnames[indexlin])
@@ -218,7 +235,7 @@ def main():
     #    fnlo.CalcCrossSection()
     #    xs_fnla.append(fnlo.GetCrossSection())
     #    ntab += 1
-    #    if ntab==nmax: break
+    #    if ntab==_nmax: break
     #print 'Using ', ntab, 'table files.'
     #xs_fnla = np.array(xs_fnla)
 
@@ -271,6 +288,11 @@ def main():
             # plot here and save plots
             Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values)
             print("Plotting done for fscl= %s" % fscl)
+
+    stop_time = timeit.default_timer()
+    timediff = stop_time-start_time
+    print('fastnnlo_approxtest: Elapsed time: %s sec = %s min' %
+          (timediff, round(timediff/60., 2)))
 
     exit(0)
     # what are these plots like?
@@ -369,8 +391,6 @@ def Read_XS(datfiles, fscl):  # takes list of datfiles (different seeds) and fsc
     ndat = 0
     xs_nnlo = []  # NNLOJET results
     seeds = []   # Seed numbers for matching
-    # default maximum number of datfiles
-    nmax = 99999
 
     print("Reading datfiles for fscl=%s ." % fscl)
     ixscol = 3 + 2 * (fscl-1)
@@ -385,7 +405,7 @@ def Read_XS(datfiles, fscl):  # takes list of datfiles (different seeds) and fsc
         seed = parts[len(parts)-2]
         seeds.append(seed)
         ndat += 1
-        if ndat == nmax:
+        if ndat == _nmax:
             break
     print('Using ', ndat, 'dat files.')
     xl = np.array(xl)
@@ -407,8 +427,6 @@ def Read_XS(datfiles, fscl):  # takes list of datfiles (different seeds) and fsc
 def Read_logfile(fnlologs, fscl, seeds, nobs):  # takes list of logfiles and fscl,
                                                 # as well as list of seeds and nobs (number of observable bins)
     nlog = 0
-    # default maximum number of logfiles
-    nmax = 99999
     xs_fnll = []
     for fnlolog in fnlologs:
         print('fastNLO file no. ', nlog, ' is ', fnlolog)
@@ -429,7 +447,7 @@ def Read_logfile(fnlologs, fscl, seeds, nobs):  # takes list of logfiles and fsc
         xs_sub = xs_tmp[indi:indf]
         xs_fnll.append(xs_sub)
         nlog += 1
-        if nlog == nmax:
+        if nlog == _nmax:
             break
     print('Using ', nlog, 'pre-evaluated table files.')
     xs_fnll = np.array(xs_fnll)
@@ -489,11 +507,11 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values):
     plt.axhline(y=1.001, linestyle='--', linewidth=1.0, color='black')
     plt.axhline(y=0.999, linestyle='--', linewidth=1.0, color='black')
     plt.fill_between([0.0, 34.0], 0.999, 1.001, color='black', alpha=0.1)
-    # plt.text(33.6,1.00085,u'+1‰')
-    # plt.text(33.7,0.99885,u'–1‰')
-    plt.text(nobs+1.1, +1.00085, '+1‰')
+    # plt.text(33.6, 1.00085, u'+1‰')
+    # plt.text(33.7, 0.99885, u'–1‰')
+    plt.text(nobs+1.1, +1.00085, u'+1‰')
     # location flexible adjusted to plotting range
-    plt.text(nobs+1.1, +0.99885, '–1‰')
+    plt.text(nobs+1.1, +0.99885, u'–1‰')
 
     dx = 1./3.
     xa = np.arange(1-dx, nobs-dx+1.e-6)
@@ -555,11 +573,11 @@ def Statistics_And_Plotting(fscl, xs_fnll, xs_nnlo, info_values):
     plt.axhline(y=-0.001, linestyle='--', linewidth=1.0, color='black')
     plt.axhline(y=+0.001, linestyle='--', linewidth=1.0, color='black')
     plt.fill_between([0.0, 34.0], -0.001, 0.001, color='black', alpha=0.1)
-    # plt.text(33.6,+0.00085,u'+1‰')
-    # plt.text(33.7,-0.00115,u'–1‰')
-    plt.text(nobs+1.1, +0.00085, '+1‰')
+    # plt.text(33.6, +0.00085, u'+1‰')
+    # plt.text(33.7, -0.00115, u'–1‰')
+    plt.text(nobs+1.1, +0.00085, u'+1‰')
     # location flexible adjusted to plotting range
-    plt.text(nobs+1.1, -0.00115, '–1‰')
+    plt.text(nobs+1.1, -0.00115, u'–1‰')
 
     dx = 1./3.
     xa = np.arange(1-dx, nobs-dx+1.e-6)
@@ -653,8 +671,8 @@ def bin_dists(q, label, xlabel, col1, col2, indicators=False, lval=0., rval=0.):
         handles = [raw, wgt]
     labels = [h.get_label() for h in handles]
 #    plt.fill_between([-0.5,33.5],0.999,1.001, color='black', alpha=0.1)
-#    plt.text(33.6,1.00085,u'+1‰')
-#    plt.text(33.7,0.99885,u'–1‰')
+#    plt.text(33.6, 1.00085, u'+1‰')
+#    plt.text(33.7, 0.99885, u'–1‰')
 
     plt.legend(handles, labels, title=r'Observable bin no. {}'.format(
         i_bin), loc='upper left', numpoints=1)
