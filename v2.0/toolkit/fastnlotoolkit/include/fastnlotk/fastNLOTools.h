@@ -8,7 +8,7 @@
 
 namespace fastNLOTools {
 
-   const bool binary = true;
+   const bool binary = false;
 
    //! - Reading std::vectors from disk
    template<typename T> int ReadVector( std::vector<T>& v, std::istream& table , double nevts = 1);

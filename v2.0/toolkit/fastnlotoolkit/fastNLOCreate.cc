@@ -671,8 +671,8 @@ void fastNLOCreate::SetScenConstsDefaults() {
 #else
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
-   fScenConsts.CacheMax  = 2;
-   fScenConsts.CacheType = 20;
+   fScenConsts.CacheMax  = 20;
+   fScenConsts.CacheType = 2;
    fScenConsts.CacheComp = 2;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.InclusiveJets = false;
@@ -2434,14 +2434,10 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       // KR: Also check for nan or inf in the faster code!!!
       if (!CheckWeightIsFinite()) return;
 
-      // KR: Moved to GetBin() itself
-      //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
       const int ObsBin = GetBin();
-      if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-         logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-         logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-         return;
-      }
+      if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
+      // stats
       fStats._nEvPS++;
 
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
@@ -2541,7 +2537,8 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       cout<<"Error! caching not implemented for scalevar tables."<<endl;
       exit(3); // also 'FlushCache has to be changed!'
    }
-
+   
+   fScenario._iOB = -1; // drop previous entry!
    fScenario._iOB = GetBin(); // we can calculate the bin number right now.
    if ( fScenario._iOB < 0 ) return; // nothing to do.
    //for ( auto& cachelem : fWeightCache ) {
@@ -2727,6 +2724,7 @@ void fastNLOCreate::FlushCache() {
                for ( const auto& elem : proc ) {
                   fScenario = elem.first;
                   fEvent = elem.second;
+                  //cout<<"cache! Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<"\tobs: "<<fScenario._o[0]<<endl;
                   FillContribution(0); // todo! not working if scalevar is != 0
                }
             }
@@ -2753,14 +2751,8 @@ void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
 
    // --- statistics and weights**2
    fStats._nProc++; //keep statistics
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
 
    if (scalevar==0) {
       fastNLOCoeffAddBase* c = GetTheCoeffTable();
@@ -2832,14 +2824,8 @@ void fastNLOCreate::FillContribution(int scalevar, const double wgtfac) {
 
    if (fEvent._n > 0) SetNumberOfEvents(fEvent._n);
 
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
    int p = fEvent._p;
 
@@ -3262,21 +3248,15 @@ void fastNLOCreate::FillRefContribution(int scalevar, const double wgtfac) {
    if (GetTheCoeffTable()->GetIRef()== 0) return;   // error. this is not a ref-table
 
    // ObsBin
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
 
    double wgt = wgtfac * fEvent._w / BinSize[ObsBin];
    int p = fEvent._p;
    // todo....
    if (! std::isfinite(wgt)) {
-      logger.error["FillContributionFixHHC"]<<"Weight w is not finite, w = " << wgt << "!"<<endl;
-      logger.error["FillContributionFixHHC"]<<"This should have been captured before, aborting ..."<<endl;
+      logger.error["FillRefContribution"]<<"Weight w is not finite, w = " << wgt << "!"<<endl;
+      logger.error["FillRefContribution"]<<"This should have been captured before, aborting ..."<<endl;
       exit(1);
    }
 
@@ -3570,15 +3550,10 @@ void fastNLOCreate::UpdateWarmupArrays() {
    //! Update the warmup-arrays fWMu1, fWx und fWMu2
    if (fWx.empty()) InitWarmupArrays();
 
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
    logger.debug["UpdateWarmupArrays"] << "ObsBin = " << ObsBin << endl;
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
    logger.debug["UpdateWarmupArrays"]<<"ObsBin="<<ObsBin<<"\tmu1="<<fScenario._m1<<"\tmu2="<<fScenario._m2<<"\tx1="<<fEvent._x1<<"\tx2="<<fEvent._x2<<endl;
 
    fWMu1[ObsBin].first       = std::min(fScenario._m1,fWMu1[ObsBin].first) ;
