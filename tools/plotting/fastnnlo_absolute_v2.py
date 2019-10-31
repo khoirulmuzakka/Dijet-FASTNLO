@@ -269,7 +269,8 @@ for i in range(nscl):
 
     ax.set_xlim(xmin, xmax)
     axr.set_xlim(xmin, xmax)
-    axr.set_ylim(0.99, 1.01)
+    # Do not set to have statistical uncertainties visible
+    #    axr.set_ylim(0.99, 1.01)
     axr.fill_between(x, 1.-abs(dst_nnlo[i]), 1.+abs(dst_nnlo[i]),
                      edgecolor=col1, facecolor=col1b, alpha=0.5)
     axr.axhline(1.0, color=col1)
