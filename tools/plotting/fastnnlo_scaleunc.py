@@ -417,10 +417,14 @@ def main():
             print('[fastnnlo_scaleunc]: Table has continuous orders up to',
                   cnt_order, 'and a maximal order of', max_order)
 
+        # If previously undefined set iordmax to maximum found in table
+        if args['order'] is None:
+            iordmax = max_order
+
         if iordmax > cnt_order:
             print('[fastnnlo_scaleunc]: Invalid choice of orders. Aborted!')
             print('[fastnnlo_scaleunc]: Highest order requested is',
-                  _order_to_text[iordmax], 'but orders are available only up to', cnt_order)
+                  _order_to_text[iordmax], 'but continuous orders are available only up to', _order_to_text[cnt_order])
             exit(1)
 
         order_list = []
