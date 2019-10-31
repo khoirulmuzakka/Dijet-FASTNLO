@@ -24,3 +24,5 @@
 .libs
 .obj
 Makefile.in
+# Python
+*.pyc
