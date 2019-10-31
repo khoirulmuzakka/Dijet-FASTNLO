@@ -148,9 +148,9 @@ public:
    void SetGlobalVerbosity(std::string sverb);                                                  //!< Set GlobalVerbosity using std::string variable
 
    // KR Allow nnlo-bridge_0.0.40 to be linked
-   void SetCacheSize(int MaxCache, int CacheComp=2, int CacheType=2);                           //!< Set maximum number of events in cache. Set to 0 to deactivate caching, CacheComp: maximum numbers of entries to be compared with new element; fCacheType: 0: deactivate, 1: 1D cache, 2: cache per ObsBin and Proc
+   void SetCacheSize(int MaxCache, int CacheCompare=2, int CacheType=2);                           //!< Set maximum number of events in cache. Set to 0 to deactivate caching, CacheCompare: maximum numbers of entries to be compared with new element; fCacheType: 0: deactivate, 1: 1D cache, 2: cache per ObsBin and Proc
    int GetCacheSize() const { return fCacheMax; }                                               //!< Get max cache size
-   int GetCacheComp() const { return fCacheComp; }                                              //!< Get cache comp value
+   int GetCacheCompare() const { return fCacheCompare; }                                              //!< Get cache comp value
    int GetCacheType() const { return fCacheType; }                                              //!< Get cache type
 
 protected:
@@ -253,9 +253,9 @@ protected:
    std::vector<std::pair<double,double> > fWMu2Rnd;                                                       //!< copy of warm-up array for rounding
    std::vector<std::pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
 
-   int fCacheMax = 30;                                                                                 //!< maximum number of entries in weight cahce
-   int fCacheComp = 5;                                                                                        //!< maximum number of entries in weight cahce
-   int fCacheType = 2;                                                                                        //!< maximum number of entries in weight cahce
+   int fCacheMax = 30;                                                                                    //!< maximum number of entries in weight cahce
+   int fCacheCompare = 5;                                                                                 //!< maximum number of entries in weight cahce
+   int fCacheType = 2;                                                                                    //!< maximum number of entries in weight cahce
    std::vector<std::pair<fnloScenario,fnloEvent> > fWeightCache;                                          //!< cache for fill-weights
    std::vector<std::vector<std::vector<std::pair<fnloScenario,fnloEvent> > > > fWeightCacheBinProc;       //!< alternative cache for fill-weights
    void FillWeightCache(int scalevar);                                                                    //!< Fill weight into cache, merge weights for identical phase space points

@@ -671,9 +671,9 @@ void fastNLOCreate::SetScenConstsDefaults() {
 #else
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
-   fScenConsts.CacheMax  = 2;
-   fScenConsts.CacheType = 20;
-   fScenConsts.CacheComp = 2;
+   fScenConsts.CacheMax  = 20;
+   fScenConsts.CacheType = 2;
+   fScenConsts.CacheCompare = 2;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
@@ -720,7 +720,7 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(OutputCompression,fSteerfile))           fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
    if (EXIST_NS(CacheMax ,fSteerfile))                   fScenConsts.CacheMax  = INT_NS(CacheMax, fSteerfile);
    if (EXIST_NS(CacheType,fSteerfile))                   fScenConsts.CacheType = INT_NS(CacheType,fSteerfile);
-   if (EXIST_NS(CacheComp,fSteerfile))                   fScenConsts.CacheComp = INT_NS(CacheComp,fSteerfile);
+   if (EXIST_NS(CacheCompare,fSteerfile))                fScenConsts.CacheCompare = INT_NS(CacheCompare,fSteerfile);
    if (EXIST_NS(FlexibleScaleTable,fSteerfile))          fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
    fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
    if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
@@ -789,7 +789,7 @@ void fastNLOCreate::PrintScenConsts() {
    logger.info["PrintScenConsts"] << "Number of decimal digits to store in output table: " << fScenConsts.OutputPrecision << endl;
    logger.info["PrintScenConsts"] << "Cache type (0,1,2): " << fScenConsts.CacheType << endl;
    logger.info["PrintScenConsts"] << "Maximum cache size: " << fScenConsts.CacheMax << endl;
-   logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheComp << endl;
+   logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheCompare << endl;
    logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
    logger.info["PrintScenConsts"] << "InclusiveJets setting for NNLOJET: " << fScenConsts.InclusiveJets << endl;
    for (unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++) {
@@ -965,9 +965,9 @@ void fastNLOCreate::Instantiate() {
    fWarmupNDigitMu2 = 2; //2 by purpose
 
    fCacheMax  = fScenConsts.CacheMax  ? fScenConsts.CacheMax  : 20;
-   fCacheComp = fScenConsts.CacheComp ? fScenConsts.CacheComp :  2;
+   fCacheCompare = fScenConsts.CacheCompare ? fScenConsts.CacheCompare :  2;
    fCacheType = fScenConsts.CacheType ? fScenConsts.CacheType :  2;
-   SetCacheSize(fCacheMax,fCacheComp,fCacheType);
+   SetCacheSize(fCacheMax,fCacheCompare,fCacheType);
 
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
@@ -2434,14 +2434,10 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
       // KR: Also check for nan or inf in the faster code!!!
       if (!CheckWeightIsFinite()) return;
 
-      // KR: Moved to GetBin() itself
-      //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
       const int ObsBin = GetBin();
-      if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-         logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-         logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-         return;
-      }
+      if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
+      // stats
       fStats._nEvPS++;
 
       fastNLOCoeffAddFix* c = (fastNLOCoeffAddFix*)GetTheCoeffTable();
@@ -2541,7 +2537,8 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       cout<<"Error! caching not implemented for scalevar tables."<<endl;
       exit(3); // also 'FlushCache has to be changed!'
    }
-
+   
+   fScenario._iOB = -1; // drop previous entry!
    fScenario._iOB = GetBin(); // we can calculate the bin number right now.
    if ( fScenario._iOB < 0 ) return; // nothing to do.
    //for ( auto& cachelem : fWeightCache ) {
@@ -2558,7 +2555,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
 
    static const double epscomp = 1.e-10;
    if ( fCacheType==1 ) {
-      for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheComp) ; ii-- ) {
+      for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheCompare) ; ii-- ) {
          auto& cachelem = fWeightCache[ii];
          if ( cachelem.second._p  != fEvent._p)       continue;
          if ( fScenario._iOB != cachelem.first._iOB)  continue;
@@ -2582,7 +2579,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
    }
    else if ( fCacheType==2 ) {
       auto& cachelem = fWeightCacheBinProc[fScenario._iOB][fEvent._p];
-      for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheComp) ; ii-- ) {
+      for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheCompare) ; ii-- ) {
          if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
          if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
          if ( fabs(cachelem[ii].first._m1   - fScenario._m1  ) >     (cachelem[ii].first._m1  ) * epscomp  ) continue;
@@ -2727,6 +2724,7 @@ void fastNLOCreate::FlushCache() {
                for ( const auto& elem : proc ) {
                   fScenario = elem.first;
                   fEvent = elem.second;
+                  //cout<<"cache! Filling weight: w="<<fEvent._w<<"\tbin="<<fScenario._iOB<<"\tobs: "<<fScenario._o[0]<<endl;
                   FillContribution(0); // todo! not working if scalevar is != 0
                }
             }
@@ -2753,14 +2751,8 @@ void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
 
    // --- statistics and weights**2
    fStats._nProc++; //keep statistics
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
 
    if (scalevar==0) {
       fastNLOCoeffAddBase* c = GetTheCoeffTable();
@@ -2832,14 +2824,8 @@ void fastNLOCreate::FillContribution(int scalevar, const double wgtfac) {
 
    if (fEvent._n > 0) SetNumberOfEvents(fEvent._n);
 
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
    fastNLOCoeffAddBase* c = GetTheCoeffTable();
    int p = fEvent._p;
 
@@ -3262,21 +3248,15 @@ void fastNLOCreate::FillRefContribution(int scalevar, const double wgtfac) {
    if (GetTheCoeffTable()->GetIRef()== 0) return;   // error. this is not a ref-table
 
    // ObsBin
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
 
    double wgt = wgtfac * fEvent._w / BinSize[ObsBin];
    int p = fEvent._p;
    // todo....
    if (! std::isfinite(wgt)) {
-      logger.error["FillContributionFixHHC"]<<"Weight w is not finite, w = " << wgt << "!"<<endl;
-      logger.error["FillContributionFixHHC"]<<"This should have been captured before, aborting ..."<<endl;
+      logger.error["FillRefContribution"]<<"Weight w is not finite, w = " << wgt << "!"<<endl;
+      logger.error["FillRefContribution"]<<"This should have been captured before, aborting ..."<<endl;
       exit(1);
    }
 
@@ -3570,15 +3550,10 @@ void fastNLOCreate::UpdateWarmupArrays() {
    //! Update the warmup-arrays fWMu1, fWx und fWMu2
    if (fWx.empty()) InitWarmupArrays();
 
-   // KR: Moved to GetBin() itself
-   //      const int ObsBin = (fScenario._iOB == -1) ? GetBin() : fScenario._iOB;
    const int ObsBin = GetBin();
    logger.debug["UpdateWarmupArrays"] << "ObsBin = " << ObsBin << endl;
-   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) {
-      logger.warn["FillAllSubprocesses"]<<"Ignored! Found ObsBin out of range, ObsBin = " << ObsBin << endl;
-      logger.warn["FillAllSubprocesses"]<<"This happens e.g. for entries outside binning phase space, please check your filling routine!" << endl;
-      return;
-   }
+   if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
    logger.debug["UpdateWarmupArrays"]<<"ObsBin="<<ObsBin<<"\tmu1="<<fScenario._m1<<"\tmu2="<<fScenario._m2<<"\tx1="<<fEvent._x1<<"\tx2="<<fEvent._x2<<endl;
 
    fWMu1[ObsBin].first       = std::min(fScenario._m1,fWMu1[ObsBin].first) ;
@@ -4572,7 +4547,7 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
+void fastNLOCreate::SetCacheSize(int MaxCache, int CacheCompare, int CacheType) {
    //! Set Cache for filling the weights
    //! fCacheType: Type. Allowed values:
    //!      0: disable cache
@@ -4581,25 +4556,25 @@ void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
    //!
    //! MaxCache:    Maximum number of entries in cache.
    //!             in case of CacheType==2: maximum number of entries for a single cache element
-   //! CacheComp:  Number of entries to be compared to the new weight.
+   //! CacheCompare:  Number of entries to be compared to the new weight.
    //!             In case all are (almost) equivalent: the weights are merged prior to filling.
    if ( MaxCache <= 0 ) fCacheType=0;
    if ( fCacheType==0 )
       logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
-   if (fCacheType == 0 ) CacheComp=0;
-   if ( CacheComp > MaxCache ) {
-      logger.warn["SetCacheSize"]<<"Warning. CacheComp cannot be larger than MaxCache."<<endl;
-      CacheComp=MaxCache;
+   if (fCacheType == 0 ) CacheCompare=0;
+   if ( CacheCompare > MaxCache ) {
+      logger.warn["SetCacheSize"]<<"Warning. CacheCompare cannot be larger than MaxCache."<<endl;
+      CacheCompare=MaxCache;
    }
    fCacheMax  = MaxCache;
-   fCacheComp = CacheComp;
+   fCacheCompare = CacheCompare;
    fCacheType = CacheType;
    // some messages
    if ( fCacheType!=0 )
-      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheComp="<<CacheComp<<endl;
+      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheCompare="<<CacheCompare<<endl;
    if ( fCacheMax > 10000 && fCacheType==2 )
       logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType="<<fCacheType<<", CacheSize="<<fCacheMax<<")"<<endl;
-   if ( fCacheComp > 200 )
+   if ( fCacheCompare > 200 )
       logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large. This may slow down the execution."<<endl;
 
 }
