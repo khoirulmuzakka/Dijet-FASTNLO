@@ -673,7 +673,7 @@ void fastNLOCreate::SetScenConstsDefaults() {
 #endif /* HAVE_LIBZ */
    fScenConsts.CacheMax  = 20;
    fScenConsts.CacheType = 2;
-   fScenConsts.CacheComp = 2;
+   fScenConsts.CacheCompare = 2;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
@@ -720,7 +720,7 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    if (EXIST_NS(OutputCompression,fSteerfile))           fScenConsts.OutputCompression = BOOL_NS(OutputCompression,fSteerfile);
    if (EXIST_NS(CacheMax ,fSteerfile))                   fScenConsts.CacheMax  = INT_NS(CacheMax, fSteerfile);
    if (EXIST_NS(CacheType,fSteerfile))                   fScenConsts.CacheType = INT_NS(CacheType,fSteerfile);
-   if (EXIST_NS(CacheComp,fSteerfile))                   fScenConsts.CacheComp = INT_NS(CacheComp,fSteerfile);
+   if (EXIST_NS(CacheCompare,fSteerfile))                fScenConsts.CacheCompare = INT_NS(CacheCompare,fSteerfile);
    if (EXIST_NS(FlexibleScaleTable,fSteerfile))          fScenConsts.FlexibleScaleTable = BOOL_NS(FlexibleScaleTable,fSteerfile);
    fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
    if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
@@ -789,7 +789,7 @@ void fastNLOCreate::PrintScenConsts() {
    logger.info["PrintScenConsts"] << "Number of decimal digits to store in output table: " << fScenConsts.OutputPrecision << endl;
    logger.info["PrintScenConsts"] << "Cache type (0,1,2): " << fScenConsts.CacheType << endl;
    logger.info["PrintScenConsts"] << "Maximum cache size: " << fScenConsts.CacheMax << endl;
-   logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheComp << endl;
+   logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheCompare << endl;
    logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
    logger.info["PrintScenConsts"] << "InclusiveJets setting for NNLOJET: " << fScenConsts.InclusiveJets << endl;
    for (unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++) {
@@ -965,9 +965,9 @@ void fastNLOCreate::Instantiate() {
    fWarmupNDigitMu2 = 2; //2 by purpose
 
    fCacheMax  = fScenConsts.CacheMax  ? fScenConsts.CacheMax  : 20;
-   fCacheComp = fScenConsts.CacheComp ? fScenConsts.CacheComp :  2;
+   fCacheCompare = fScenConsts.CacheCompare ? fScenConsts.CacheCompare :  2;
    fCacheType = fScenConsts.CacheType ? fScenConsts.CacheType :  2;
-   SetCacheSize(fCacheMax,fCacheComp,fCacheType);
+   SetCacheSize(fCacheMax,fCacheCompare,fCacheType);
 
    // Try to get warm-up values.
    // Otherwise a warm-up run will be initialized.
@@ -2555,7 +2555,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
 
    static const double epscomp = 1.e-10;
    if ( fCacheType==1 ) {
-      for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheComp) ; ii-- ) {
+      for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheCompare) ; ii-- ) {
          auto& cachelem = fWeightCache[ii];
          if ( cachelem.second._p  != fEvent._p)       continue;
          if ( fScenario._iOB != cachelem.first._iOB)  continue;
@@ -2579,7 +2579,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
    }
    else if ( fCacheType==2 ) {
       auto& cachelem = fWeightCacheBinProc[fScenario._iOB][fEvent._p];
-      for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheComp) ; ii-- ) {
+      for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheCompare) ; ii-- ) {
          if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
          if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
          if ( fabs(cachelem[ii].first._m1   - fScenario._m1  ) >     (cachelem[ii].first._m1  ) * epscomp  ) continue;
@@ -4547,7 +4547,7 @@ fastNLOInterpolBase* fastNLOCreate::MakeInterpolationKernels(string KernelName, 
 
 
 // ___________________________________________________________________________________________________
-void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
+void fastNLOCreate::SetCacheSize(int MaxCache, int CacheCompare, int CacheType) {
    //! Set Cache for filling the weights
    //! fCacheType: Type. Allowed values:
    //!      0: disable cache
@@ -4556,25 +4556,25 @@ void fastNLOCreate::SetCacheSize(int MaxCache, int CacheComp, int CacheType) {
    //!
    //! MaxCache:    Maximum number of entries in cache.
    //!             in case of CacheType==2: maximum number of entries for a single cache element
-   //! CacheComp:  Number of entries to be compared to the new weight.
+   //! CacheCompare:  Number of entries to be compared to the new weight.
    //!             In case all are (almost) equivalent: the weights are merged prior to filling.
    if ( MaxCache <= 0 ) fCacheType=0;
    if ( fCacheType==0 )
       logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
-   if (fCacheType == 0 ) CacheComp=0;
-   if ( CacheComp > MaxCache ) {
-      logger.warn["SetCacheSize"]<<"Warning. CacheComp cannot be larger than MaxCache."<<endl;
-      CacheComp=MaxCache;
+   if (fCacheType == 0 ) CacheCompare=0;
+   if ( CacheCompare > MaxCache ) {
+      logger.warn["SetCacheSize"]<<"Warning. CacheCompare cannot be larger than MaxCache."<<endl;
+      CacheCompare=MaxCache;
    }
    fCacheMax  = MaxCache;
-   fCacheComp = CacheComp;
+   fCacheCompare = CacheCompare;
    fCacheType = CacheType;
    // some messages
    if ( fCacheType!=0 )
-      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheComp="<<CacheComp<<endl;
+      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheCompare="<<CacheCompare<<endl;
    if ( fCacheMax > 10000 && fCacheType==2 )
       logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType="<<fCacheType<<", CacheSize="<<fCacheMax<<")"<<endl;
-   if ( fCacheComp > 200 )
+   if ( fCacheCompare > 200 )
       logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large. This may slow down the execution."<<endl;
 
 }

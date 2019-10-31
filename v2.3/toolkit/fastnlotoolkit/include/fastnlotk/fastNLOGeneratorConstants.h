@@ -116,7 +116,7 @@ namespace fastNLO {
 
       int CacheType; //!< Cache type: 1 or 2, 0 for deactivation
       int CacheMax ; //!< maximum size of cache
-      int CacheComp; //!< number of elements to be compared with new entry
+      int CacheCompare; //!< number of elements to be compared with new entry
 
       /**# -------------------------------------------------------------------- #
          #   Choose fastNLO interpolation kernels and distance measures
