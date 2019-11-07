@@ -235,10 +235,11 @@ fastNLOCreate::fastNLOCreate(const fastNLO::GeneratorConstants& GenConsts, const
      logger.info["fastNLOCreate"] << "Steering file " << steerfile << " does not exist, try to run with preset values!" << endl;
    } else {
      // At last, read steering for final completions and modifications
+      cout<<"OK, steerfile: "<<steerfile<<"\t namespace: "<<steeringNameSpace<<endl;
      ReadSteeringFile(steerfile,steeringNameSpace);
    }
    // DEBUG
-   //   PRINTALL();
+   PRINTALL();
    //! Update constants from steering namespace, but only if either of warmup or steering file exist!
    if ( lwarm || lsteer ) {
      SetGenConstsFromSteering();
@@ -964,9 +965,9 @@ void fastNLOCreate::Instantiate() {
    fWarmupNDigitMu1 = 1; //1 by purpose
    fWarmupNDigitMu2 = 2; //2 by purpose
 
-   fCacheMax  = fScenConsts.CacheMax  ? fScenConsts.CacheMax  : 20;
-   fCacheCompare = fScenConsts.CacheCompare ? fScenConsts.CacheCompare :  2;
-   fCacheType = fScenConsts.CacheType ? fScenConsts.CacheType :  2;
+   fCacheMax  = fScenConsts.CacheMax > 0  ? fScenConsts.CacheMax  : 20;
+   fCacheCompare = fScenConsts.CacheCompare > 0 ? fScenConsts.CacheCompare :  2;
+   fCacheType = ( fScenConsts.CacheType>=0 && fScenConsts.CacheType<=2 )  ? fScenConsts.CacheType :  2;
    SetCacheSize(fCacheMax,fCacheCompare,fCacheType);
 
    // Try to get warm-up values.
@@ -2537,7 +2538,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       cout<<"Error! caching not implemented for scalevar tables."<<endl;
       exit(3); // also 'FlushCache has to be changed!'
    }
-   
+
    fScenario._iOB = -1; // drop previous entry!
    fScenario._iOB = GetBin(); // we can calculate the bin number right now.
    if ( fScenario._iOB < 0 ) return; // nothing to do.
