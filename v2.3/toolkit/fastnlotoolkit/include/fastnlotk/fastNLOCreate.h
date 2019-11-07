@@ -254,8 +254,8 @@ protected:
    std::vector<std::pair<double,double> > fWxRnd;                                                         //!< copy of warm-up array for rounding
 
    int fCacheMax = 30;                                                                                    //!< maximum number of entries in weight cahce
-   int fCacheCompare = 5;                                                                                 //!< maximum number of entries in weight cahce
-   int fCacheType = 2;                                                                                    //!< maximum number of entries in weight cahce
+   int fCacheCompare = 20;                                                                                 //!< maximum number of entries in weight cahce
+   int fCacheType = 0;                                                                                    //!< maximum number of entries in weight cahce
    std::vector<std::pair<fnloScenario,fnloEvent> > fWeightCache;                                          //!< cache for fill-weights
    std::vector<std::vector<std::vector<std::pair<fnloScenario,fnloEvent> > > > fWeightCacheBinProc;       //!< alternative cache for fill-weights
    void FillWeightCache(int scalevar);                                                                    //!< Fill weight into cache, merge weights for identical phase space points

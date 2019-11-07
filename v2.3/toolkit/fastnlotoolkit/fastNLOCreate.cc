@@ -673,8 +673,8 @@ void fastNLOCreate::SetScenConstsDefaults() {
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
    fScenConsts.CacheMax  = 20;
-   fScenConsts.CacheType = 2;
-   fScenConsts.CacheCompare = 2;
+   fScenConsts.CacheType = 0;
+   fScenConsts.CacheCompare = 10;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
@@ -966,8 +966,8 @@ void fastNLOCreate::Instantiate() {
    fWarmupNDigitMu2 = 2; //2 by purpose
 
    fCacheMax  = fScenConsts.CacheMax > 0  ? fScenConsts.CacheMax  : 20;
-   fCacheCompare = fScenConsts.CacheCompare > 0 ? fScenConsts.CacheCompare :  2;
-   fCacheType = ( fScenConsts.CacheType>=0 && fScenConsts.CacheType<=2 )  ? fScenConsts.CacheType :  2;
+   fCacheCompare = fScenConsts.CacheCompare > 0 ? fScenConsts.CacheCompare :  10;
+   fCacheType = ( fScenConsts.CacheType>=0 && fScenConsts.CacheType<=2 )  ? fScenConsts.CacheType :  0;
    SetCacheSize(fCacheMax,fCacheCompare,fCacheType);
 
    // Try to get warm-up values.
