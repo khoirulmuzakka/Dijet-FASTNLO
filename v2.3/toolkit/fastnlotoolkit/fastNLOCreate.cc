@@ -676,7 +676,8 @@ void fastNLOCreate::SetScenConstsDefaults() {
    fScenConsts.CacheType = 0;
    fScenConsts.CacheCompare = 10;
    fScenConsts.FlexibleScaleTable = false;
-   fScenConsts.NFlexScales = 0;
+   fScenConsts.NFlexScales = 2;
+   fScenConsts.FlexConstScale2 = PDG_MZ;
    fScenConsts.InclusiveJets = false;
    fScenConsts.ScaleVariationFactors.clear();
    fScenConsts.ReadBinningFromSteering = false;
@@ -727,6 +728,8 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    fIsFlexibleScale = fScenConsts.FlexibleScaleTable;
    if (EXIST_NS(NFlexScales,fSteerfile))                 fScenConsts.NFlexScales = INT_NS(NFlexScales,fSteerfile);
    fNFlexScales = fScenConsts.NFlexScales;
+   if (EXIST_NS(FlexConstScale2,fSteerfile))             fScenConsts.FlexConstScale2 = DOUBLE_NS(FlexConstScale2,fSteerfile);
+   fFlexConstScale2 = fScenConsts.FlexConstScale2;
    if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
    fIsInclusiveJets = fScenConsts.InclusiveJets;
    if (EXIST_NS(ScaleVariationFactors,fSteerfile))       fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
@@ -796,6 +799,7 @@ void fastNLOCreate::PrintScenConsts() {
    logger.info["PrintScenConsts"] << "Number of comparisons (cache):   " << fScenConsts.CacheCompare << endl;
    logger.info["PrintScenConsts"] << "Create table fully flexible in mu_f: " << fScenConsts.FlexibleScaleTable << endl;
    logger.info["PrintScenConsts"] << "No. of flex scales filled simultaneously: " << fScenConsts.NFlexScales << endl;
+   logger.info["PrintScenConsts"] << "Constant used for scale2, if only one flex-scale requested: " << fScenConsts.FlexConstScale2 << endl;
    logger.info["PrintScenConsts"] << "InclusiveJets setting for NNLOJET: " << fScenConsts.InclusiveJets << endl;
    for (unsigned int i=0; i<fScenConsts.ScaleVariationFactors.size(); i++) {
       logger.info["PrintScenConsts"] << "Factorization scale variation factor [" << i << "]: " << fScenConsts.ScaleVariationFactors[i] << endl;
@@ -1022,6 +1026,7 @@ void fastNLOCreate::Instantiate() {
 
    fIsFlexibleScale  = fScenConsts.FlexibleScaleTable;
    fNFlexScales      = fScenConsts.NFlexScales;
+   fFlexConstScale2  = fScenConsts.FlexConstScale2;
    fIsInclusiveJets  = fScenConsts.InclusiveJets;
    fApplyPDFReweight = fScenConsts.ApplyPDFReweighting;
    SetOutputPrecision(fScenConsts.OutputPrecision);
