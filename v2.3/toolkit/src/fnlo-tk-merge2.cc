@@ -421,6 +421,7 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
       if ( ftag.find(".dat") != string::npos) ftag.resize(ftag.find(".dat"));
       if ( ftag.find(".tab") != string::npos) ftag.resize(ftag.find(".tab"));
       if ( ftag.find("/") != string::npos) ftag=ftag.substr(ftag.find_last_of("/")+1,ftag.size());
+      ftag += ".";
       //cout<<"ftag="<<ftag<<endl;
       for ( vector<string>& lit : content ) {
 	 string nnfile = lit[0];
