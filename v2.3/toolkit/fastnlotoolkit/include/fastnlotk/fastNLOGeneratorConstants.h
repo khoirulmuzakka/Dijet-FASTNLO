@@ -106,6 +106,8 @@ namespace fastNLO {
       int OutputPrecision;//!< Number of decimal digits to store in output table (def.=8).
       bool OutputCompression;//!< If zlib available, gzip output table.
       bool FlexibleScaleTable;//!< Create table fully flexible in mu_f (larger size, and requires scale independent weights during creation), true, or table with fixed number of mu_f scale factors, def.=false.
+      int NFlexScales;//!<No. of flexible scales to fill simultaneously; 1 or 2
+      double FlexConstScale2;//!< Constant value set for 2nd "flexible" scale
       std::vector<double> ScaleVariationFactors; //!< Factorization scale variations (only needed for fixed-scale tables), List of scale factors must include factor '1', Scale factors will be ordered according to fastNLO convention: (1, min, ... , max). Defaults: {0.5, 1, 2}
 
       bool ReadBinningFromSteering;//!< Specify if binning is read from fScenConst or from warmup

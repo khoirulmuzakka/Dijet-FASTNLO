@@ -120,6 +120,8 @@ public:
    void SetWarmupTableFilename(std::string);                                                         //!< Set the filename, which is used for storage of the warmup-table (otherwise a default is used)
    inline bool GetIsWarmup() const { return fIsWarmup; };                                              //!< Get flag for warmup table
    inline bool GetIsFlexibleScale() const { return fIsFlexibleScale; }                          //!< Get if flexible-scale table is requested
+   inline int GetNFlexScales() const { return fNFlexScales; }                                   //!< Get no. flexible scales to fill simultaneously
+   inline double GetFlexConstScale2() const { return fFlexConstScale2; }                        //!< Get constant value set for 2nd "flexible" scale
    inline bool GetIsInclusiveJets() const { return fIsInclusiveJets; }                          //!< Get if inclusive jet table is requested
    void SetWarmupXSafetyMargin(int margin = 4) { fWarmupXMargin = margin;}                          //!< Set margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
    void SetWarmupNDigitMu1(int rnd = 1) { fWarmupNDigitMu1 = rnd;}                              //!< Round warmup values for scale 1
@@ -213,6 +215,8 @@ protected:
    int fWarmupNDigitMu2;                                                                          //!< Digits of warmup values for scale 2
    int  fIOrd;                                                                                  //!< order of alpha_s of run
    bool fIsFlexibleScale;                                                                       //!< is it a flexible scale table?
+   int  fNFlexScales;                                                                           //!< no. of simultaneous flex-scales
+   double fFlexConstScale2;                                                                     //!< constant value set for 2nd "flexible" scale
    bool fIsInclusiveJets;                                                                       //!< is it an inclusive jets table?
    bool fApplyPDFReweight;                                                                      //!< shall the PDF reweight be applied.
    std::string fWarmupFilename;                                                                 //!< File name of the warmup table
