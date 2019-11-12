@@ -2808,7 +2808,7 @@ void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
    else {
       // Add weight factor wgtfac for x section differences (TODO: Does this work with DB's cache?)
       if (fIsFlexibleScale) {
-         if (fCacheMax > 1) {
+         if (fCacheMax > 1  && fCacheType>0 ) {
             FillWeightCache(scalevar);
             if (fCacheType==1 && (int)fWeightCache.size() >= fCacheMax)
                FlushCache();
