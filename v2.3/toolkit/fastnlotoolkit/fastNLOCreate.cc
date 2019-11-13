@@ -2745,7 +2745,7 @@ void fastNLOCreate::FlushCache() {
       else {
          logger.error["FlushCache()"]<<"fCacheType = "<<fCacheType<<endl;
       }
-      fScenario._iOB = -1; // important.
+      fScenario = fnloScenario();//._iOB = -1; // important.
    }
 
    fWeightCache.clear();
