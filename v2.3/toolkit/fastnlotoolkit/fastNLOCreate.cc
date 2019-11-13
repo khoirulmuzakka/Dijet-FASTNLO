@@ -2387,26 +2387,19 @@ void fastNLOCreate::ReadCoefficientSpecificVariables() {
 int fastNLOCreate::GetBin() {
    //! Get ObsBin number from scenario,
    //! either directly, when iOB is set, or from multidimensional observables
-   if ( fScenario._iOB > -1 ) {
-      fObsBin = fScenario._iOB;
-      logger.debug["GetBin"] << "Taking ObsBin directly from scenario, fObsBin = " << fObsBin << endl;
+   if ( fScenario._iOB > 0 ) { // if not -1 or 0(!), then we believe that value
+      fObsBin         = fScenario._iOB;
+      //logger.debug["GetBin"] << "Taking ObsBin directly from scenario, fObsBin = " << fObsBin << endl;
+      return fObsBin;
+   }
+   //! Check cache and get ObsBin from there if available
+   else if ( fPreviousObs_o == fScenario._o ) {
+      fObsBin = fPreviousObsBin;
       return fObsBin;
    }
 
    //! Get dimensionality of binning
    const int idiff = GetNumDiffBin();
-   logger.debug["GetBin"] << "Dimensionality of scenario, idiff = NDim = " << idiff << endl;
-
-   //! Check cache and get ObsBin from there if available
-   if ( ( fPreviousObs_o.size() == 1 && fPreviousObs_o[0] == fScenario._o[0] ) ||
-        ( fPreviousObs_o.size() == 2 && fPreviousObs_o[0] == fScenario._o[0] && fPreviousObs_o[1] == fScenario._o[1] ) ||
-        ( fPreviousObs_o.size() == 3 && fPreviousObs_o[0] == fScenario._o[0] && fPreviousObs_o[1] == fScenario._o[1] && fPreviousObs_o[2] == fScenario._o[2] ) ) {
-      logger.debug["GetBin"] << "Taking ObsBin from cache, fObsBin = " << fObsBin << endl;
-      fObsBin        = fPreviousObsBin;
-      fScenario._iOB = fPreviousObsBin;
-      return fPreviousObsBin;//fPreviousScen._iOB;
-   }
-
    //! Calculate ObsBin number from multidimensional observables
    if ( idiff == 1 ) {
       fObsBin = GetObsBinNumber(fScenario._o[0]);
@@ -2420,7 +2413,6 @@ int fastNLOCreate::GetBin() {
    }
 
    //! Store scenario in cache
-   fScenario._iOB = fObsBin;
    fPreviousObsBin = fObsBin;
    fPreviousObs_o  = fScenario._o;
 
@@ -2551,27 +2543,18 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
       exit(3); // also 'FlushCache has to be changed!'
    }
 
-   fScenario._iOB = -1; // drop previous entry!
-   fScenario._iOB = GetBin(); // we can calculate the bin number right now.
-   if ( fScenario._iOB < 0 ) return; // nothing to do.
+   // fScenario._iOB = -1; // drop previous entry!
+   // fScenario._iOB = GetBin(); // we can calculate the bin number right now.
+   // if ( fScenario._iOB < 0 ) return; // nothing to do.
    //for ( auto& cachelem : fWeightCache ) {
 
-   if ( fCacheType==2 && fWeightCacheBinProc.empty() ) {
-      fWeightCacheBinProc.resize(GetNObsBin());
-      for ( auto& cc : fWeightCacheBinProc ) {
-         cc.resize(GetNSubprocesses());
-         for ( auto& bb : cc ) {
-            bb.reserve(int(fCacheMax*0.5)); // *0.7 because most of the bins will not receive the max limit
-         }
-      }
-   }
 
    static const double epscomp = 1.e-10;
    if ( fCacheType==1 ) {
       for ( int ii = int(fWeightCache.size())-1 ; ii>=0 && ii>=(int(fWeightCache.size()) - fCacheCompare) ; ii-- ) {
          auto& cachelem = fWeightCache[ii];
          if ( cachelem.second._p  != fEvent._p)       continue;
-         if ( fScenario._iOB != cachelem.first._iOB)  continue;
+         if ( fObsBin != cachelem.first._iOB)  continue;
          //else if ( cachelem.first._o[0] != fScenario._o[0]) continue;
          // if ( fWeightCache[ii].second._x1  == fEvent._x1  ) continue;
          // if ( fWeightCache[ii].second._x2  == fEvent._x2  ) continue;
@@ -2589,9 +2572,21 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
          return; // done !
       }
       fWeightCache.push_back(make_pair(fScenario,fEvent));
+      fWeightCache.back().first._iOB  = fObsBin;
    }
    else if ( fCacheType==2 ) {
-      auto& cachelem = fWeightCacheBinProc[fScenario._iOB][fEvent._p];
+      // resize if needed:
+      if ( fWeightCacheBinProc.empty() ) {
+         fWeightCacheBinProc.resize(GetNObsBin());
+         for ( auto& cc : fWeightCacheBinProc ) {
+            cc.resize(GetNSubprocesses());
+            for ( auto& bb : cc ) {
+               bb.reserve(int(fCacheMax*0.5)); // *0.7 because most of the bins will not receive the max limit
+            }
+         }
+      }
+      // fill
+      auto& cachelem = fWeightCacheBinProc[fObsBin][fEvent._p];
       for ( int ii = int(cachelem.size())-1 ; ii>=0 && ii>=(int(cachelem.size()) - fCacheCompare) ; ii-- ) {
          if ( fabs(cachelem[ii].second._x1  - fEvent._x1     ) >     (cachelem[ii].second._x1 ) * epscomp  ) continue;
          if ( fabs(cachelem[ii].second._x2  - fEvent._x2     ) >     (cachelem[ii].second._x2 ) * epscomp  ) continue;
@@ -2606,6 +2601,7 @@ void fastNLOCreate::FillWeightCache(int scalevar) {
          return; // done !
       }
       cachelem.push_back(make_pair(fScenario,fEvent));
+      cachelem.back().first._iOB  = fObsBin;
    }
    else {
       // nothing todo!
@@ -2670,9 +2666,11 @@ void fastNLOCreate::FlushCache() {
       //const double epsfill = 1.e-14;
       for ( int iwrf = 0 ; iwrf<6 ; iwrf++ ) {
          fEvent.Reset();
-         for ( fScenario._iOB = 0 ; fScenario._iOB<(int)GetNObsBin() ; fScenario._iOB++ ) { // ordered fill by iobs
+         //for ( fScenario._iOB = 0 ; fScenario._iOB<(int)GetNObsBin() ; fScenario._iOB++ ) { // ordered fill by iobs (changes fScenario._iOB, which may not be provided by generator!)
+            // check carefully the filling routines (with and without cache)
+         for ( fObsBin = 0 ; fObsBin<(int)GetNObsBin() ; fObsBin++ ) { // ordered fill by iobs
             for ( const auto& cachelem : fWeightCache ) {
-               if ( fScenario._iOB != cachelem.first._iOB ) continue;
+               if ( fObsBin != cachelem.first._iOB ) continue;
                switch (iwrf) {
                case 0:
                   //if ( fabs(cachelem.second._w) < epsfill ) continue;
@@ -2721,6 +2719,7 @@ void fastNLOCreate::FlushCache() {
             }
          }
       }
+      //fScenario._iOB = -1;
    }
    else {
       if ( fCacheType==1 ) {
@@ -2746,6 +2745,7 @@ void fastNLOCreate::FlushCache() {
       else {
          logger.error["FlushCache()"]<<"fCacheType = "<<fCacheType<<endl;
       }
+      fScenario._iOB = -1; // important.
    }
 
    fWeightCache.clear();
@@ -2766,6 +2766,14 @@ void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
    fStats._nProc++; //keep statistics
    const int ObsBin = GetBin();
    if (ObsBin < 0 || ObsBin >= (int)GetNObsBin()) return;
+
+   // sanity
+   if (fEvent._x1<0 || fEvent._x2<0) {
+      logger.error["Fill"]<<"x-value is smaller than zero: x1="<<fEvent._x1<<", x2="<<fEvent._x2<<". Skipping event."<<endl;
+      fEvent._x1=1;
+      fEvent._x2=1;
+      return ;
+   }
 
    if (scalevar==0) {
       fastNLOCoeffAddBase* c = GetTheCoeffTable();
@@ -2795,26 +2803,21 @@ void fastNLOCreate::Fill(int scalevar, const double wgtfac) {
       c->fWgt.SigSumW2 += fEvent._sig*fEvent._sig;
    }
 
-   // sanity
-   if (fEvent._x1<0 || fEvent._x2<0) {
-      logger.error["Fill"]<<"x-value is smaller than zero: x1="<<fEvent._x1<<", x2="<<fEvent._x2<<". Skipping event."<<endl;
-      fEvent._x1=1;
-      fEvent._x2=1;
-      return ;
-   }
-
    if (fIsWarmup) {
       if (scalevar==0 && ObsBin>=0) UpdateWarmupArrays();
       // else skip event
-   } else if (GetTheCoeffTable()->GetIRef()) FillRefContribution(scalevar);
+   } 
+   else if (GetTheCoeffTable()->GetIRef()) {
+      FillRefContribution(scalevar);
+   }
    else {
       // Add weight factor wgtfac for x section differences (TODO: Does this work with DB's cache?)
       if (fIsFlexibleScale) {
-         if (fCacheMax > 1  && fCacheType>0 ) {
+         if ( fCacheType>0 && fCacheMax > 1 ) {
             FillWeightCache(scalevar);
-            if (fCacheType==1 && (int)fWeightCache.size() >= fCacheMax)
-               FlushCache();
-            if (fCacheType==2 && !fWeightCacheBinProc.empty() && fScenario._iOB>=0 && (int)fWeightCacheBinProc[fScenario._iOB][fEvent._p].size() >= fCacheMax )
+            if ( (fCacheType==1 && (int)fWeightCache.size() >= fCacheMax) ||
+                 (fCacheType==2 && !fWeightCacheBinProc.empty() && (int)fWeightCacheBinProc[fObsBin][fEvent._p].size() >= fCacheMax )
+               )
                FlushCache();
          } else {
             FillContribution(scalevar,wgtfac);
