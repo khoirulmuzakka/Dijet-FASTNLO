@@ -2398,13 +2398,13 @@ int fastNLOCreate::GetBin() {
    logger.debug["GetBin"] << "Dimensionality of scenario, idiff = NDim = " << idiff << endl;
 
    //! Check cache and get ObsBin from there if available
-   if ( (int)fLastScen._o.size() == idiff ) {
-      if ( ( idiff == 1 && fLastScen._o[0] == fScenario._o[0] ) ||
-           ( idiff == 2 && fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] ) ||
-           ( idiff == 3 && fLastScen._o[0] == fScenario._o[0] && fLastScen._o[1] == fScenario._o[1] && fLastScen._o[2] == fScenario._o[2] ) ) {
-         logger.debug["GetBin"] << "Taking ObsBin from cache, fObsBin = " << fObsBin << endl;
-         return fObsBin;
-      }
+   if ( ( fPreviousObs_o.size() == 1 && fPreviousObs_o[0] == fScenario._o[0] ) ||
+        ( fPreviousObs_o.size() == 2 && fPreviousObs_o[0] == fScenario._o[0] && fPreviousObs_o[1] == fScenario._o[1] ) ||
+        ( fPreviousObs_o.size() == 3 && fPreviousObs_o[0] == fScenario._o[0] && fPreviousObs_o[1] == fScenario._o[1] && fPreviousObs_o[2] == fScenario._o[2] ) ) {
+      logger.debug["GetBin"] << "Taking ObsBin from cache, fObsBin = " << fObsBin << endl;
+      fObsBin        = fPreviousObsBin;
+      fScenario._iOB = fPreviousObsBin;
+      return fPreviousObsBin;//fPreviousScen._iOB;
    }
 
    //! Calculate ObsBin number from multidimensional observables
@@ -2420,7 +2420,9 @@ int fastNLOCreate::GetBin() {
    }
 
    //! Store scenario in cache
-   fLastScen = fScenario;
+   fScenario._iOB = fObsBin;
+   fPreviousObsBin = fObsBin;
+   fPreviousObs_o  = fScenario._o;
 
    return fObsBin;
 }

@@ -223,8 +223,8 @@ protected:
    // TODO: fSteerfile as internally set variable is used as default steeringNameSpace at many places. This should be avoided!
    std::string fSteerfile;                                                                      //!< filename of steering file (and default steeringNameSpace!)
    int fObsBin;                                                                                 //!< ObsBin from 'last' 'Fill()'-call
-   fnloScenario fLastScen;                                                                      //!< keep information of scenario from last 'Fill()'-call
-
+   std::map<int,double> fPreviousObs_o;                                                         //!< keep information of scenario from last 'Fill()'-call
+   int fPreviousObsBin;                                                                         //!< keep information of scenario from last 'Fill()'-call
    fastNLOReader* fReader;                                                                      //!< PDF and alpha_s interface for reference tables
 
    fastNLO::GeneratorConstants fGenConsts;                                                      //!< Generator specific constants
