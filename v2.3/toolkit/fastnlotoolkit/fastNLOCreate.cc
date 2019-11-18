@@ -672,9 +672,9 @@ void fastNLOCreate::SetScenConstsDefaults() {
 #else
    fScenConsts.OutputCompression = false;
 #endif /* HAVE_LIBZ */
-   fScenConsts.CacheMax  = 20;
-   fScenConsts.CacheType = 0;
-   fScenConsts.CacheCompare = 10;
+   fScenConsts.CacheMax     = 0;
+   fScenConsts.CacheCompare = 0;
+   fScenConsts.CacheType    = 0;
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.NFlexScales = 2;
    fScenConsts.FlexConstScale2 = PDG_MZ;
@@ -973,8 +973,8 @@ void fastNLOCreate::Instantiate() {
    fWarmupNDigitMu1 = 1; //1 by purpose
    fWarmupNDigitMu2 = 2; //2 by purpose
 
-   fCacheMax  = fScenConsts.CacheMax > 0  ? fScenConsts.CacheMax  : 20;
-   fCacheCompare = fScenConsts.CacheCompare > 0 ? fScenConsts.CacheCompare :  10;
+   fCacheMax  = fScenConsts.CacheMax > 0  ? fScenConsts.CacheMax  : 0;
+   fCacheCompare = fScenConsts.CacheCompare > 0 ? fScenConsts.CacheCompare :  0;
    fCacheType = ( fScenConsts.CacheType>=0 && fScenConsts.CacheType<=2 )  ? fScenConsts.CacheType :  0;
    SetCacheSize(fCacheMax,fCacheCompare,fCacheType);
 
@@ -4574,25 +4574,38 @@ void fastNLOCreate::SetCacheSize(int MaxCache, int CacheCompare, int CacheType) 
    //!             in case of CacheType==2: maximum number of entries for a single cache element
    //! CacheCompare:  Number of entries to be compared to the new weight.
    //!             In case all are (almost) equivalent: the weights are merged prior to filling.
-   if ( MaxCache <= 0 ) fCacheType=0;
-   if ( fCacheType==0 )
-      logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
-   if (fCacheType == 0 ) CacheCompare=0;
-   if ( CacheCompare > MaxCache ) {
-      logger.warn["SetCacheSize"]<<"Warning. CacheCompare cannot be larger than MaxCache."<<endl;
-      CacheCompare=MaxCache;
-   }
-   fCacheMax  = MaxCache;
+   fCacheMax     = MaxCache;
    fCacheCompare = CacheCompare;
-   fCacheType = CacheType;
-   // some messages
-   if ( fCacheType!=0 )
-      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType="<<fCacheType<<"\tCacheMax="<<fCacheMax<<"\tCacheCompare="<<CacheCompare<<endl;
-   if ( fCacheMax > 10000 && fCacheType==2 )
-      logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType="<<fCacheType<<", CacheSize="<<fCacheMax<<")"<<endl;
-   if ( fCacheCompare > 200 )
-      logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large. This may slow down the execution."<<endl;
+   fCacheType    = CacheType;
 
+   // Checks
+   if ( fCacheType == 0 ) {
+      fCacheMax     = 0;
+      fCacheCompare = 0;
+   }
+   if ( fCacheMax <= 0 ) {
+      if ( fCacheType != 0 ) {
+         logger.warn["SetCacheSize"]<<"Warning. fCacheMax <= 0: " << fCacheMax << ". Cache deactivated!"<<endl;
+      }
+      fCacheMax     = 0;
+      fCacheCompare = 0;
+      fCacheType    = 0;
+   }
+   if ( fCacheCompare > fCacheMax ) {
+      logger.warn["SetCacheSize"]<<"Warning. fCacheCompare = " << fCacheCompare << " is larger than fCacheMax = " << fCacheMax << ". Reduced to fCacheMax!" << endl;
+      fCacheCompare = fCacheMax;
+   }
+
+   // some messages
+   if ( fCacheType == 0 ) {
+      logger.info["SetCacheSize"]<<"Deactivate filling cache."<<endl;
+   } else {
+      logger.info["SetCacheSize"]<<"Using cache for fill weights (for flex tables). CacheType = "<<fCacheType<<"\tCacheMax = "<<fCacheMax<<"\tCacheCompare = "<<fCacheCompare<<endl;
+   }
+   if ( fCacheMax > 10000 && fCacheType == 2 )
+      logger.warn["SetCacheSize"]<<"Cache size can become large (CacheType = "<<fCacheType<<", fCacheMax = "<<fCacheMax<<")"<<endl;
+   if ( fCacheCompare > 200 )
+      logger.warn["SetCacheSize"]<<"Cache comparison value is pretty large: fCacheCompare = "<<fCacheCompare<<". This may slow down the execution."<<endl;
 }
 
 
