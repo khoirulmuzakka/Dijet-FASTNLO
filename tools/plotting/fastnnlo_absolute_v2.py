@@ -45,6 +45,9 @@ parser.add_argument('-l', '--logfile', default='file.log', required=True,
 parser.add_argument('-o', '--outputfilename', required=False, nargs='?', type=str,
                     help='Customise the first part of the output filename.'
                     'Default: Same structure as datfile name.')
+parser.add_argument('-u', '--uncertaintyrange', default=-1., type=float,
+                    help='Range in statistical uncertainty (in percent) to show in ratio subplot.'
+                    'Negative values mean automatic choice by matplotlib.')
 
 
 # parse arguments
@@ -54,6 +57,7 @@ namesp = parser.parse_args()
 # take care of the input files
 datfile = args['datfile']
 logfile = args['logfile']
+uncrange = args['uncertaintyrange']
 
 
 params = {'legend.fontsize': 'x-large',
@@ -269,8 +273,8 @@ for i in range(nscl):
 
     ax.set_xlim(xmin, xmax)
     axr.set_xlim(xmin, xmax)
-    # Do not set to have statistical uncertainties visible
-    #    axr.set_ylim(0.99, 1.01)
+    if uncrange > 0:
+        axr.set_ylim(1.-uncrange/100., 1.+uncrange/100.)
     axr.fill_between(x, 1.-abs(dst_nnlo[i]), 1.+abs(dst_nnlo[i]),
                      edgecolor=col1, facecolor=col1b, alpha=0.5)
     axr.axhline(1.0, color=col1)
