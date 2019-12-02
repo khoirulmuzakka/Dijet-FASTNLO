@@ -112,8 +112,9 @@ int main(int argc, char** argv) {
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          man << "[#vars]: Number of mu_r, mu_f scale variations to investigate, if possible, def. = 1." << endl;
          man << "   If #vars == 1 then only the central scale with scale factors of (1,1) is investigated." << endl;
-         man << "   If  1 < #vars < 8  then no. of additional mu_r, mu_f scale factor variations to investigate, if possible." << endl;
-         man << "   If -7 < #vars < 0  then no. of additional mu_r, mu_f fixed scale variations to investigate, if possible." << endl;
+         man << "   If  1 < #vars < 8   then no. of additional mu_r, mu_f scale factor variations to investigate, if possible." << endl;
+         man << "   If -7 < #vars < 0   then no. of additional mu_r, mu_f low fixed-scale variations to investigate, if possible." << endl;
+         man << "   If -13 < #vars < -6 then no. of additional mu_r, mu_f high fixed-scale variations to investigate, if possible." << endl;
          man << "   If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1)." << endl;
          man << "[ascode]: Name of desired alpha_s evolution code, def. = GRV." << endl;
          man << "   Alternatives are: LHAPDF, RUNDEC, and" << endl;
@@ -166,24 +167,23 @@ int main(int argc, char** argv) {
 
 
 
-
-
-
-
    //--- PDF or scale variations
    int nvars = 1;
    const int nvarmax = 7;
-   const int nfixmax = 6;
+   const int nfixmax = 12;
    const double xmur[] =   { 1.0, 0.5, 2.0, 0.5, 1.0, 1.0, 2.0 };
    const double xmuf[] =   { 1.0, 0.5, 2.0, 1.0, 0.5, 2.0, 1.0 };
-   const double fixmur[] = { 1.0, 2.718281828459045, 4.481689070338065, 2.718281828459045, 4.481689070338065, 2.718281828459045, 12.18249396070347 };
-   const double fixmuf[] = { 1.0, 2.718281828459045, 4.481689070338065, 4.481689070338065, 2.718281828459045, 12.18249396070347, 2.718281828459045 };
+   double fixmur[nvarmax];
+   double fixmuf[nvarmax];
+   const double fixmurlow[]  = { 1.0, 2.718281828459045, 4.481689070338065, 2.718281828459045, 4.481689070338065, 2.718281828459045, 12.18249396070347 };
+   const double fixmuflow[]  = { 1.0, 2.718281828459045, 4.481689070338065, 4.481689070338065, 2.718281828459045, 12.18249396070347, 2.718281828459045 };
+   const double fixmurhigh[] = { 1.0, 90.0171313005, 54.5981500331, 148.4131591026, 90.0171313005, 54.5981500331, 90.0171313005 };
+   const double fixmufhigh[] = { 1.0, 90.0171313005, 54.5981500331, 148.4131591026, 54.5981500331, 90.0171313005, 148.4131591026 };
    if (argc > 3) {
       chtmp = (const char*) argv[3];
    }
    if (argc <= 3 || chtmp == "_") {
-      shout["fnlo-tk-cppread"] << "No request given for PDF or scale variations," << endl;
-      shout << "            investigating primary scale only." << endl;
+      shout["fnlo-tk-cppread"] << "No request given for PDF or scale variations, using primary scale only." << endl;
    } else {
       nvars = atoi(argv[3]);
       if (nvars < -nfixmax) {
@@ -198,7 +198,21 @@ int main(int argc, char** argv) {
          if ( nvars > 0 ) {
             shout["fnlo-tk-cppread"] << "If possible, will try to do " << nvars << " scale factor variations." << endl;
          } else if ( nvars < 0 ) {
-            shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " additional fixed scale variations." << endl;
+            for ( int i=0; i<7; i++ ) {
+               if ( nvars < -6 ) {
+                  fixmur[i] = fixmurhigh[i];
+                  fixmuf[i] = fixmufhigh[i];
+               } else {
+                  fixmur[i] = fixmurlow[i];
+                  fixmuf[i] = fixmuflow[i];
+               }
+            }
+            if ( nvars < -6 ) {
+               nvars = nvars + 6;
+               shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " additional high fixed-scale variations." << endl;
+            } else {
+               shout["fnlo-tk-cppread"] << "If possible, will try to do " << -nvars << " additional low fixed-scale variations." << endl;
+            }
          } else {
             shout["fnlo-tk-cppread"] << "If possible, will try to do all PDF members." << endl;
          }
@@ -1140,7 +1154,7 @@ int main(int argc, char** argv) {
          }
       } else {
          if (!fnlo->GetIsFlexibleScaleTable()) {
-            error["fnlo-tk-cppread"] << "The selected fixed scale setting (fixmur, fixmuf) = ("
+            error["fnlo-tk-cppread"] << "The selected fixed-scale setting (fixmur, fixmuf) = ("
                                      << fixmur[ivar] << ","
                                      << fixmuf[ivar] << ") is not possible with this table, aborted!" << endl;
             exit(1);
@@ -1314,7 +1328,7 @@ int main(int argc, char** argv) {
       else if ( ivar == 0 || !sclfix ) {
          snprintf(buffer, sizeof(buffer), "The scale factors xmur, xmuf chosen here are: % #10.3f, % #10.3f",fnlo->GetScaleFactorMuR(),fnlo->GetScaleFactorMuF());
       }
-      //! Fixed scale variations
+      //! Fixed-scale variations
       else if ( sclfix) {
          snprintf(buffer, sizeof(buffer), "The fixed scales mur, muf chosen here are: % #10.3f, % #10.3f",fixmur[ivar],fixmuf[ivar]);
       }
