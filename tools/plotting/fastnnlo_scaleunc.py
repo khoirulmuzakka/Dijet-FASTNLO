@@ -5,12 +5,14 @@
 #
 # Plot the scale uncertainty
 #
-# Created by B.Schillinger, 09.10.2018
+# Created by B. Schillinger, 09.10.2018
 # Modified by K. Rabbertz, 31.10.2018
 # Prepared for python3 by K. Rabbertz, 28.10.2019
 #
 ########################################################################
 #
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 import argparse
 import glob
@@ -33,7 +35,7 @@ from matplotlib import cm
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grids
-# TODO: Currently installed only for python2!
+# TODO: Currently installed only for Python 2!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
@@ -280,16 +282,16 @@ def main():
     nostat = False
     if args['datfiles'] is None:
         nostat = True
-        print('[fastnnlo_pdfunc]: No statistical uncertainties requested.')
+        print('[fastnnlo_scaleunc]: No statistical uncertainties requested.')
     elif args['datfiles'][0] == 'auto':
-        print('[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.')
+        print('[fastnnlo_scaleunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.')
     else:
         for datfile in args['datfiles']:
             lstat = os.path.isfile(datfile)
             if lstat:
                 datfilenames.append(datfile)
             else:
-                print('[fastnnlo_pdfunc]: Given file ', datfile,
+                print('[fastnnlo_scaleunc]: Given file ', datfile,
                       'for statistical uncertainties not found, aborted!')
                 exit(1)
 
@@ -375,7 +377,7 @@ def main():
         xmin = 0.95*min(bin_bounds.ravel())
         xmax = 1.05*max(bin_bounds.ravel())
         if verb:
-            print('[fastnnlo_pdfunc]: xmin=%s, xmax=%s. \n' % (xmin, xmax))
+            print('[fastnnlo_scaleunc]: xmin=%s, xmax=%s. \n' % (xmin, xmax))
 
         # Preparing x-errors (via bin_bounds) --> x_errors[0, :] are initially negative (positive via -1*), x_errors[1, :] positive
         x_errors = np.array(
@@ -449,13 +451,13 @@ def main():
 
             lstat = (len(datfilenames) > 0)
             if lstat and len(datfilenames) != len(order_list):
-                print('[fastnnlo_pdfunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!')
+                print('[fastnnlo_scaleunc]: Mismatch between no. of requested orders and no. of filenames for statistical uncertainties, aborted!')
                 exit(1)
 
             dxsr = []
             for fname in datfilenames:
                 print(
-                    '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
+                    '[fastnnlo_scaleunc]: Taking statistical uncertainties from', fname)
                 cols = np.loadtxt(fname, usecols=list(range(3, 5)))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
@@ -581,8 +583,8 @@ def main():
 
         stop_time = timeit.default_timer()
         timediff = stop_time-start_time
-        print('fastnnlo_pdfunc: Elapsed time: %s sec = %s min' %
-              (timediff, round(timediff/60., 2)))
+        print('fastnnlo_scaleunc: Elapsed time: %s sec = %s min' %
+              (timediff, round(timediff/60, 2)))
 
 
 if __name__ == '__main__':
