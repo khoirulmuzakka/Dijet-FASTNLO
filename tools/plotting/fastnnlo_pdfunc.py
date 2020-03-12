@@ -1,16 +1,20 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
-
+#
 ###########################################
 #
 # Plot the PDF uncertainty
 #
-#
 # Created by B.Schillinger, 20.11.2018
 # Modified by K. Rabbertz, 16.05.2019
+# Prepared for python3 by K. Rabbertz, 07.03.2020
 #
 ###########################################
 #
+# python2 compatibility
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 import argparse
 import glob
 import os
@@ -18,36 +22,73 @@ import re
 import string
 import sys
 import timeit
-# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
-# mpl.use('Agg')
-mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
-import matplotlib.pyplot as plt
-from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
-                               NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
+from matplotlib.ticker import (FormatStrFormatter, LogFormatter, NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
+# We do not want any interactive plotting! Figures are saved to files instead.
+# This also avoids the ANNOYANCE of frequently missing Tkinter/tkinter (python2/3) GUI backends!
+# To produce scalable graphics for publication use eps, pdf, or svg as file format.
+# For this to work we try the Cairo backend, which can do all of these plus the raster format png.
+# If this is not usable, we fall back to the Agg backend capable only of png for nice web plots.
+#ngbackends = mpl.rcsetup.non_interactive_bk
+#print('[fastnnlo_pdfunc]: Non GUI backends are: ', ngbackends)
+# 1st try cairo
+backend = 'cairo'
+usecairo = True
+try:
+    import cairocffi as cairo
+except ImportError:
+    try:
+        import cairo
+    except ImportError:
+        usecairo = False
+#        print('[fastnnlo_pdfunc]: Can not use cairo backend :-(')
+#        print('                   cairocffi or pycairo are required to be installed')
+    else:
+        if cairo.version_info < (1, 11, 0):
+            # Introduced create_for_data for Py3.
+            usecairo = False
+#            print('[fastnnlo_pdfunc]: Can not use cairo backend :-(')
+#            print('                   cairo {} is installed; cairo>=1.11.0 is required'.format(cairo.version))
+if usecairo:
+    mpl.use('cairo')
+else:
+    backend = 'agg'
+    useagg = True
+    try:
+        mpl.use(backend, force=True)
+        print('[fastnnlo_pdfunc]: Warning! Could not import cairo backend :-( Using agg instead for raster plots only!')
+    except:
+        useagg = False
+        print('[fastnnlo_pdfunc]: Can not use agg backend :-(')
+        raise ImportError('[fastnnlo_pdfunc]: Neither cairo nor agg backend found :-( Cannot produce any plots. Good bye!')
+    mpl.use('agg')
+import matplotlib.pyplot as plt
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grid
+# TODO: Currently installed only for Python 2!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
+#import warnings
+#warnings.filterwarnings("error")
+
 
 # Redefine ScalarFormatter
-
-
 class ScalarFormatterForceFormat(ScalarFormatter):
     # Override function that finds format to use.
     def _set_format(self, vmin, vmax):
         self.format = "%1.2f"  # Give format here
 
-# Action class to allow comma-separated list in options
-
-
+# Action class to allow comma-separated (or empty) list in options
 class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, values.split(','))
+        if values:
+            setattr(namespace, self.dest, values[0].split(','))
+        else:
+            setattr(namespace, self.dest, [''])
 
 
 # Some global definitions
@@ -57,7 +98,7 @@ _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
 _order_color = {'LO': 'g', 'NLO': 'b', 'NNLO': 'r'}
 #_colors = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
 #_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
-_colors = ['orange', 'green', 'purple', 'blue', 'brown']
+_colors = ['orange', 'blue', 'green', 'purple', 'brown']
 #_symbols = ['s', 'X', 'o', '^', 'v']
 _symbols = ['s', 'x', 'o', '^', 'v']
 _hatches = ['-', '//', '\\', '|', '.']
@@ -87,7 +128,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
                 nicename = pdfn
         pdfnicenames.append(nicename)
 
-    gs = gridspec.GridSpec(3, 3)
+    gs = gridspec.GridSpec(3, 3, hspace=0)
 
     # For plotting various results, max = 5, 'next to each other', handling via shift from bincenter
     if len(pdfsets) == 1:
@@ -118,8 +159,46 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
 
         fig = plt.figure(figsize=(7, 7))
         ax1 = plt.subplot(gs[:-1, :])
+        ax1.set_autoscalex_on(False)
+        plt.setp(ax1.get_xticklabels(), visible=False)
 
         print('[fastnnlo_pdfunc]: Producing %s plot.' % order_item)
+
+        # Upper subplot setup
+        #
+        # Set limits on x axis on coupled axis from lower plot
+        #    ax1.set_xlim(left=xmin, right=xmax)
+        # TODO: 'minor_thresholds' needs matplotlib > 1.5.0
+        #        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
+        #        ax1.get_xaxis().set_minor_formatter(axfmt)
+        #                        ax1.get_xaxis().set_minor_formatter(NullFormatter())
+        #                        if logx: ax1.set_xscale('log', nonposx='clip')
+        #                        else: ax1.set_xscale('linear')
+        #                        if logy: ax1.set_yscale('log', nonposy='clip')
+        #                        else: ax1.set_yscale('linear')
+        ax1.set_xscale('log', nonposx='clip')
+        ax1.set_yscale('log', nonposy='clip')
+        # Set label on x axis on coupled axis from lower plot
+        #        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
+                       verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+        # TODO: Commented out for now, since loc attribute not defined in prehistoric Centos7 matplotlib version 1.2.0
+        ax1.set_title('%s' % title, loc='left')
+        #        ax1.set_title('%s' % title)
+        ax1.text(0.03, 0.15, 'Reference PDF: %s' %
+                 pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
+                 verticalalignment='bottom', transform=ax1.transAxes)
+        ax1.text(0.03, 0.03, 'PDF uncertainty at %s' % order_item, horizontalalignment='left',
+                 verticalalignment='bottom', transform=ax1.transAxes)
+
+        #        Only for publication
+        # H1
+        #        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
+        #                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+        # ZEUS
+        #        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
+        #                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
         # Loop over PDF sets
         pdf_index = -1
@@ -137,45 +216,22 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
                              xs_all[pdf_index, ord_index, :] + xs_all[0,
                                                                       ord_index, :]*rel_pdf_unc[pdf_index, ord_index, 1, :],
                              color=_colors[pdf_index], alpha=0.3, hatch=_hatches[pdf_index])
-
-        # 'minor_thresholds' needs matplotlib > 1.5.0
-        #        axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.9))
-        ax1.set_xlim([xmin, xmax])
-#                        if logx: ax1.set_xscale('log', nonposx='clip')
-#                        else: ax1.set_xscale('linear')
-#                        if logy: ax1.set_yscale('log', nonposy='clip')
-#                        else: ax1.set_yscale('linear')
-        ax1.set_xscale('log', nonposx='clip')
-        #        ax1.get_xaxis().set_minor_formatter(axfmt)
-#                        ax1.get_xaxis().set_minor_formatter(NullFormatter())
-        ax1.set_yscale('log', nonposy='clip')
-#                        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-        ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
-                       verticalalignment='top', y=1.0, rotation=90, labelpad=24)
         ax1.legend(fontsize=10, numpoints=1)
-        ax1.text(0.03, 0.15, 'Reference PDF: %s' %
-                 pdfnicenames[0], horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
-                 verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.text(0.03, 0.03, 'PDF uncertainty at %s' % order_item, horizontalalignment='left',
-                 verticalalignment='bottom', transform=ax1.transAxes)
-        ax1.set_title('%s' % title, loc='left')
 
-#        Only for publication
-# H1
-#        ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
-#                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-# ZEUS
-#        ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
-#                 horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-
-        # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
+        # Lower subplot setup
+        #
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
+        # Set common x axis bounds for both
+        ax2.set_xlim(left=xmin, right=xmax)
+        ax2.set_ylim(0.85, 1.15)
 #        ax2.get_xaxis().set_minor_formatter(axfmt)
         ax2.set_yscale('linear', nonposy='clip')
-        ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
-                       x=1.0, verticalalignment='top', y=1.0)
+#        ax2.set_yscale('log', nonposy='clip')
+        ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='center', x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
+        ax2.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted', linewidth=1.6, alpha=0.2)
 
+        # Ratio subplot with relative pdf uncertainties; denominator in ratio = first PDF in pdfsets list for requested order
         patches = []  # Later needed for legend
         for pdf_index in range(0, len(pdfsets)):
             # Divide xs for each PDF by first given PDF (xs)
@@ -206,10 +262,6 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
                 (0, 0), 0, 0, color=_colors[pdf_index], label=pdfnicenames[pdf_index], alpha=0.4))
             ax2.add_patch(patches[pdf_index])
 
-        ax2.set_ylabel(r'Ratio to ref. PDF', horizontalalignment='center',
-                       x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
-        ax2.axhline(y=1, xmin=0, xmax=1, color='k',
-                    linestyle='dotted', linewidth=1.6, alpha=0.2)
 
         fig.tight_layout()
         ordernames += '_%s' % order_item
@@ -222,6 +274,10 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
                                                order_item, pdffilenames[1:], scale_name)
             if not nostat:
                 filename = filename+'.stat'
+
+        # Eliminate possible [] around units to avoid problems with filenames
+        filename = re.sub(r'[\[\]]','',filename)
+
         for fmt in formats:
             figname = '%s.%s' % (filename, fmt)
             fig.savefig(figname)
@@ -243,24 +299,23 @@ def main():
                         help='Filename glob of fastNLO tables to be evaluated. This must be specified!')
     # Optional arguments
     parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
-                        help='Comma-separated list of NNLOJET dat files with statistical uncertainties for each order to show. If set to "auto", dat files matching to table name are used. If nothing is chosen, statistical uncertainties are ignored.')
+                        help='Comma-separated or empty list of NNLOJET dat files with statistical uncertainties for each order to show. If empty, dat files matching to table name are used. If not set, statistical uncertainties are ignored.')
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Output filename (optional).')
-    parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
-                        help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
+    parser.add_argument('--format', required=False, nargs=1, type=str, action=SplitArgs,
+                        help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If not set, png is used.')
     parser.add_argument('--logx', default=True, required=False, nargs=1, type=bool,
                         help='Switch between linear and logarithmic x axis. NOT working yet!')
     parser.add_argument('--logy', default=True, required=False, nargs=1, type=bool,
                         help='Switch between linear and logarithmic y axis. NOT working yet!')
     parser.add_argument('-m', '--member', default=0, type=int,
                         help='Member of PDFset, default is 0.')
-    parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
-                        help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If nothing is chosen, show all orders available in table.')
-    parser.add_argument('-p', '--pdfset', required=False, nargs='?', type=str, action=SplitArgs,
-                        default=['CT14nnlo'],
+    parser.add_argument('-o', '--order', required=False, nargs=1, type=str, action=SplitArgs,
+                        help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If not set, show all orders available in table.')
+    parser.add_argument('-p', '--pdfset', required=False, nargs=1, type=str, action=SplitArgs, #default=['CT14nnlo'],
                         help='Comma-separated list of PDF sets to use.')
     parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
-                        choices=range(16), metavar='[0-15]',
+                        choices=list(range(16)), metavar='[0-15]',
                         help='For flexible-scale tables define central scale choice for MuR and MuF by selection enum fastNLO::ScaleFunctionalForm ("0"=kScale1, "1"=kScale2, "2"=kQuadraticSum), ...')
     parser.add_argument('--scalename', default=None, type=str,
                         help='Replace default scale name by given string.')
@@ -272,6 +327,12 @@ def main():
                         help='Replace x axis default label by given string.')
     parser.add_argument('--ylabel', default=None, type=str,
                         help='Replace y axis default label by given string.')
+
+    # Print header
+    print("\n###########################################################################################")
+    print("# fastnnlo_pdfunc:")
+    print("# Plot the PDF uncertainty")
+    print("###########################################################################################\n")
 
     # Parse arguments
     args = vars(parser.parse_args())
@@ -296,12 +357,12 @@ def main():
     # Orders to be shown
     iorders = []
     iordmin = _text_to_order['LO']
-    iordmax = _text_to_order['NNLO']
+    iordmax = _text_to_order['LO']
     if args['order'] is None:
         print('[fastnnlo_pdfunc]: Evaluate table up to highest available order.')
     else:
         for ord in args['order']:
-            if _text_to_order.has_key(ord):
+            if ord in _text_to_order:
                 iorders.append(_text_to_order[ord])
             else:
                 print('[fastnnlo_pdfunc]: Illegal order specified, aborted!')
@@ -317,7 +378,7 @@ def main():
     if args['datfiles'] is None:
         nostat = True
         print('[fastnnlo_pdfunc]: No statistical uncertainties requested.')
-    elif args['datfiles'][0] == 'auto':
+    elif args['datfiles'][0] == '':
         print('[fastnnlo_pdfunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.')
     else:
         for datfile in args['datfiles']:
@@ -337,8 +398,12 @@ def main():
     if formats is None:
         formats = ['png']
     for fmt in formats:
-        if not _formats.has_key(fmt):
+        if fmt not in _formats:
             print('[fastnnlo_pdfunc]: Illegal format specified, aborted!')
+            print('[fastnnlo_pdfunc]: Format list:', args['format'])
+            exit(1)
+        elif fmt != 'png' and not usecairo:
+            print('[fastnnlo_pdfunc]: Vector format plots not possible without cairo backend, aborted!')
             print('[fastnnlo_pdfunc]: Format list:', args['format'])
             exit(1)
 
@@ -401,8 +466,7 @@ def main():
             print('[fastnnlo_pdfunc]: bin_bounds.flatten(): \n',
                   bin_bounds.flatten(), '\n')
 
-        x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / \
-            2.  # this is a list of bin centers
+        x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / 2.  # this is a list of bin centers
         xmin = 0.95*min(bin_bounds.ravel())
         xmax = 1.05*max(bin_bounds.ravel())
         if verb:
@@ -467,7 +531,7 @@ def main():
         dxsr_cn = []
         sep = '.'
         if not nostat:
-            if args['datfiles'][0] == 'auto':
+            if args['datfiles'][0] == '':
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
@@ -483,7 +547,7 @@ def main():
             for fname in datfilenames:
                 print(
                     '[fastnnlo_pdfunc]: Taking statistical uncertainties from', fname)
-                cols = np.loadtxt(fname, usecols=range(3, 5))
+                cols = np.loadtxt(fname, usecols=list(range(3, 5)))
                 xs_dat = np.array(cols[:, 0])
                 dxs_dat = np.array(cols[:, 1])
                 dxsr_dat = np.divide(dxs_dat, xs_dat, out=np.ones_like(
@@ -491,7 +555,7 @@ def main():
                 dxsr.append(dxsr_dat)
             dxsr_cn = abs(np.array(dxsr))
             # Empty list for use with next table in automatic mode
-            if args['datfiles'][0] == 'auto':
+            if args['datfiles'][0] == '':
                 datfilenames = []
 
         # For flexible-scale tables set scale to user choice (default is 0)
@@ -624,7 +688,7 @@ def main():
     stop_time = timeit.default_timer()
     timediff = stop_time-start_time
     print('fastnnlo_pdfunc: Elapsed time: %s sec = %s min' %
-          (timediff, round(timediff/60., 2)))
+          (timediff, round(timediff/60, 2)))
 
 
 if __name__ == '__main__':

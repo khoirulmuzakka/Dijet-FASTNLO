@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 #
 ########################################################################
@@ -7,10 +7,11 @@
 #
 # Created by B. Schillinger, 09.10.2018
 # Modified by K. Rabbertz, 31.10.2018
-# Prepared for python3 by K. Rabbertz, 28.10.2019
+# Prepared for python3 by K. Rabbertz, 07.03.2020
 #
 ########################################################################
 #
+# python2 compatibility
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -22,16 +23,48 @@ import string
 import sys
 import timeit
 import matplotlib as mpl
-# If necessary, set offline backend
-# Use e.g. Agg on Centos 7 of bms3; otherwise get error: No module named 'tkinter' ...
-# mpl.use('Agg')
-# If necessary, use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
-# mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
-import matplotlib.pyplot as plt
-from matplotlib.ticker import (FormatStrFormatter, LogFormatter,
-                               NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
+from matplotlib.ticker import (FormatStrFormatter, LogFormatter, NullFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
+# We do not want any interactive plotting! Figures are saved to files instead.
+# This also avoids the ANNOYANCE of frequently missing Tkinter/tkinter (python2/3) GUI backends!
+# To produce scalable graphics for publication use eps, pdf, or svg as file format.
+# For this to work we try the Cairo backend, which can do all of these plus the raster format png.
+# If this is not usable, we fall back to the Agg backend capable only of png for nice web plots.
+#ngbackends = mpl.rcsetup.non_interactive_bk
+#print('[fastnnlo_scaleunc]: Non GUI backends are: ', ngbackends)
+# 1st try cairo
+backend = 'cairo'
+usecairo = True
+try:
+    import cairocffi as cairo
+except ImportError:
+    try:
+        import cairo
+    except ImportError:
+        usecairo = False
+#        print('[fastnnlo_scaleunc]: Can not use cairo backend :-(')
+#        print('                   cairocffi or pycairo are required to be installed')
+    else:
+        if cairo.version_info < (1, 11, 0):
+            # Introduced create_for_data for Py3.
+            usecairo = False
+#            print('[fastnnlo_scaleunc]: Can not use cairo backend :-(')
+#            print('                   cairo {} is installed; cairo>=1.11.0 is required'.format(cairo.version))
+if usecairo:
+    mpl.use('cairo')
+else:
+    backend = 'agg'
+    useagg = True
+    try:
+        mpl.use(backend, force=True)
+        print('[fastnnlo_scaleunc]: Warning! Could not import cairo backend :-( Using agg instead for raster plots only!')
+    except:
+        useagg = False
+        print('[fastnnlo_scaleunc]: Can not use agg backend :-(')
+        raise ImportError('[fastnnlo_scaleunc]: Neither cairo nor agg backend found :-( Cannot produce any plots. Good bye!')
+    mpl.use('agg')
+import matplotlib.pyplot as plt
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grids
@@ -39,6 +72,8 @@ import numpy as np
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
+#import warnings
+#warnings.filterwarnings("error")
 
 
 # Redefine ScalarFormatter
@@ -48,10 +83,13 @@ class ScalarFormatterForceFormat(ScalarFormatter):
         self.format = "%1.2f"  # Give format here
 
 
-# Action class to allow comma-separated list in options
+# Action class to allow comma-separated (or empty) list in options
 class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, values.split(','))
+        if values:
+            setattr(namespace, self.dest, values[0].split(','))
+        else:
+            setattr(namespace, self.dest, [''])
 
 
 # Some global definitions
@@ -88,9 +126,11 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         if pdfn in pdfset:
             pdfnicename = pdfn
 
-    gs = gridspec.GridSpec(3, 3)
+    gs = gridspec.GridSpec(3, 3, hspace=0)
     fig = plt.figure(figsize=(7, 7))
     ax1 = plt.subplot(gs[:-1, :])
+    ax1.set_autoscalex_on(False)
+    plt.setp(ax1.get_xticklabels(), visible=False)
 
     # For plotting various results, max = 3, 'next to each other', handling via shift from bincenter
     if len(order_list) == 1:
@@ -103,6 +143,38 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         print('[fastnnlo_scaleunc]: Too many orders to plot simultaneously. Aborted!')
         print('[fastnnlo_scaleunc]: Current maximum is 3. The order list is', order_list)
         sys.exit(1)
+
+    # Upper subplot setup
+    #
+    # Set limits on x axis on coupled axis from lower plot
+    #    ax1.set_xlim(left=xmin, right=xmax)
+    # TODO: 'minor_thresholds' needs matplotlib > 1.5.0
+    #    axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
+    #    ax1.get_xaxis().set_minor_formatter(axfmt)
+    #        ax1.get_xaxis().set_minor_formatter(NullFormatter())
+    ax1.set_xscale('log', nonposx='clip')
+    ax1.set_yscale('log', nonposy='clip')
+    # Set label on x axis on coupled axis from lower plot
+    #        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+    ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
+                   verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+    # TODO: Commented out for now, since loc attribute not defined in prehistoric Centos7 matplotlib version 1.2.0
+    ax1.set_title('%s' % title, loc='left')
+    #    ax1.set_title('%s' % title)
+    ax1.text(0.03, 0.15, 'PDF set: %s' % pdfnicename, horizontalalignment='left',
+             verticalalignment='bottom', transform=ax1.transAxes)
+    ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
+             verticalalignment='bottom', transform=ax1.transAxes)
+    ax1.text(0.03, 0.03, '%s' % variation_type, horizontalalignment='left',
+             verticalalignment='bottom', transform=ax1.transAxes)
+
+    #        Only for publication
+    # H1
+    #    ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
+    #             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+    # ZEUS
+    #    ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
+    #             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
 
     # Plot all x section results in order_list
     xs_index = -1
@@ -118,44 +190,25 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
                      ms=6, marker=_order_symbol[order_item], color=_order_color[order_item], fmt='.', label=order_item)
         ax1.fill_between(x_axis*shift, xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 2, :],
                          xs_all[xs_index] + xs_all[xs_index]*rel_scale_unc[xs_index, 1, :], color=_order_color[order_item], hatch=_hatches[xs_index], alpha=0.30)
-
-    # 'minor_thresholds' needs matplotlib > 1.5.0
-    #    axfmt = LogFormatter(labelOnlyBase=False, minor_thresholds=(2, 0.4))
-    ax1.set_xlim([xmin, xmax])
-    ax1.set_xscale('log', nonposx='clip')
-    #    ax1.get_xaxis().set_minor_formatter(axfmt)
-    #        ax1.get_xaxis().set_minor_formatter(NullFormatter())
-    ax1.set_yscale('log', nonposy='clip')
-    #        ax1.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
-    ax1.set_ylabel(r'%s' % ylabel, horizontalalignment='right', x=1.0,
-                   verticalalignment='top', y=1.0, rotation=90, labelpad=24)
     ax1.legend(fontsize=10, numpoints=1)
-    ax1.text(0.03, 0.15, 'PDF set: %s' % pdfnicename, horizontalalignment='left',
-             verticalalignment='bottom', transform=ax1.transAxes)
-    ax1.text(0.03, 0.08, 'Scale: %s' % nice_scale_name, horizontalalignment='left',
-             verticalalignment='bottom', transform=ax1.transAxes)
-    ax1.text(0.03, 0.03, '%s' % variation_type, horizontalalignment='left',
-             verticalalignment='bottom', transform=ax1.transAxes)
-    ax1.set_title('%s' % title, loc='left')
 
-#        Only for publication
-# H1
-#    ax1.text(0.35, 0.90, r'$30 < Q^2 < 42\,\mathrm{GeV}^2$',
-#             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
-# ZEUS
-#    ax1.text(0.35, 0.90, r'$500 < Q^2 < 1000\,\mathrm{GeV}^2$',
-#             horizontalalignment='left', verticalalignment='bottom', transform=ax1.transAxes)
+
+    # Lower subplot setup
+    #
+    ax2 = plt.subplot(gs[2, :], sharex=ax1)
+    # Set common x axis bounds for both
+    ax2.set_xlim(left=xmin, right=xmax)
+    #    ax2.set_xbound(lower=xmin, upper=xmax)
+    ax2.set_yscale('linear', nonposy='clip')
+    ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+    ax2.set_ylabel(r'Ratio to %s' % order_list[0], horizontalalignment='center', x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
+    #        ax2.legend(fontsize=10, numpoints=1)
+    #        ax1.set_xticklabels([])
+    #        ax1.set_xticks([])
+    #        ax1.get_xaxis().set_visible(False)
+    ax2.axhline(y=1, xmin=0, xmax=1, color='k', linestyle='dotted', linewidth=1.6, alpha=0.2)
 
     # Ratio subplot with relative scale uncertainties; denominator in ratio = first order in order_list
-    ax2 = plt.subplot(gs[2, :], sharex=ax1)
-    ax2.set_yscale('linear', nonposy='clip')
-    ax2.set_xlabel(r'%s' % xlabel, horizontalalignment='right',
-                   x=1.0, verticalalignment='top', y=1.0)
-#        ax2.legend(fontsize=10, numpoints=1)
-#        ax1.set_xticklabels([])
-#        ax1.set_xticks([])
-#        ax1.get_xaxis().set_visible(False)
-
     xs_index = -1
     ordernames = ''
     for item in order_list:
@@ -181,10 +234,6 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         ax2.fill_between(x_axis, (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 2, :])/xs_all[0]),
                          (xs_all[xs_index]*(1+rel_scale_unc[xs_index, 1, :])/xs_all[0]), color=_order_color[item], hatch=_hatches[xs_index], alpha=0.30)
 
-    ax2.set_ylabel(r'Ratio to %s' %
-                   order_list[0], horizontalalignment='center', x=1.0, verticalalignment='top', y=0.5, rotation=90, labelpad=24)
-    ax2.axhline(y=1, xmin=0, xmax=1, color='k',
-                linestyle='dotted', linewidth=1.6, alpha=0.2)
     fig.tight_layout()
 
     if given_filename is not None:
@@ -196,10 +245,13 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         if not nostat:
             filename = filename+'.stat'
 
+    # Eliminate possible [] around units to avoid problems with filenames
+    filename = re.sub(r'[\[\]]','',filename)
+
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)
         fig.savefig(figname)
-        print('[fastnnlo_scaledep]: Plot saved as:', figname)
+        print('[fastnnlo_scaleunc]: Plot saved as:', figname)
 #        print(plt.get_fignums())
     plt.close(fig)
 
@@ -220,14 +272,14 @@ def main():
     parser.add_argument('-a', '--asymmetric', action="store_true",
                         help='If -a is chosen, use asymmetric (6P) scale variations; otherwise use symmetric ones (2P).')
     parser.add_argument('-d', '--datfiles', required=False, nargs='?', type=str, action=SplitArgs,
-                        help='Comma-separated list of NNLOJET dat files with statistical uncertainties for each order to show. If set to "auto", dat files matching to table name are used. If nothing is chosen, statistical uncertainties are ignored.')
+                        help='Comma-separated or empty list of NNLOJET dat files with statistical uncertainties for each order to show. If empty, dat files matching to table name are used. If not set, statistical uncertainties are ignored.')
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Output filename (optional).')
-    parser.add_argument('--format', required=False, nargs='?', type=str, action=SplitArgs,
+    parser.add_argument('--format', required=False, nargs=1, type=str, action=SplitArgs,
                         help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
     parser.add_argument('-m', '--member', default=0, type=int,
                         help='Member of PDFset, default is 0.')
-    parser.add_argument('-o', '--order', required=False, nargs='?', type=str, action=SplitArgs,
+    parser.add_argument('-o', '--order', required=False, nargs=1, type=str, action=SplitArgs,
                         help='Comma-separated list of orders to show: LO, NLO, and/or NNLO. If nothing is chosen, show all orders available in table.')
     parser.add_argument('-p', '--pdfset', default='CT14nlo', type=str,
                         help='PDFset to evaluate fastNLO table.')
@@ -245,13 +297,19 @@ def main():
     parser.add_argument('--ylabel', default=None, type=str,
                         help='Replace y axis default label by given string.')
 
+    # Print header
+    print("\n###########################################################################################")
+    print("# fastnnlo_scaleunc:")
+    print("# Plot the scale uncertainty")
+    print("###########################################################################################\n")
+
     # Parse arguments
     args = vars(parser.parse_args())
 
     # List of table names
     files = args['table']
     print('\n')
-    print('[fastnnlo_scaleunc]: Analysing table list: ')
+    print('[fastnnlo_scaleunc]: Analysing table list:')
     for file in files:
         print('[fastnnlo_scaleunc]:   ', file)
 
@@ -283,7 +341,7 @@ def main():
     if args['datfiles'] is None:
         nostat = True
         print('[fastnnlo_scaleunc]: No statistical uncertainties requested.')
-    elif args['datfiles'][0] == 'auto':
+    elif args['datfiles'][0] == '':
         print('[fastnnlo_scaleunc]: Automatic filename matching is used to load statistical uncertainties from NNLOJET.')
     else:
         for datfile in args['datfiles']:
@@ -319,6 +377,10 @@ def main():
     for fmt in formats:
         if fmt not in _formats:
             print('[fastnnlo_scaleunc]: Illegal format specified, aborted!')
+            print('[fastnnlo_scaleunc]: Format list:', args['format'])
+            exit(1)
+        elif fmt != 'png' and not usecairo:
+            print('[fastnnlo_scaleunc]: Vector format plots not possible without cairo backend, aborted!')
             print('[fastnnlo_scaleunc]: Format list:', args['format'])
             exit(1)
 
@@ -372,8 +434,7 @@ def main():
             print('[fastnnlo_scaleunc]: bin_bounds.flatten()',
                   bin_bounds.flatten(), '\n')
 
-        x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / \
-            2.  # this is a list of bin centers
+        x_axis = (bin_bounds.T[0]+bin_bounds.T[1]) / 2.  # this is a list of bin centers
         xmin = 0.95*min(bin_bounds.ravel())
         xmax = 1.05*max(bin_bounds.ravel())
         if verb:
@@ -442,7 +503,7 @@ def main():
         dxsr_cn = []
         sep = '.'
         if not nostat:
-            if args['datfiles'][0] == 'auto':
+            if args['datfiles'][0] == '':
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
@@ -466,7 +527,7 @@ def main():
                 dxsr.append(dxsr_dat)
             dxsr_cn = abs(np.array(dxsr))
             # Empty list for use with next table in automatic mode
-            if args['datfiles'][0] == 'auto':
+            if args['datfiles'][0] == '':
                 datfilenames = []
 
         # For flexible-scale tables set scale to user choice (default is 0)
