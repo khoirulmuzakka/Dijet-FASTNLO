@@ -14,7 +14,7 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOInterpolCatmullRom::fastNLOInterpolCatmullRom(double min, double max) : fastNLOInterpolBase(min,max,4) {
+fastNLOInterpolCatmullRom::fastNLOInterpolCatmullRom(double min, double max, fastNLOGrid::GridType type) : fastNLOInterpolBase(min,max,type,4) {
    debug["fastNLOInterpolCatmullRom"]<<"New fastNLOInterpolCatmullRom instance."<<endl;
 }
 

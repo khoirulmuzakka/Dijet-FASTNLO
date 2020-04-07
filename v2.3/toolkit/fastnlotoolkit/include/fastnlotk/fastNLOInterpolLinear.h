@@ -21,7 +21,7 @@ class fastNLOInterpolLinear : public fastNLOInterpolBase {
    
 public:
 
-   fastNLOInterpolLinear(double min, double max);
+   fastNLOInterpolLinear(double min, double max, fastNLOGrid::GridType type);
    ~fastNLOInterpolLinear(void);
    
    //   vector<pair<int,double> > CalcNodeValues(double val);

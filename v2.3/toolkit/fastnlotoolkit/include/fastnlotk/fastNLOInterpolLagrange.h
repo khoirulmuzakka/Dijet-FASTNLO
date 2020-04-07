@@ -22,7 +22,7 @@ class fastNLOInterpolLagrange : public fastNLOInterpolBase {
    
 public:
 
-   fastNLOInterpolLagrange(double min, double max);
+   fastNLOInterpolLagrange(double min, double max, fastNLOGrid::GridType type);
    ~fastNLOInterpolLagrange(void);
    
    //   vector<pair<int,double> > CalcNodeValues(double val);

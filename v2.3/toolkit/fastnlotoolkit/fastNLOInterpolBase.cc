@@ -14,10 +14,12 @@ using namespace std;
 //______________________________________________________________________________
 
 
-fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, int nMinNodes = -1) :
+fastNLOInterpolBase::fastNLOInterpolBase(double min, double max, fastNLOGrid::GridType type, int nMinNodes = -1) :
    PrimalScream("fastNLOInterpol"),fNMinNodes(nMinNodes), fvalmin(min), fvalmax(max) {
    debug["fastNLOInterpolBase"]<<"New fastNLOInterpolBase instance."<<endl;
    fLastGridPointWasRemoved=false;
+   debug["fastNLOInterpolBase"]<<"Distance measure = "<<type<<endl;
+   fdm = type;
 }
 
 
@@ -75,24 +77,21 @@ void fastNLOInterpolBase::RemoveLastNode(){
 //______________________________________________________________________________
 
 
-void fastNLOInterpolBase::MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodesPerMag){
+void fastNLOInterpolBase::MakeGridsWithNNodesPerMagnitude(int nNodesPerMag,double ReduceXmin){
    if ( fvalmin >= fvalmax ){
       warn["MakeGridsWithNNodesPerMagnitude"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
    }
    int nxtot = (int)(fabs(log10(fvalmax)-log10(fvalmin))*nNodesPerMag);
    if ( nxtot < nNodesPerMag ) nxtot = nNodesPerMag; // at least nxPerMagnitude points
    debug["MakeGridWithNNodesPerMagnitude"]<<"Create "<<nxtot<<" nodes (valmin="<<fvalmin<<",valmax="<<fvalmax<<")."<<endl;
-   MakeGrids(type,nxtot+1); // plus 1. We have now a node at 1
+   MakeGrids(nxtot+1,ReduceXmin); // plus 1. We have now a node at 1
 }
 
-void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
+void fastNLOInterpolBase::MakeGrids(int nNodes, double ReduceXmin){
    // Generate the Hgrid first, and then the grid;
    // type: Type of distance measure
    // nNodes. Number of nodes. nNodes must be >= 1.
    // using fvalmin and fvalmin for the grid range
-
-   debug["MakeGrid"]<<"Distance measure = "<<type<<endl;
-   fdm = type;
 
    // check number of nodes
    if ( nNodes == -1 ) {
@@ -112,7 +111,26 @@ void fastNLOInterpolBase::MakeGrids(fastNLOGrid::GridType type, int nNodes){
       error["MakeGrid"]<<"Minimum grid value is smaller/equal maximum value. min="<<fvalmin<<", max="<<fvalmax<<endl;
    }
 
+   // make the grids
    MakeGrids(fvalmin,fvalmax,nNodes);
+
+   // Reduce X min
+   // then all is set up, and we can conveniently re-initalise the grids
+   if ( ReduceXmin != 0 ) {
+      cout<<"Test prinout. To be removed!"<<endl; // to be removed
+      cout<<" Printing grid before applying ReduceXmin factor of: "<<ReduceXmin<<endl; // to be removed
+      PrintGrid();
+      double Hdelta = fHgrid[1] - fHgrid[0];
+      double Hxmin = fHgrid[0] - Hdelta*ReduceXmin;
+      fvalmin = MakeGridFromHGrid({Hxmin})[0];// new minimum
+      MakeGrids(fvalmin,fvalmax,nNodes); // make grids again
+      cout<<endl; // to be removed
+      cout<<" Printing grid after applying ReduceXmin factor."<<endl; // to be removed
+      PrintGrid(); // to be removed
+      cout<<endl; // to be removed
+      cout<<endl; // to be removed
+   }
+
 
 }
 

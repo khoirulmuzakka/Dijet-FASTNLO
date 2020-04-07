@@ -24,7 +24,7 @@ class fastNLOInterpolOneNode :  public fastNLOInterpolBase {
    
 public:
 
-   fastNLOInterpolOneNode(double min, double max);
+   fastNLOInterpolOneNode(double min, double max, fastNLOGrid::GridType type);
    ~fastNLOInterpolOneNode(void);
    
    //   vector<pair<int,double> > CalcNodeValues(double val);

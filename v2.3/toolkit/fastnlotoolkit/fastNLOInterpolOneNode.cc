@@ -12,7 +12,7 @@
 using namespace std;
 
 //______________________________________________________________________________
-fastNLOInterpolOneNode::fastNLOInterpolOneNode(double min, double max) : fastNLOInterpolBase(min,max,1) {
+fastNLOInterpolOneNode::fastNLOInterpolOneNode(double min, double max, fastNLOGrid::GridType type) : fastNLOInterpolBase(min,max,type,1) {
    debug["fastNLOInterpolOneNode"]<<"New fastNLOInterpolOneNode instance."<<endl;
    fDummyNode.resize(1);
    fDummyNode[0] = make_pair(0,1);

@@ -15,7 +15,7 @@ class fastNLOInterpolCatmullRom : public fastNLOInterpolBase {
 
 public:
 
-   fastNLOInterpolCatmullRom(double min, double max);
+   fastNLOInterpolCatmullRom(double min, double max, fastNLOGrid::GridType type);
    ~fastNLOInterpolCatmullRom(void);
 
    //   vector<pair<int,double> > CalcNodeValues(double val);

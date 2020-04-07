@@ -196,7 +196,7 @@ protected:
    void InitVariablesInCoefficientTable();
    void InitCoeffTable();
    void InitInterpolationKernels();
-   fastNLOInterpolBase* MakeInterpolationKernels(std::string KernelName, double xdn, double xup);
+   fastNLOInterpolBase* MakeInterpolationKernels(std::string KernelName, double xdn, double xup, const std::string& distancemeasure);
    void InitGrids();
    void GetWarmupValues();
    bool CheckWarmupConsistency();                                                               //!< Check consistency of warmup bin-grid and variables with steering values.
@@ -219,6 +219,7 @@ protected:
    double fFlexConstScale2;                                                                     //!< constant value set for 2nd "flexible" scale
    bool fIsInclusiveJets;                                                                       //!< is it an inclusive jets table?
    bool fApplyPDFReweight;                                                                      //!< shall the PDF reweight be applied.
+   double fReduceXmin;                                                                          //!< Reduce Xmin in units of x-nodes.
    std::string fWarmupFilename;                                                                 //!< File name of the warmup table
    // TODO: fSteerfile as internally set variable is used as default steeringNameSpace at many places. This should be avoided!
    std::string fSteerfile;                                                                      //!< filename of steering file (and default steeringNameSpace!)

@@ -12,7 +12,7 @@
 using namespace std;
 
 //______________________________________________________________________________
-fastNLOInterpolLagrange::fastNLOInterpolLagrange(double min, double max) : fastNLOInterpolBase(min,max,4) {
+fastNLOInterpolLagrange::fastNLOInterpolLagrange(double min, double max, fastNLOGrid::GridType type) : fastNLOInterpolBase(min,max,type,4) {
    debug["fastNLOInterpolLagrange"]<<"New fastNLOInterpolLagrange instance."<<endl;
 }
 

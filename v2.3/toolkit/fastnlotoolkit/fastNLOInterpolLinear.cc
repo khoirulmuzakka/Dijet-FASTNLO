@@ -12,7 +12,7 @@
 using namespace std;
 
 //______________________________________________________________________________
-fastNLOInterpolLinear::fastNLOInterpolLinear(double min, double max) : fastNLOInterpolBase(min,max,2) {
+fastNLOInterpolLinear::fastNLOInterpolLinear(double min, double max, fastNLOGrid::GridType type) : fastNLOInterpolBase(min,max,type,2) {
    debug["fastNLOInterpolLinear"]<<"New fastNLOInterpolLinear instance."<<endl;
 }
 

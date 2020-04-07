@@ -28,13 +28,13 @@ class fastNLOInterpolBase : public PrimalScream {
 
 public:
 
-   fastNLOInterpolBase(double min, double max, int nMinNodes);
+   fastNLOInterpolBase(double min, double max, fastNLOGrid::GridType type, int nMinNodes);
    virtual ~fastNLOInterpolBase(void);
 
    const std::vector<std::pair<int,double> >& GetNodeValues(double val);
 
-   void MakeGrids(fastNLOGrid::GridType type, int nNodes);
-   void MakeGridsWithNNodesPerMagnitude(fastNLOGrid::GridType type, int nNodes);
+   void MakeGrids(int nNodes,double ReduceXmin=0);
+   void MakeGridsWithNNodesPerMagnitude(int nNodes,double ReduceXmin=0);
    void RemoveLastNode();
 
    void PrintGrid();
