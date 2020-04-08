@@ -123,6 +123,7 @@ public:
    inline int GetNFlexScales() const { return fNFlexScales; }                                   //!< Get no. flexible scales to fill simultaneously
    inline double GetFlexConstScale2() const { return fFlexConstScale2; }                        //!< Get constant value set for 2nd "flexible" scale
    inline bool GetIsInclusiveJets() const { return fIsInclusiveJets; }                          //!< Get if inclusive jet table is requested
+   inline double GetReduceXmin() const { return fReduceXmin; }                                  //!< Get ReduceXmin value
    void SetWarmupXSafetyMargin(int margin = 4) { fWarmupXMargin = margin;}                          //!< Set margin for x-value: First digit in '%e' notation (e.g. margin=4: x=6.6e-3 -> 6.2e-3)
    void SetWarmupNDigitMu1(int rnd = 1) { fWarmupNDigitMu1 = rnd;}                              //!< Round warmup values for scale 1
    void SetWarmupNDigitMu2(int rnd = 2) { fWarmupNDigitMu2 = rnd;}                              //!< Round warmup values for scale 2

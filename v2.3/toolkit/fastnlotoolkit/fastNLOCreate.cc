@@ -733,7 +733,7 @@ void fastNLOCreate::SetScenConstsFromSteering() {
    fFlexConstScale2 = fScenConsts.FlexConstScale2;
    if (EXIST_NS(InclusiveJets,fSteerfile))               fScenConsts.InclusiveJets = BOOL_NS(InclusiveJets,fSteerfile);
    fIsInclusiveJets = fScenConsts.InclusiveJets;
-   if (EXIST_NS(ReduceXmin,fSteerfile))                  fScenConsts.ReduceXmin = BOOL_NS(ReduceXmin,fSteerfile);
+   if (EXIST_NS(ReduceXmin,fSteerfile))                  fScenConsts.ReduceXmin = DOUBLE_NS(ReduceXmin,fSteerfile);
    fReduceXmin = fScenConsts.ReduceXmin;
    if (EXIST_NS(ScaleVariationFactors,fSteerfile))       fScenConsts.ScaleVariationFactors = DOUBLE_ARR_NS(ScaleVariationFactors,fSteerfile);
    if (EXIST_NS(ReadBinningFromSteering,fSteerfile))     fScenConsts.ReadBinningFromSteering = BOOL_NS(ReadBinningFromSteering,fSteerfile);

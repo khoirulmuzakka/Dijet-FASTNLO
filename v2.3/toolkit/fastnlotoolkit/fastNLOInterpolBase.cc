@@ -117,18 +117,10 @@ void fastNLOInterpolBase::MakeGrids(int nNodes, double ReduceXmin){
    // Reduce X min
    // then all is set up, and we can conveniently re-initalise the grids
    if ( ReduceXmin != 0 ) {
-      cout<<"Test prinout. To be removed!"<<endl; // to be removed
-      cout<<" Printing grid before applying ReduceXmin factor of: "<<ReduceXmin<<endl; // to be removed
-      PrintGrid();
-      double Hdelta = fHgrid[1] - fHgrid[0];
+      double Hdelta = (fHgrid[1] - fHgrid[0]) * (nNodes-1.)/(nNodes -1. -ReduceXmin);//(second factor to account for potentially increased number of nodes)
       double Hxmin = fHgrid[0] - Hdelta*ReduceXmin;
       fvalmin = MakeGridFromHGrid({Hxmin})[0];// new minimum
       MakeGrids(fvalmin,fvalmax,nNodes); // make grids again
-      cout<<endl; // to be removed
-      cout<<" Printing grid after applying ReduceXmin factor."<<endl; // to be removed
-      PrintGrid(); // to be removed
-      cout<<endl; // to be removed
-      cout<<endl; // to be removed
    }
 
 
