@@ -259,8 +259,10 @@ def main():
     weights = []  # Weight factors
 
     # Read binning and cross sections from NNLOJET dat files
-    datglob = datfile[:-(len(seed)+len('dat'))]+'*.dat'
-    #    print('datglob ', datglob, '\n')
+    # Insist on constant seed index length; otherwise log files might not be present when adding grids from external production with other seed ranges
+    seedglob = (len(seed)-1) * '?'
+    datglob = datfile[:-(len(seed)+len('dat'))] + seedglob + '.dat'
+    print('[fastnnlo_multigridclosure]: dat file glob is: {}'.format(datglob))
     datfiles = glob.glob(datglob)
     if not datfiles:
         print('[fastnnlo_multigridclosure]: ERROR! No NNLOJET dat files matching {} found! Aborted.'.format(datglob))

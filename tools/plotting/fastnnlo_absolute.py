@@ -326,8 +326,9 @@ for file in [logfile]:
         lines = f.readlines()
         # Counter for scale variations
         nvar = 0
-        murfix = []
-        muffix = []
+        sclfac = []
+        murvar = []
+        mufvar = []
         for line in lines:
             # Find header line(s) matching '#IObs'
             if re.search(r'#IObs', line):
@@ -339,11 +340,20 @@ for file in [logfile]:
                     # Eliminate possible [] around units to avoid problems with filenames
                     scalename = re.sub(r'[\[\]]','',scalename)
                     if verb: print('[fastnnlo_absolute]: Detected scale definition: {:s}'.format(scalename))
+            # Scale factors
+            elif re.search(r'xmur, xmuf', line):
+                lend = re.sub('# The scale factors xmur, xmuf chosen here are:','',line)
+                mus = lend.split(',')
+                sclfac.append(True)
+                murvar.append(float(mus[0]))
+                mufvar.append(float(mus[1]))
+            # Fixed scale settings
             elif re.search(r'mur, muf', line):
                 lend = re.sub('# The fixed scales mur, muf chosen here are:','',line)
                 mus = lend.split(',')
-                murfix.append(float(mus[0]))
-                muffix.append(float(mus[1]))
+                sclfac.append(False)
+                murvar.append(float(mus[0]))
+                mufvar.append(float(mus[1]))
             # Skip all other lines except the ones with cross sections
             elif not re.search(r'\s*[#CLN].*', line):
                 # Accumulate all numbers into one string
@@ -388,8 +398,11 @@ titwgt = 'bold'
 limfs = 'x-large'
 if nice_scalename: scalename = nice_scalename
 sclnam = [scalename]
-for i in range(6):
-    sclnam.append(r'$\bf(\mu_r,\mu_f) = $ ({:4.1f},{:4.1f})'.format(murfix[i],muffix[i]))
+for i in range(nscl):
+    if sclfac[i]:
+        sclnam.append(r'$\bf(\mu_r/\mu_0,\mu_f/\mu_0) = $ ({:4.1f},{:4.1f})'.format(murvar[i],mufvar[i]))
+    else:
+        sclnam.append(r'$\bf(\mu_r,\mu_f) = $ ({:4.1f},{:4.1f})'.format(murvar[i],mufvar[i]))
 xmin = xl[0]
 xmax = xu[nobs-1]
 
