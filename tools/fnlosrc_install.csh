@@ -715,7 +715,8 @@ endif
 #------------------------------------------------------------------------------
 if ( ! $mpinnlo ) then
 #   set arc="fastnlo_toolkit-2.3.1-2585"
-   set arc="fastnlo_toolkit-2.3.1-2657"
+#   set arc="fastnlo_toolkit-2.3.1-2657"
+   set arc="fastnlo_toolkit-2.3.1-2753"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
