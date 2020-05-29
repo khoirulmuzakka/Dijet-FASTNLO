@@ -7,7 +7,7 @@
 // ---- Getters for results---- //
 struct XsUncertainty {
    //! Struct for returning vectors with cross section and relative uncertainty
-   // keep definition of this class outside of fastNLOReader, beacause of python wrapper
+   // keep definition of this class outside of fastNLOReader, because of python wrapper
    std::vector < double > xs;
    std::vector < double > dxsl;
    std::vector < double > dxsu;
@@ -89,6 +89,8 @@ public:
    std::vector < double > GetCrossSection();                //!< Return vector with all cross section values
    std::vector < double > GetCrossSection(bool lNorm);      //!< Return vector with all cross section values, normalize on request
    std::vector < double > GetNormCrossSection();            //!< Return vector with all normalized cross section values
+   std::vector < double > GetUncertainty();                 //!< Return vector with additional uncertainty of cross section values
+   std::vector < double > GetUncertainty(bool lNorm);       //!< Return vector with additional uncertainty of cross section values, normalise on request (NOT YET IMPLEMENTED)
    std::vector < std::map< double, double > > GetCrossSection_vs_x1(); //! Cross section vs. x1 ( XSection_vsX1[bin][<x,xs>] )
    std::vector < std::map< double, double > > GetCrossSection_vs_x2(); //! Cross section vs. x2 ( XSection_vsX1[bin][<x,xs>] )
 
@@ -98,11 +100,14 @@ public:
    std::vector < std::vector < double > > GetCrossSection2Dim();
 
 
-   //! Return struct with vectors containing the cross section values and the selected scale uncertainty
+   //! Return struct with vectors containing the cross section values and the selected uncertainty
    XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
    XsUncertainty GetScaleUncertainty( const fastNLO::EScaleUncertaintyStyle eScaleUnc, bool lNorm );
+   XsUncertainty GetAddUncertainty( const fastNLO::EAddUncertaintyStyle eAddUnc );
+   XsUncertainty GetAddUncertainty( const fastNLO::EAddUncertaintyStyle eAddUnc, bool lNorm );
    //! Function for use with pyext (TODO: Clean this up)
    std::vector< std::vector<double> > GetScaleUncertaintyVec( const fastNLO::EScaleUncertaintyStyle eScaleUnc );
+   std::vector< std::vector<double> > GetAddUncertaintyVec( const fastNLO::EAddUncertaintyStyle eAddUnc );
 
    // ---- Getters for fastNLOReader member variables ---- //
    fastNLO::EScaleFunctionalForm GetMuRFunctionalForm() const { return fMuRFunc; };
@@ -250,6 +255,7 @@ protected:
    // ---- Cross sections ---- //
    std::vector < double > XSection_LO;
    std::vector < double > XSection;
+   std::vector < double > dXSection; // stored uncertainty of x section
    std::vector < double > kFactor;
    std::vector < double > QScale_LO;
    std::vector < double > QScale;

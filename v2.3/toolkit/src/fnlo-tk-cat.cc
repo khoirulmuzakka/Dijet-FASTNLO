@@ -112,7 +112,6 @@ int main(int argc, char** argv) {
          info["fnlo-tk-cat"]<<"Reading table '" << path << "'" << endl;
          yell << _CSEPSC << endl;
          fastNLOTable tab(path);
-
          //! --- Initialising result with first read table
          //! --- If necessary, normalisation is done later on
          if ( !resultTable ) {

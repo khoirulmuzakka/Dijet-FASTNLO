@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
          yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-yodaout"] << "This program evaluates a fastNLO table and" << endl;
-         info["fnlo-tk-yodaout"] << "prints out cross sections with either scale or" << endl;
-         info["fnlo-tk-yodaout"] << "PDF uncertainties in YODA format for use with Rivet." << endl;
+         info["fnlo-tk-yodaout"] << "prints out cross sections with statistical (if available), " << endl;
+         info["fnlo-tk-yodaout"] << "scale, or PDF uncertainties in YODA format for use with Rivet." << endl;
          info["fnlo-tk-yodaout"] << "For this to work, the scenario description must contain" << endl;
          info["fnlo-tk-yodaout"] << "the Rivet ID in the form 'RIVET_ID=EXP_YYYY_INSPIREID/Dii-xjj-ykk'," << endl;
          info["fnlo-tk-yodaout"] << "where 'ii', 'jj', and 'kk' indicate the first histogram covered by" << endl;
@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
          man << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
          man << "                 AS (a_s(M_Z) variation uncertainty with GRV evolution)" << endl;
+         man << "                 ST (statistical uncertainty of x section calculation, if available)" << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          man << "   Alternatives: LO, NLO_only, NNLO, NNLO_only (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
@@ -122,6 +123,7 @@ int main(int argc, char** argv) {
          man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
          man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"np\"" << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -150,11 +152,13 @@ int main(int argc, char** argv) {
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
    EAsUncertaintyStyle    eAsUnc    = kAsNone;
+   EAddUncertaintyStyle   eAddUnc   = kAddNone;
    string chunc = "none";
    if (argc > 3) {
       chunc = (const char*) argv[3];
    }
    if (argc <= 3 || chunc == "_") {
+      chunc = "none";
       shout["fnlo-tk-yodaout"] << "No request given for uncertainty, none evaluated." << endl;
    } else {
       if ( chunc == "NN" ) {
@@ -188,6 +192,9 @@ int main(int argc, char** argv) {
       } else if ( chunc == "AS" ) {
          eAsUnc = kAsGRV;
          shout["fnlo-tk-yodaout"] << "Showing a_s(M_Z) uncertainty with GRV evolution." << endl;
+      } else if ( chunc == "ST" ) {
+         eAddUnc = kAddStat;
+         shout["fnlo-tk-yodaout"] << "Showing statistical uncertainty of x section calculation." << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of uncertainty, " << chunc << ", aborted!" << endl;
          exit(1);
@@ -201,6 +208,7 @@ int main(int argc, char** argv) {
       chord = (const char*) argv[4];
    }
    if (argc <= 4 || chord == "_") {
+      chord = "NLO";
       shout["fnlo-tk-yodaout"] << "No request given for fixed-order precision, using NLO." << endl;
    } else {
       if ( chord == "LO" ) {
@@ -232,6 +240,7 @@ int main(int argc, char** argv) {
       chnorm = (const char*) argv[5];
    }
    if (argc <= 5 || chnorm == "_") {
+      chnorm = "no";
       shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections," << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
@@ -243,6 +252,7 @@ int main(int argc, char** argv) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
+      chflex = "scale1";
       shout["fnlo-tk-yodaout"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex << endl;
@@ -254,17 +264,44 @@ int main(int argc, char** argv) {
       chnp = (const char*) argv[7];
    }
    if (argc <= 7 || chnp == "_") {
+      chnp = "no";
       shout["fnlo-tk-yodaout"] << "Do not apply nonperturbative corrections." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Apply nonperturbative corrections if available." << endl;
    }
 
-   //! ---  Too many arguments
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
    if (argc > 8) {
+      VerbosityLevel  = (const char*) argv[8];
+   }
+   if (argc <= 8 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-yodaout"] << "No request given for verbosity level," << endl;
+      shout << "            using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-yodaout"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //! ---  Too many arguments
+   if (argc > 9) {
       error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
    yell << _CSEPSC << endl;
+   //---  End of parsing arguments
+
+   //! --- Reset verbosity level to warning only from here on
+   // TODO: KR: A string to enum map or similar could come in handy here
+   if ( VerbosityLevel == "DEBUG" ) {
+      SetGlobalVerbosity(DEBUG);
+   } else if ( VerbosityLevel == "INFO" ) {
+      SetGlobalVerbosity(INFO);
+   } else if ( VerbosityLevel == "ERROR" ) {
+      SetGlobalVerbosity(ERROR);
+   } else {
+      SetGlobalVerbosity(WARNING);
+   }
 
    //! --- fastNLO initialisation, read & evaluate table
    //! Initialise a fastNLO instance with interface to LHAPDF
@@ -375,26 +412,26 @@ int main(int argc, char** argv) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale1);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+                                 << "from only the first scale of this flexible-scale table. "
+                                 << "Please check how this table was filled!" << endl;
       } else if ( chflex == "scale2" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale2);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+                                 << "from only the second scale of this flexible-scale table. "
+                                 << "Please check how this table was filled!" << endl;
       } else if ( chflex == "scale12" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale1);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+                                 << "from only the first scale of this flexible-scale table. "
+                                 << "Please check how this table was filled!" << endl;
       } else if ( chflex == "scale21" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale2);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+                                 << "from only the second scale of this flexible-scale table. "
+                                 << "Please check how this table was filled!" << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
       }
@@ -409,16 +446,24 @@ int main(int argc, char** argv) {
    string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
       XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative scale uncertainties (%s)",chunc.c_str());
       LineName += "_dxscl";
    } else if ( chunc == "AS" ) {
       XsUnc = fnlo->GetAsUncertainty(eAsUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative a_s(M_Z) Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative a_s(M_Z) uncertainties (%s)",chunc.c_str());
       LineName += "_dxa_s";
+   } else if ( chunc == "ST" ) {
+      XsUnc = fnlo->GetAddUncertainty(eAddUnc, lNorm);
+      snprintf(buffer, sizeof(buffer), " # Relative statistical uncertainties (%s)",chunc.c_str());
+      LineName += "_dxst";
    } else if ( chunc != "none" ) {
       XsUnc = fnlo->GetPDFUncertainty(ePDFUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative PDF uncertainties (%s)",chunc.c_str());
       LineName += "_dxpdf";
+   } else {
+      XsUnc = fnlo->GetScaleUncertainty(kScaleNone, lNorm);
+      snprintf(buffer, sizeof(buffer), " # Without uncertainties");
+      LineName += "_dxnone";
    }
 
    if ( XsUnc.xs.size() ) {

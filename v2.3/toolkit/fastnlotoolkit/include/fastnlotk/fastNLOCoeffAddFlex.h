@@ -18,8 +18,8 @@ public:
    virtual ~fastNLOCoeffAddFlex(){;}
    virtual fastNLOCoeffAddFlex* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false) ;
-   virtual void Read(std::istream& table);
-   void ReadRest(std::istream& table);
+   virtual void Read(std::istream& table, int ITabVersionRead);
+   void ReadRest(std::istream& table, int ITabVersionRead);
    virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Print(int iprint) const;
    virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption = fastNLO::kMerge);
@@ -51,7 +51,7 @@ public:
 
 protected:
 
-   void ReadCoeffAddFlex(std::istream& table);
+   void ReadCoeffAddFlex(std::istream& table, int ITabVersionRead);
 
    int fILOord;   // obtained from Scenario
    int fSTildeDISFormat = 1; // format of sigma-tilde coefficients (0: log(mu2/q2), 1: log(mu2))

@@ -52,37 +52,40 @@ fastNLOCoeffAddBase* fastNLOCoeffAddBase::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::Read(istream& table){
-   fastNLOCoeffBase::ReadBase(table);
+void fastNLOCoeffAddBase::Read(istream& table, int ITabVersionRead){
+   debug["ReadCoeffAddBase::Read"]<<"Start reading table ..."<<endl;
+   fastNLOCoeffBase::ReadBase(table, ITabVersionRead);
    CheckCoeffConstants(this);
-   ReadCoeffAddBase(table);
-   EndReadCoeff(table);
+   ReadCoeffAddBase(table, ITabVersionRead);
+   fastNLOCoeffBase::ReadCoeffInfoBlocks(table, ITabVersionRead);
+   EndReadCoeff(table, ITabVersionRead);
+   debug["ReadCoeffAddBase::Read"]<<"Finished reading table ..."<<endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
+void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table, int ITabVersionRead){
    CheckCoeffConstants(this);
    char buffer[5257];
-   string stest;
-   if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase"
-   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
+   //   string stest;
+   // if ( fVersionRead>=24000 ) table >> stest; //"fastNLO_CoeffAddBase"
+   // if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
    table >> IRef;
    table >> IScaleDep;
-   if ( fVersionRead >= 24000 ) {
-      table >> Nevt;
-      table >> fWgt.WgtNevt;
-      table >> fWgt.NumTable;
-      table >> fWgt.WgtNumEv;
-      table >> fWgt.WgtSumW2;
-      table >> fWgt.SigSumW2;
-      table >> fWgt.SigSum;
-      fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsSumW2, table );
-      fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSumW2, table );
-      fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
-      fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
-   }
-   else {
+   // if ( fVersionRead >= 24000 ) {
+   //    table >> Nevt;
+   //    table >> fWgt.WgtNevt;
+   //    table >> fWgt.NumTable;
+   //    table >> fWgt.WgtNumEv;
+   //    table >> fWgt.WgtSumW2;
+   //    table >> fWgt.SigSumW2;
+   //    table >> fWgt.SigSum;
+   //    fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsSumW2, table );
+   //    fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSumW2, table );
+   //    fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
+   //    fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
+   // }
+   // else {
       table >> Nevt;
       double readNevt = Nevt;
       if ( Nevt <= 0 ) { // v2300
@@ -98,7 +101,7 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
          fastNLOTools::ReadFlexibleVector ( fWgt.SigObsSum, table );
          fastNLOTools::ReadFlexibleVector ( fWgt.WgtObsNumEv, table );
       }
-   }
+   // }
    table >> Npow;
    int NPDF;
    table >> NPDF;
@@ -224,8 +227,8 @@ void fastNLOCoeffAddBase::ReadCoeffAddBase(istream& table){
       }
    }
 
-   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
-   if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
+   // if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
+   // if ( fVersionRead>=24000 ) fastNLOTools::ReadUnused(table);
 }
 
 
@@ -234,12 +237,11 @@ void fastNLOCoeffAddBase::Write(ostream& table, int itabversion) {
    debug["Write"]<<"Calling fastNLOCoeffBase::Write()"<<endl;
    fastNLOCoeffBase::Write(table,itabversion);
    CheckCoeffConstants(this);
-   if ( itabversion >= 24000 ) table << "fastNLO_CoeffAddBase" << sep;
-   if ( itabversion >= 24000 ) table << 0 << sep; // v2.4, but yet unused
+   // if ( itabversion >= 24000 ) table << "fastNLO_CoeffAddBase" << sep;
+   // if ( itabversion >= 24000 ) table << 0 << sep; // v2.4, but yet unused
    table << IRef << sep;
    table << IScaleDep << sep;
-   // table << Nevt << sep;
-   if ( itabversion==23000 || itabversion==23500 || itabversion==23600 ) { // detailed storage of weights
+   if ( itabversion==23000 || itabversion==23500 || itabversion==23600 || itabversion==25000 ) { // detailed storage of weights
       if ( itabversion==23000 || itabversion==23500 ) table << -1 << sep; // -1: read the values below
       else table << -2 << sep; // -1: read the values below
       table << Nevt << sep;
@@ -254,19 +256,19 @@ void fastNLOCoeffAddBase::Write(ostream& table, int itabversion) {
       fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
       fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
    }
-   else if ( itabversion>=24000 ) { // detailed storage of weights
-      table << Nevt << sep;
-      table << fWgt.WgtNevt << sep;
-      table << fWgt.NumTable << sep;
-      table << fWgt.WgtNumEv << sep;
-      table << fWgt.WgtSumW2 << sep;
-      table << fWgt.SigSumW2 << sep;
-      table << fWgt.SigSum << sep;
-      fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsSumW2, table );
-      fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSumW2, table );
-      fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
-      fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
-   }
+   // else if ( itabversion>=24000 ) { // detailed storage of weights
+   //    table << Nevt << sep;
+   //    table << fWgt.WgtNevt << sep;
+   //    table << fWgt.NumTable << sep;
+   //    table << fWgt.WgtNumEv << sep;
+   //    table << fWgt.WgtSumW2 << sep;
+   //    table << fWgt.SigSumW2 << sep;
+   //    table << fWgt.SigSum << sep;
+   //    fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsSumW2, table );
+   //    fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSumW2, table );
+   //    fastNLOTools::WriteFlexibleVector ( fWgt.SigObsSum, table );
+   //    fastNLOTools::WriteFlexibleVector ( fWgt.WgtObsNumEv, table );
+   // }
    else {
       table << Nevt << sep;
    }
@@ -355,8 +357,8 @@ void fastNLOCoeffAddBase::Write(ostream& table, int itabversion) {
          table << ScaleDescript[i][j] << sep;
       }
    }
-   if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
-   if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   // if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
+   // if ( itabversion>=24000 ) table << 0 << sep; // v2.4, but yet unused
 
 }
 

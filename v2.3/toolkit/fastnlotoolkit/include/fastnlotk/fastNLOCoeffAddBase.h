@@ -107,7 +107,7 @@ public:
    virtual ~fastNLOCoeffAddBase() {}
    virtual fastNLOCoeffAddBase* Clone() const;                                     //!< returns 'new' copy of this instance.
    static bool CheckCoeffConstants(const fastNLOCoeffBase* c, bool quiet = false);
-   void Read(std::istream& table);
+   void Read(std::istream& table, int ITabVersionRead);
    virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Add(const fastNLOCoeffAddBase& other, fastNLO::EMerge moption=fastNLO::kMerge);
    virtual void Print(int iprint) const;
@@ -174,7 +174,7 @@ public:
    double GetMergeWeight(fastNLO::EMerge moption, int proc, int bin) const ; //!< Get merge weight for a given bin and subprocess
 
 protected:
-   void ReadCoeffAddBase(std::istream& table);
+   void ReadCoeffAddBase(std::istream& table, int ITabVersionRead);
    int GetScaledimfromvar(int scalevar) const;
 
    int IRef = 0;

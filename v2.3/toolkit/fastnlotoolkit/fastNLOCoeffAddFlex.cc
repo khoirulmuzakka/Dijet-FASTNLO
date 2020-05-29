@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "fastnlotk/fastNLOTable.h"
 #include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOCoeffAddFlex.h"
 
@@ -46,23 +47,29 @@ fastNLOCoeffAddFlex* fastNLOCoeffAddFlex::Clone() const {
 
 
 ///________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::Read(istream& table){
-   fastNLOCoeffBase::ReadBase(table);
-   ReadRest(table);
+void fastNLOCoeffAddFlex::Read(istream& table, int ITabVersionRead){
+   debug["ReadCoeffAddFlex::Read"]<<"Start reading coefficient table version "<<ITabVersionRead<<endl;
+   fastNLOCoeffBase::ReadBase(table, ITabVersionRead);
+   ReadRest(table, ITabVersionRead);
+   debug["ReadCoeffAddFlex::Read"]<<"Finished reading coefficient table version "<<ITabVersionRead<<endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::ReadRest(istream& table){
+void fastNLOCoeffAddFlex::ReadRest(istream& table, int ITabVersionRead){
+   debug["ReadCoeffAddFlex::ReadRest"]<<"Start reading rest of coefficient table version "<<ITabVersionRead<<endl;
    CheckCoeffConstants(this);
-   fastNLOCoeffAddBase::ReadCoeffAddBase(table);
-   ReadCoeffAddFlex(table);
-   EndReadCoeff(table);
+   fastNLOCoeffAddBase::ReadCoeffAddBase(table, ITabVersionRead);
+   ReadCoeffAddFlex(table, ITabVersionRead);
+   fastNLOCoeffBase::ReadCoeffInfoBlocks(table, ITabVersionRead);
+   EndReadCoeff(table, ITabVersionRead);
+   debug["ReadCoeffAddFlex::ReadRest"]<<"Finished reading rest of coefficient table version "<<ITabVersionRead<<endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
+void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table, int ITabVersionRead){
+   debug["ReadCoeffAddFlex::ReadCoeffAddFlex"]<<"Start reading coefficients for table version "<<ITabVersionRead<<endl;
    CheckCoeffConstants(this);
 
    //  ---- order of reading... ---- //
@@ -119,6 +126,7 @@ void fastNLOCoeffAddFlex::ReadCoeffAddFlex(istream& table){
          AlphasTwoPi[i][j].resize(ScaleNode2[i].size());
       }
    }
+   debug["ReadCoeffAddFlex::ReadCoeffAddFlex"]<<"Finished reading coefficients for table version "<<ITabVersionRead<<endl;
 }
 
 
@@ -195,6 +203,10 @@ void fastNLOCoeffAddFlex::Write(ostream& table, int itabversion) {
    */
    //printf("  *  fastNLOCoeffAddFlex::Write(). Wrote %d lines of v2.1 Tables.\n",nn3);
    debug["Write"]<<"Wrote "<<nn3<<" lines of v2.1 Tables."<<endl;
+
+   if ( itabversion >= 25000 ) {
+      fastNLOCoeffBase::WriteCoeffInfoBlocks(table, itabversion);
+   }
 }
 
 

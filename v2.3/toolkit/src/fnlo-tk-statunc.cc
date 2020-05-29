@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 #include <unistd.h>
+//#include "fastnlotk/fastNLOTable.h"
+#include "fastnlotk/fastNLOTools.h"
 #include "fastnlotk/fastNLOLHAPDF.h"
 #include "fastnlotk/speaker.h"
 #ifdef WITH_YODA
@@ -43,32 +45,43 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! --- Print program purpose
-   yell << _CSEPSC << endl;
-   info["fnlo-tk-statunc"] << "Program to read a sample of fastNLO tables and write out" << endl;
-   info["fnlo-tk-statunc"] << "averaged QCD cross sections with statistical uncertainties" << endl;
-   yell << _SSEPSC << endl;
-   info["fnlo-tk-statunc"] << "For more explanations type:" << endl;
-   info["fnlo-tk-statunc"] << "./fnlo-tk-statunc -h" << endl;
-   yell << _CSEPSC << endl;
-
-   //! --- Parse commmand line
+   //! --- Parse command line
    char buffer[1024]; // TODO: Use PATH_MAX instead?
-   yell << "" << endl;
-   yell << _CSEPSC << endl;
-   shout["fnlo-tk-statunc"] << "fastNLO Statistical Table Sample Evaluator"<<endl;
-   yell << _SSEPSC << endl;
    string tablebase;
    if (argc <= 1) {
+      yell << "" << endl;
+      yell << _CSEPSC << endl;
+      shout["fnlo-tk-statunc"] << "fastNLO Statistical Table Sample Evaluator"<<endl;
+      yell << _SSEPSC << endl;
       error["fnlo-tk-statunc"] << "No fastNLO sample specified!" << endl;
-      shout["fnlo-tk-statunc"] << "For an explanation of command line arguments type:" << endl;
+      shout["fnlo-tk-statunc"] << "For more explanations type:" << endl;
       shout["fnlo-tk-statunc"] << "./fnlo-tk-statunc -h" << endl;
+      shout["fnlo-tk-statunc"] << "For version number printout type:" << endl;
+      shout["fnlo-tk-statunc"] << "./fnlo-tk-statunc -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
       tablebase = (const char*) argv[1];
+      if (tablebase == "-v") {
+         fastNLOTools::PrintFastnloVersion();
+         return 0;
+      }
+      //! --- Print program purpose
+      yell << _CSEPSC << endl;
+      info["fnlo-tk-statunc"] << "Program to read a sample of fastNLO tables and write out" << endl;
+      info["fnlo-tk-statunc"] << "averaged QCD cross sections with statistical uncertainties" << endl;
+      yell << _SSEPSC << endl;
+      info["fnlo-tk-statunc"] << "For more explanations type:" << endl;
+      info["fnlo-tk-statunc"] << "./fnlo-tk-statunc -h" << endl;
+      info["fnlo-tk-statunc"] << "For version number printout type:" << endl;
+      info["fnlo-tk-statunc"] << "./fnlo-tk-statunc -v" << endl;
+      yell << _CSEPSC << endl;
+      yell << "" << endl;
       //! --- Usage info
       if (tablebase == "-h") {
+         yell << _CSEPSC << endl;
+         info["fnlo-tk-statunc"] << "fastNLO Statistical Table Sample Evaluator"<<endl;
+         yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-statunc"] << "This program evaluates a sample of equivalent, but" << endl;
          info["fnlo-tk-statunc"] << "statistically independent fastNLO tables and" << endl;
@@ -98,6 +111,7 @@ int main(int argc, char** argv) {
          man << "   Alternatives: LO, NNLO, NLO-ONLY, NNLO-ONLY (if available)" << endl;
          man << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
          man << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -107,6 +121,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-statunc"] << "Evaluating table sample: "  <<  tablebase << endl;
       }
    }
+
    //---  PDF set
    string PDFFile = "X";
    if (argc > 2) {
@@ -122,38 +137,41 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-statunc"] << "Using PDF set   : " << PDFFile << endl;
    }
+
    //! --- Fixed-order choice
+   string FixedOrderChoice = "NLO";
    ESMOrder eOrder = kNextToLeading;
-   string chord = "NLO";
    bool lexclusive = false;
    if (argc > 3) {
-      chord = (const char*) argv[3];
+      FixedOrderChoice = (const char*) argv[3];
    }
-   if (argc <= 3 || chord == "_") {
+   if (argc <= 3 || FixedOrderChoice == "_") {
+      FixedOrderChoice = "NLO";
       shout["fnlo-tk-statunc"] << "No request given for fixed-order precision, using NLO." << endl;
    } else {
-      if ( chord == "LO" ) {
+      if ( FixedOrderChoice == "LO" ) {
          eOrder = kLeading;
          shout["fnlo-tk-statunc"] << "Deriving LO cross sections for comparison." << endl;
-      } else if ( chord == "NLO" ) {
+      } else if ( FixedOrderChoice == "NLO" ) {
          eOrder = kNextToLeading;
          shout["fnlo-tk-statunc"] << "Deriving NLO cross sections for comparison." << endl;
-      } else if ( chord == "NNLO" ) {
+      } else if ( FixedOrderChoice == "NNLO" ) {
          eOrder = kNextToNextToLeading;
          shout["fnlo-tk-statunc"] << "Deriving NNLO cross sections for comparison." << endl;
-      } else if ( chord == "NLO-ONLY" ) {
+      } else if ( FixedOrderChoice == "NLO-ONLY" ) {
          eOrder = kNextToLeading;
          lexclusive = true;
          shout["fnlo-tk-statunc"] << "Deriving NLO contributions for comparison." << endl;
-      } else if ( chord == "NNLO-ONLY" ) {
+      } else if ( FixedOrderChoice == "NNLO-ONLY" ) {
          eOrder = kNextToNextToLeading;
          lexclusive = true;
          shout["fnlo-tk-statunc"] << "Deriving NNLO contributions for comparison." << endl;
       } else {
-         error["fnlo-tk-statunc"] << "Illegal choice of fixed-order precision, " << chord << ", aborted!" << endl;
+         error["fnlo-tk-statunc"] << "Illegal choice of fixed-order precision, " << FixedOrderChoice << ", aborted!" << endl;
          exit(1);
       }
    }
+
    //! --- Start counter
    string chmin = "0000";
    if (argc > 4) {
@@ -168,6 +186,7 @@ int main(int argc, char** argv) {
       error["fnlo-tk-statunc"] << "Illegal minimal counter number for looping over table sample, " << nmin << ", aborted!" << endl;
       exit(1);
    }
+
    //! --- End counter
    string chmax = "1000";
    if (argc > 5) {
@@ -185,11 +204,39 @@ int main(int argc, char** argv) {
       error["fnlo-tk-statunc"] << "Maximal counter number smaller than minimal one, nmin = " << nmin << ", nmax = " << nmax << ", aborted!" << endl;
       exit(1);
    }
+
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
+   if (argc > 6) {
+      VerbosityLevel  = (const char*) argv[6];
+   }
+   if (argc <= 6 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-statunc"] << "No request given for verbosity level," << endl;
+      shout << "            using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-statunc"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //---  Too many arguments
+   if (argc > 7) {
+      error["fnlo-tk-statunc"] << "Too many arguments, aborting!" << endl;
+      exit(1);
+   }
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
    //! --- Reset verbosity level to warning only from here on
-   SetGlobalVerbosity(WARNING);
+   // TODO: KR: A string to enum map or similar could come in handy here
+   if ( VerbosityLevel == "DEBUG" ) {
+      SetGlobalVerbosity(DEBUG);
+   } else if ( VerbosityLevel == "INFO" ) {
+      SetGlobalVerbosity(INFO);
+   } else if ( VerbosityLevel == "ERROR" ) {
+      SetGlobalVerbosity(ERROR);
+   } else {
+      SetGlobalVerbosity(WARNING);
+   }
 
    //! --- Loop over selected table sample
    //! Initialise fastNLO instances with interface to LHAPDF
@@ -209,7 +256,7 @@ int main(int argc, char** argv) {
    vector < double > dxstmp3;
    vector < double > dxstmp4;
    string firsttable;
-
+   vector<string> alltables;
    for ( int itab=nmin; itab<=nmax; itab++) {
       char buftmp[5];
       snprintf(buftmp, sizeof(buftmp), "%04d", itab);
@@ -219,6 +266,7 @@ int main(int argc, char** argv) {
       if ( ! access(tablename.c_str(), R_OK) == 0 ) tablename += ".gz";
       if ( access(tablename.c_str(), R_OK) == 0 ) {
          nfound++;
+         alltables.push_back(tablename);
          fastNLOLHAPDF fnlo(tablename,PDFFile,0);
          //! Print essential table information, but only for very first table
          //! and do some initialization
@@ -327,6 +375,35 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
+   // KR TEST MERGING
+
+   fastNLOTable* resultTable = NULL;
+   int nmerge = 0;
+   EMerge moption = kMerge;
+   for ( const string& path : alltables ) {
+      nmerge++;
+      if (nmerge == 1) {
+         resultTable = new fastNLOTable(path);
+      } else {
+         fastNLOTable tab(path);
+         resultTable->MergeTable(tab, moption); // merge
+      }
+   }
+   // --- Write result
+   resultTable->SetFilename("mergetest.tab.gz");
+   resultTable->SetITabVersionWrite(25000);
+   // Loop over contributions in table
+   for ( int ic=0; ic<resultTable->GetNcontrib()+resultTable->GetNdata(); ic++ ) {
+      fastNLOCoeffAddBase* coeff = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(ic);
+      int ib = coeff->GetNCoeffInfoBlocks();
+      cout<< "IIIIIIIII = " << ic << ", ib = " << ib <<endl;
+   }
+   //   AddCoeffInfoBlock
+   info["Blubber"]<<"Write merged results to file "<<resultTable->GetFilename()<<"."<<endl;
+   resultTable->WriteTable();
+
+   // KR TEST MERGING
+
    //! Write out statistical fluctuation info
    yell << _CSEPSC << endl;
    shout << "Special info on statistical fluctuations:" << endl;
@@ -378,7 +455,7 @@ int main(int argc, char** argv) {
 
    // //! Write out cross sections with statistical uncertainty
    // yell << " " << _DSEPS << endl;
-   // yell << " Statistical uncertainties of the " << chord << " cross section for the primary scale choice.\n";
+   // yell << " Statistical uncertainties of the " << FixedOrderChoice << " cross section for the primary scale choice.\n";
    // yell << " " << _SSEPS << endl;
    // yell << "  bin       cross section           rel. average error of the mean\n";
    // yell << " " << _SSEPS << endl;
@@ -447,7 +524,7 @@ int main(int argc, char** argv) {
 
    //! --- Naming the file (and the legend line!) according to calculation order and uncertainty choice
    string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
-   string FileName = chord + "_" + PDFName + "_stat";
+   string FileName = FixedOrderChoice + "_" + PDFName + "_stat";
    string LineName = FileName + "_dxst";
 
    //! --- YODA analysis object creation and storage

@@ -23,7 +23,7 @@ public:
    virtual ~fastNLOCoeffBase(){};                                              //! destructor
    virtual fastNLOCoeffBase* Clone() const;                                     //!< returns 'new' copy of this instance.
 
-   virtual void Read(std::istream& table);
+   virtual void Read(std::istream& table, int ITabVersionRead);
    virtual void Write(std::ostream& table, int ITabVersionWrite);
    virtual void Print(int iprint) const;
 
@@ -73,9 +73,20 @@ public:
    bool IsEnabled() const {return enabled;}
    void Enable(bool on=true) {enabled = on;}
 
+   // Added to include CoeffInfoBlocks
+   bool HasCoeffInfoBlock() const {return NCoeffInfoBlocks>0;}
+   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1);
+   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2);
+   int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1);
+   int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2);
+   std::vector < double > GetCoeffInfoContent(int Index) const { return CoeffInfoBlockContent[Index]; };
+   int GetNCoeffInfoBlocks() const {return NCoeffInfoBlocks;}
+
 protected:
-   void ReadBase(std::istream& table);
-   void EndReadCoeff(std::istream& table);
+   void ReadBase(std::istream& table, int ITabVersionRead);
+   void ReadCoeffInfoBlocks(std::istream& table, int ITabVersionRead);
+   void WriteCoeffInfoBlocks(std::ostream& table, int ITabVersionWrite);
+   void EndReadCoeff(std::istream& table, int ITabVersionRead);
 
    int fNObsBins; // obtained from Scenario
 
@@ -90,6 +101,14 @@ protected:
    std::vector < std::string > CodeDescript;
 
    bool enabled = false;
+
+   // Added to include CoeffInfoBlocks
+   int NCoeffInfoBlocks = 0; // Not present for version numbers < 25000
+   std::vector < int > ICoeffInfoBlockFlag1;
+   std::vector < int > ICoeffInfoBlockFlag2;
+   std::vector < int > NCoeffInfoBlockDescr;
+   std::vector < std::vector < std::string > > CoeffInfoBlockDescript;
+   fastNLO::v2d CoeffInfoBlockContent;
 };
 
 

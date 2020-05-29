@@ -58,8 +58,8 @@ int main(int argc, char** argv) {
    //! --- Set verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! ---  Parse commmand line
-   char buffer[1024];
+   //! ---  Parse command line
+   char buffer[1024]; // TODO: Use PATH_MAX instead?
    string tablename;
    if (argc <= 1) {
       yell << "" << endl;
@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
          man << "[Mz]: Set value of M_Z at which alpha_s(M_Z) is defined in alpha_s evolution, def. = 91.1876 (PDG)" << endl;
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -148,6 +149,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-cppread"] << "Evaluating table: " << tablename << endl;
       }
    }
+
    //--- PDF set
    string chtmp = "X";
    string PDFFile = "X";
@@ -164,8 +166,6 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-cppread"] << "Using PDF set   : " << PDFFile << endl;
    }
-
-
 
    //--- PDF or scale variations
    int nvars = 1;
@@ -244,11 +244,12 @@ int main(int argc, char** argv) {
    }
 
    //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
-   string chflex = "scale1";
+   string chflex;
    if (argc > 6) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
+      chflex = "scale1";
       shout["fnlo-tk-cppread"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
@@ -346,8 +347,21 @@ int main(int argc, char** argv) {
       }
    }
 
-   //---  Too many arguments
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
    if (argc > 11) {
+      VerbosityLevel  = (const char*) argv[11];
+   }
+   if (argc <= 11 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-cppread"] << "No request given for verbosity level," << endl;
+      shout << "            using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-cppread"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //---  Too many arguments
+   if (argc > 12) {
       error["fnlo-tk-cppread"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
@@ -355,7 +369,16 @@ int main(int argc, char** argv) {
    //---  End of parsing arguments
 
    //! --- Reset verbosity level to warning only from here on
-   SetGlobalVerbosity(WARNING);
+   // TODO: KR: A string to enum map or similar could come in handy here
+   if ( VerbosityLevel == "DEBUG" ) {
+      SetGlobalVerbosity(DEBUG);
+   } else if ( VerbosityLevel == "INFO" ) {
+      SetGlobalVerbosity(INFO);
+   } else if ( VerbosityLevel == "ERROR" ) {
+      SetGlobalVerbosity(ERROR);
+   } else {
+      SetGlobalVerbosity(WARNING);
+   }
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!
@@ -1127,26 +1150,26 @@ int main(int argc, char** argv) {
                fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale1);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                       << "from only the first scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the first scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else if ( chflex == "scale2" ) {
                fnlo->SetMuFFunctionalForm(kScale2);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
-                                       << "from only the second scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the second scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else if ( chflex == "scale12" ) {
                fnlo->SetMuFFunctionalForm(kScale2);
                fnlo->SetMuRFunctionalForm(kScale1);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                       << "from only the first scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the first scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else if ( chflex == "scale21" ) {
                fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
-                                       << "from only the second scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the second scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else {
                error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
                exit(1);

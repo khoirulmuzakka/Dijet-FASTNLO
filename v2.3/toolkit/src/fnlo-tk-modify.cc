@@ -137,7 +137,6 @@ int main(int argc, char** argv) {
 
    fastNLOTable table(CHAR(InTable));
    table.ReadTable();
-
    if ( EXIST(PrintInputA1) ) {
       if ( BOOL(PrintInputA1) ) table.PrintHeader(1);
    }
@@ -147,8 +146,8 @@ int main(int argc, char** argv) {
 
    // Block A1
    if ( EXIST(Itabversion) ) {
-      info["fnlo-tk-modify"]<<"Modifying table version: from "<< table.GetItabversion() << " to " << INT(Itabversion) << endl;
-      table.SetItabversion(INT(Itabversion));
+      info["fnlo-tk-modify"]<<"Modifying table version: from "<< table.GetITabVersionRead() << " to " << INT(Itabversion) << endl;
+      table.SetITabVersionWrite(INT(Itabversion));
    }
    if ( EXIST(ScenName) ) {
       info["fnlo-tk-modify"]<<"Modifying scenario name: from "<< table.GetScenName() << " to " << STRING(ScenName) << endl;

@@ -515,9 +515,9 @@ fastNLOReader::fastNLOReader(const fastNLOReader& other) :
    ffilename(other.ffilename), fScalevar(other.fScalevar), fScaleFacMuR(other.fScaleFacMuR),
    fUnits(other.fUnits), fPDFSuccess(other.fPDFSuccess), fPDFCached(other.fPDFCached),
    fAlphasCached(other.fAlphasCached), Fct_MuR(other.Fct_MuR), Fct_MuF(other.Fct_MuF),
-   XSection(other.XSection), QScale(other.QScale), XSectionRef(other.XSectionRef),
-   XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
-   XSectionRef_s2(other.XSectionRef_s2)
+   XSection(other.XSection), dXSection(other.dXSection), QScale(other.QScale),
+   XSectionRef(other.XSectionRef), XSectionRefMixed(other.XSectionRefMixed),
+   XSectionRef_s1(other.XSectionRef_s1), XSectionRef_s2(other.XSectionRef_s2)
    // XSection_LO(other.XSection_LO), XSection(other.XSection), kFactor(other.kFactor),
    // QScale_LO(other.QScale_LO), QScale(other.QScale), XSectionRef(other.XSectionRef),
    // XSectionRefMixed(other.XSectionRefMixed), XSectionRef_s1(other.XSectionRef_s1),
@@ -1307,6 +1307,8 @@ void fastNLOReader::CalcCrossSection() {
 
    XSection.clear();
    XSection.resize(NObsBin);
+   dXSection.clear();
+   dXSection.resize(NObsBin);
    fXSection_vsX1.clear();
    fXSection_vsX2.clear();
    fXSection_vsX1.resize(NObsBin);
@@ -1493,17 +1495,30 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
    // Test that c ist not a NULL pointer, i.e. an unfilled contribution, else return
    if (!c) return;
 
-   vector<double>* XS = &XSection;
-   vector<double>* QS = &QScale;
+   // Set up pointers to stored vectors
+   vector<double>* XS  = &XSection;
+   vector<double>* dXS = &dXSection;
+   vector<double>* QS  = &QScale;
+
    // KR: Having different IXsectUnits in different contributions only works when
    //     everything always scaled to Ipublunits (unique per table)
    // Get x section units of each contribution
    int xUnits = c->GetIXsectUnits();
    logger.debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
+   // Check whether CoeffInfoBlock for relative stat. uncertainties (0,0) exists
+   logger.debug["CalcCrossSectionv21"]<<"Checking on presence of statistical uncertainties  ..."<<endl;
+   int iCIBIndex = c->GetCoeffInfoBlockIndex(0,0);
+   std::vector < double > dCIBCont;
+   if ( iCIBIndex > -1 ) {
+      logger.debug["CalcCrossSectionv21"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical uncertainties."<<endl;
+      dCIBCont = c->GetCoeffInfoContent(iCIBIndex);
+   }
+
    for (unsigned int i=0; i<NObsBin; i++) {
       double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = c->GetNxmax(i);
+      double XStmp = 0.;
       for (unsigned int jS1=0; jS1<c->GetNScaleNode1(i); jS1++) {
          double Q2           = c->GetScaleNode1(i,jS1)*c->GetScaleNode1(i,jS1);
          double lq2 = log(Q2);
@@ -1536,6 +1551,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
                      }
                   }
                   XS->at(i)   += xsci;
+                  XStmp       += xsci;
                   QS->at(i)   += xsci*mur;
                   // cross section as 'functions' of x
                   //double x1 = c->GetXNode1(i,x);
@@ -1546,6 +1562,11 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
                }
             }
          }
+      }
+      if ( dCIBCont.empty() ) {
+         dXS->at(i) += 0.;
+      } else {
+         dXS->at(i) += fabs(XStmp)*dCIBCont[i]; // XStmp may be negative, but dCIBCont as statistical uncertainty should not!
       }
    }
    logger.debug["CalcCrossSectionv21"]<<"... leaving CalcCrossSectionv21."<<endl;
@@ -1576,18 +1597,31 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
       //      FillPDFCache(0.,true);
    }
 
-   int scaleVar       = c->GetNpow() == ILOord ? 0 : fScalevar;
-   vector<double>* XS = &XSection;
-   vector<double>* QS = &QScale;
+   // Set up pointers to stored vectors
+   vector<double>* XS  = &XSection;
+   vector<double>* dXS = &dXSection;
+   vector<double>* QS  = &QScale;
+
    // KR: Having different IXsectUnits in different contributions only works when
    //     everything always scaled to Ipublunits (unique per table)
    // Get x section units of each contribution
    int xUnits = c->GetIXsectUnits();
    logger.debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
+   // Check whether CoeffInfoBlock for relative stat. uncertainties (0,0) exists
+   logger.debug["CalcCrossSectionv20"]<<"Checking on presence of statistical uncertainties  ..."<<endl;
+   int iCIBIndex = c->GetCoeffInfoBlockIndex(0,0);
+   std::vector < double > dCIBCont;
+   if ( iCIBIndex > -1 ) {
+      logger.debug["CalcCrossSectionv20"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical uncertainties."<<endl;
+      dCIBCont = c->GetCoeffInfoContent(iCIBIndex);
+   }
+
+   int scaleVar = c->GetNpow() == ILOord ? 0 : fScalevar;
    for (unsigned int i=0; i<NObsBin; i++) {
       double unit = RescaleCrossSectionUnits(BinSize[i], xUnits);
       int nxmax = c->GetNxmax(i);
+      double XStmp = 0.;
       for (int j=0; j<c->GetTotalScalenodes(); j++) {
          double scalefac = fScaleFacMuR/c->GetScaleFactor(scaleVar);
          double mur      = scalefac * c->GetScaleNode(i,scaleVar,j);
@@ -1595,14 +1629,20 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
             for (int l=0; l<c->GetNSubproc(); l++) {
                if (!c->SubIsEnabled(l)) continue;
                double xsci     = c->GetSigmaTilde(i,scaleVar,j,k,l) *  c->AlphasTwoPi_v20[i][j]  * c->PdfLc[i][j][k][l] * unit / c->GetNevt(i,l);
-               XS->at(i)      +=  xsci;
-               QS->at(i)      +=  xsci*mur;
+               XS->at(i)      += xsci;
+               XStmp          += xsci;
+               QS->at(i)      += xsci*mur;
                //double x1 = c->GetXNode1(i,k);
                //double x2 = c->GetXNode2(i,k);
                fXSection_vsX1[i][c->GetX1(i,k)] += xsci;
                //fXSection_vsX2[i][x2] += xsci;
             }
          }
+      }
+      if ( dCIBCont.empty() ) {
+         dXS->at(i) += 0.;
+      } else {
+         dXS->at(i) += fabs(XStmp)*dCIBCont[i]; // XStmp may be negative, but dCIBCont as statistical uncertainty should not!
       }
    }
    logger.debug["CalcCrossSectionv20"]<<"... leaving CalcCrossSectionv20."<<endl;
@@ -2307,7 +2347,7 @@ void fastNLOReader::FillBlockBPDFLCsDISv21(fastNLOCoeffAddFlex* c, fastNLOCoeffA
                for (int x=0; x<c->GetNxmax(i); x++) {
                   //double xp = c->GetXNode1(i,x);
                   double xp = c->GetXNode1(i,x);
-                  
+
                   if (SpeedUp) {
                      if (c == c0)
                         c->PdfXfx[i][x][jS1][kS2] = GetXFXSqrtS(xp,muf);
@@ -3508,7 +3548,7 @@ XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eS
          XsUnc.dxsu[iobs] = 0.;
          XsUnc.dxsl[iobs] = 0.;
       }
-      logger.debug["GetScaleUncertainty"]<<"iobs = " << iobs << "dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
+      logger.debug["GetScaleUncertainty"]<<"iobs = " << iobs << ", dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
    }
 
    logger.info["GetScaleUncertainty"]<<"Setting scale factors back to default of unity."<<endl;
@@ -3519,6 +3559,97 @@ XsUncertainty fastNLOReader::GetScaleUncertainty(const EScaleUncertaintyStyle eS
 
 std::vector< std::vector<double> > fastNLOReader::GetScaleUncertaintyVec(const EScaleUncertaintyStyle eScaleUnc) {
    XsUncertainty xsUnc = fastNLOReader::GetScaleUncertainty(eScaleUnc);
+   std::vector<std::vector<double> > xsUncVec;
+   xsUncVec.resize(3);
+   xsUncVec[0] = xsUnc.xs;
+   xsUncVec[1] = xsUnc.dxsu;
+   xsUncVec[2] = xsUnc.dxsl;
+   return xsUncVec;
+}
+
+
+// Added to include CoeffInfoBlocks
+//
+//______________________________________________________________________________
+vector < double > fastNLOReader::GetUncertainty() {
+   // Get uncertainty of fast calculated cross section stored in additional CoeffInfoBlocks
+   if (dXSection.empty()) CalcCrossSection();
+   return dXSection;
+}
+
+//______________________________________________________________________________
+vector < double > fastNLOReader::GetUncertainty(bool lNorm) {
+   // Get uncertainty of fast calculated cross section stored in additional CoeffInfoBlocks
+   if (dXSection.empty()) CalcCrossSection();
+   if (lNorm) {
+      //      vector < double > XNorm = GetNormCrossSection();
+      //      return XNorm;
+      logger.error["GetUncertainty"]<<"Additional uncertainty for normalised x sections not yet implemented; aborted!"<<endl;
+      exit(1);
+   } else {
+      return dXSection;
+   }
+}
+
+//________________________________________________________________________________________________________________
+XsUncertainty fastNLOReader::GetAddUncertainty(const EAddUncertaintyStyle eAddUnc) {
+   XsUncertainty XsUnc = GetAddUncertainty(eAddUnc, false);
+   return XsUnc;
+}
+
+
+//______________________________________________________________________________
+XsUncertainty fastNLOReader::GetAddUncertainty(const EAddUncertaintyStyle eAddUnc, bool lNorm) {
+   //
+   XsUncertainty XsUnc;
+   vector < double > MyXSection;
+   vector < double > MydXSection;
+   unsigned int NObsBin = GetNObsBin();
+
+   //! Cross section and absolute uncertainties
+   CalcCrossSection();
+   MyXSection  = GetCrossSection(lNorm);
+   MydXSection = GetUncertainty(lNorm);
+
+   //! Fill return struct
+   if (eAddUnc == kAddNone) {
+      logger.info["GetAddUncertainty"]<<"No additional uncertainty selected, uncertainties will be zero."<<endl;
+      for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
+         XsUnc.xs.push_back(MyXSection[iobs]);
+         XsUnc.dxsu.push_back(0);
+         XsUnc.dxsl.push_back(0);
+      }
+   } else if (eAddUnc == kAddStat) {
+      logger.info["GetAddUncertainty"]<<"Statistical uncertainties selected."<<endl;
+      for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
+         XsUnc.xs.push_back(MyXSection[iobs]);
+         XsUnc.dxsu.push_back(MydXSection[iobs]);
+         XsUnc.dxsl.push_back(-MydXSection[iobs]);
+      }
+   } else {
+      logger.error["GetAddUncertainty"]<<"ERROR! No valid additional uncertainty style selected, exiting."<<endl;
+      logger.error["GetAddUncertainty"]<<"Style enum = "<<eAddUnc<<endl;
+      exit(1);
+   }
+
+
+   //! Divide by cross section != 0 to give relative uncertainties
+   for (unsigned int iobs = 0; iobs < NObsBin; iobs++) {
+      if (fabs(XsUnc.xs[iobs]) > DBL_MIN) {
+         XsUnc.dxsu[iobs] = +fabs(XsUnc.dxsu[iobs] / XsUnc.xs[iobs]);
+         XsUnc.dxsl[iobs] = -fabs(XsUnc.dxsl[iobs] / XsUnc.xs[iobs]);
+      } else {
+         XsUnc.dxsu[iobs] = 0.;
+         XsUnc.dxsl[iobs] = 0.;
+      }
+      logger.debug["GetAddUncertainty"]<<"iobs = " << iobs << ", dxsl = " << XsUnc.dxsl[iobs] << ", dxsu = " << XsUnc.dxsu[iobs] <<endl;
+   }
+
+   return XsUnc;
+}
+
+std::vector< std::vector<double> > fastNLOReader::GetAddUncertaintyVec(const EAddUncertaintyStyle eAddUnc) {
+   XsUncertainty xsUnc = fastNLOReader::GetAddUncertainty(eAddUnc);
    std::vector<std::vector<double> > xsUncVec;
    xsUncVec.resize(3);
    xsUncVec[0] = xsUnc.xs;
