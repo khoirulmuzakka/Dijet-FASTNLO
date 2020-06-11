@@ -125,7 +125,8 @@ int main(int argc, char** argv) {
          man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
          man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
-         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1," << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2." << endl;
          man << "[Nf]: Set no. of flavours to use in alpha_s evolution, def. = 5" << endl;
          man << "   Alternatives: 3,4,6, and 0 i.e. Nf matching at thresholds." << endl;
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
@@ -1147,6 +1148,9 @@ int main(int argc, char** argv) {
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
                                        << "from only the second scale of this flexible-scale table." << endl
                                        << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "kProd" ) {
+               fnlo->SetMuFFunctionalForm(kProd);
+               fnlo->SetMuRFunctionalForm(kProd);
             } else {
                error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
                exit(1);

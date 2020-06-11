@@ -382,12 +382,12 @@ da_fl2nn = dstat*np.multiply(a_fl2nn, dst_nnlo)
 titwgt = 'bold'
 limfs = 'x-large'
 if nice_scalename: scalename = nice_scalename
-sclnam = [scalename]
+sclnam = []
 for i in range(nscl):
     if sclfac[i]:
-        sclnam.append(r'$\bf(\mu_r/\mu_0,\mu_f/\mu_0) = $ ({:4.1f},{:4.1f})'.format(murvar[i],mufvar[i]))
+        sclnam.append(r'{} $\bf(\mu_r/\mu_0,\mu_f/\mu_0) = $ ({:4.1f},{:4.1f})'.format(scalename,murvar[i],mufvar[i]))
     else:
-        sclnam.append(r'$\bf(\mu_r,\mu_f) = $ ({:4.1f},{:4.1f})'.format(murvar[i],mufvar[i]))
+        sclnam.append(r'{} $\bf(\mu_r,\mu_f) = $ ({:4.1f},{:4.1f})'.format(scalename,murvar[i],mufvar[i]))
 xmin = xl[0]
 xmax = xu[nobs-1]
 
