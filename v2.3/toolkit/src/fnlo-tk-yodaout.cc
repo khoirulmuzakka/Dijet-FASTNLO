@@ -116,10 +116,11 @@ int main(int argc, char** argv) {
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
          man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
-         man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
-         man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
+         man << "   Default:      \"kScale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"kScale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
          man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2." << endl;
          man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"np\"" << endl;
          yell << " #" << endl;
@@ -238,7 +239,7 @@ int main(int argc, char** argv) {
    }
 
    //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
-   string chflex = "scale1";
+   string chflex = "kScale1";
    if (argc > 6) {
       chflex = (const char*) argv[6];
    }
@@ -371,13 +372,13 @@ int main(int argc, char** argv) {
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
    if (fnlo->GetIsFlexibleScaleTable()) {
-      if ( chflex == "scale1" ) {
+      if ( chflex == "kScale1" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale1);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
                                  << "from only the first scale of this flexible-scale table." << endl
                                  << "                        Please check how this table was filled!" << endl;
-      } else if ( chflex == "scale2" ) {
+      } else if ( chflex == "kScale2" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale2);
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
@@ -395,6 +396,9 @@ int main(int argc, char** argv) {
          info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
                                  << "from only the second scale of this flexible-scale table." << endl
                                  << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "kProd" ) {
+         fnlo->SetMuFFunctionalForm(kProd);
+         fnlo->SetMuRFunctionalForm(kProd);
       } else {
          error["fnlo-tk-yodaout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
       }

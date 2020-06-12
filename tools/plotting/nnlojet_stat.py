@@ -18,7 +18,9 @@
 import argparse
 import numpy as np
 from io import StringIO
-import matplotlib.pyplot as plt 
+import matplotlib as mpl
+mpl.use('Agg')  # otherwise some matplotlib error occurs
+import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import textwrap
 
@@ -27,7 +29,7 @@ def crosssection(number, name, color_opt, marker_opt):
 
     x,y = np.loadtxt(name, comments='#', usecols=(3,4), unpack= True)
     bins = []
-    for i in range(len(x)): 
+    for i in range(len(x)):
         bins.append(i+int(number)*0.15)
 
     #Takes care of correct labeling
@@ -43,7 +45,8 @@ def crosssection(number, name, color_opt, marker_opt):
                     index = title.find('/')
                     title = title[index + 1:]
                 title = title.replace('.dat','')
-        plt.title(title)
+#        plt.title(title)
+        plt.title('Blafasel')
         plt.ylabel('Cross section')
 
     else:
@@ -52,7 +55,7 @@ def crosssection(number, name, color_opt, marker_opt):
     #Plot the data with stat uncertainies
     plt.plot(bins, x, marker=marker_opt, color=color_opt, linestyle='dashed', linewidth = 0, markersize=5, label = label)
     plt.errorbar(bins, x, yerr=y, xerr=None, ecolor = color_opt, elinewidth = 1, capsize = 5, linestyle='')
-    
+
 
 def ratio(number, default, name, color_opt, marker_opt, color_default, marker_default, order):
     x_d,y_d = np.loadtxt(default, comments='#', usecols=(3,4), unpack= True)
@@ -65,7 +68,7 @@ def ratio(number, default, name, color_opt, marker_opt, color_default, marker_de
         label = 'NNLO'
     else:
         label = 'LO'
-    
+
     for i in range(len(x)):
         bins.append(i)
 
@@ -88,7 +91,7 @@ def ratio(number, default, name, color_opt, marker_opt, color_default, marker_de
     plt.bar(bins, y, color=color_opt, width=0.8-number*0.2, alpha = 0.2*(number+1), edgecolor = color_opt, align='center', label = None)
     plt.ylabel('Rel. stat. unc.')
     plt.subplot(412)
-    
+
     if(number!=order):
         function = fit_polynomial(bins, x, y, color_opt, marker_opt, label)
         plt.plot(bins, function, color =  color_opt, marker = None, linewidth = 1)
@@ -110,15 +113,15 @@ def fit_polynomial(x, y, y_error, color_opt, marker_opt, label):            #Fit
     function_const=[]
     for i in  range(len(function)):
         y[i] = y[i]/function[i]
-        function_const.append(1.) 
-            
+        function_const.append(1.)
+
     plt.plot(x, y, color =  color_opt, marker = marker_opt, linewidth = 0, markersize=5, label = label)
     plt.plot(z, function_const, color =  color_opt, linestyle = '-',linewidth = 1, marker = None, label = None)
     plt.errorbar(x, y, yerr=y_error, xerr=None, ecolor = color_opt, elinewidth = 1, capsize = 5, linestyle='')
     plt.ylabel('Ratio/fit')
     plt.subplot(412)
     return function
-    
+
 
 def  main():
     """
@@ -131,17 +134,17 @@ def  main():
         3) Ratio compared to the fit
         4) Statistical uncertainites
 
-        Figure is saved as eps under the name of the NNLO file                                                                      
-        
-        ----------------------------------------------                                                                                                                                  
+        Figure is saved as eps under the name of the NNLO file
+
+        ----------------------------------------------
 
         Example input:
         ./plot_5.py -f <path_to_file>/ALL.xm12_y1.dat -f  <path_to_file>/NLO.xm12_y1.dat -f  <path_to_file>/NNLO.xm12_y1.dat -r 0
-                                                      
+
            \'-f\': required before every file
            \'-r\': File for the ratio plot has to be specified
 
-        ----------------------------------------------   
+        ----------------------------------------------
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -149,7 +152,7 @@ def  main():
     parser.add_argument('-f', '--files', action = 'append', help = 'Enter files you want to analyze, \'-f\' required before every file')
     parser.add_argument('-r', '--ratio_to', help = 'Enter index of the file for the ratio plot (mandatory), starting from 0')
     args = parser.parse_args()
-    
+
     filelist = args.files
     number = int(args.ratio_to)
     print('----------------------------------------------')
@@ -168,8 +171,8 @@ def  main():
     plt.yscale('log')
     for i in range(len(filelist)):
         print('Processing file ',str(i+1),'/',str(len(filelist)),': ',str(filelist[i]))
-        crosssection(i, str(filelist[i]), color[i], marker[i])    
-    plt.legend()   
+        crosssection(i, str(filelist[i]), color[i], marker[i])
+    plt.legend()
 
     #Ratio plot
     plt.subplot(412)
@@ -178,8 +181,9 @@ def  main():
         ratio(i, str(filelist[number]), str(filelist[i]), color[i], marker[i], color[number], marker[number], number)
 
     plt.subplot(414)
+#    plt.yscale('log')
     plt.xlabel('Bin')
-    
+
     #Save figure
     save_as = ''
     for i in range(len(filelist)):
@@ -194,6 +198,7 @@ def  main():
         save_as = save_as[index + 1:]
     #save_as = 'CMS_plots07/'+save_as
     save_as = save_as.replace('.dat','.eps')
+    save_as = 'test.png'
     plt.savefig(save_as)
     print('File saved as:')
     print(save_as)
