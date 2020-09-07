@@ -40,7 +40,7 @@ fastNLOGrid::GridType fastNLOInterpolBase::TranslateGridType(string in){
    else if ( in == "3rdrtlog10" ) return fastNLOGrid::k3rdrtLog10;
    else if ( in == "4thrtlog10" ) return fastNLOGrid::k4thrtLog10;
    else {
-      cout<<"fastNLOInterpolBase::TranslateGridTyp. Error. Cannot identify distance measure. in="<<in<<endl;
+      cout<<"fastNLOInterpolBase::TranslateGridType: Error! Cannot identify distance measure. in="<<in<<endl;
       exit(1);
    }
 }
@@ -116,7 +116,9 @@ void fastNLOInterpolBase::MakeGrids(int nNodes, double ReduceXmin){
 
    // Reduce X min
    // then all is set up, and we can conveniently re-initalise the grids
-   if ( ReduceXmin != 0 ) {
+   //   if ( ReduceXmin != 0 ) { // ReduceXmin is double quantity
+   if ( ReduceXmin > DBL_MIN ) {
+      warn["MakeGrids"]<<"Default x binning is modified by ReduceXmin steering parameter. Identical settings must be used for all grids to be merged!"<<endl;
       double Hdelta = (fHgrid[1] - fHgrid[0]) * (nNodes-1.)/(nNodes -1. -ReduceXmin);//(second factor to account for potentially increased number of nodes)
       double Hxmin = fHgrid[0] - Hdelta*ReduceXmin;
       fvalmin = MakeGridFromHGrid({Hxmin})[0];// new minimum

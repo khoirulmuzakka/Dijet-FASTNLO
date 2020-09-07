@@ -16,7 +16,7 @@
 
 #include "fastNLOInterpolBase.h"
 #include "fastNLOCoeffAddBase.h"
-#include "fastNLOGeneratorConstants.h"
+#include "fastNLOTableConstants.h"
 
 
 class fastNLOCreate : public fastNLOTable {
