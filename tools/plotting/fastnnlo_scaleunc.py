@@ -68,7 +68,7 @@ import matplotlib.pyplot as plt
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grids
-# TODO: Currently installed only for Python 2!
+# ATTENTION: fastNLO python extension is required for Python 3!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
