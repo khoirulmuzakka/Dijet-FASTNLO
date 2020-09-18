@@ -98,7 +98,8 @@ _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
 _order_color = {'LO': 'g', 'NLO': 'b', 'NNLO': 'r'}
 #_colors = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
 #_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
-_colors = ['orange', 'blue', 'green', 'purple', 'brown']
+#_colors = ['orange', 'blue', 'green', 'purple', 'brown']
+_colors = ['orange', 'green', 'purple', 'blue', 'brown']
 #_symbols = ['s', 'X', 'o', '^', 'v']
 _symbols = ['s', 'x', 'o', '^', 'v']
 _hatches = ['-', '//', '\\', '|', '.']
@@ -223,7 +224,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
         # Set common x axis bounds for both
         ax2.set_xlim(left=xmin, right=xmax)
-        ax2.set_ylim(0.85, 1.15)
+#        ax2.set_ylim(0.85, 1.15)
 #        ax2.get_xaxis().set_minor_formatter(axfmt)
         ax2.set_yscale('linear', nonposy='clip')
 #        ax2.set_yscale('log', nonposy='clip')
