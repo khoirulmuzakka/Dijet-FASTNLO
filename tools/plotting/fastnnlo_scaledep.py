@@ -106,6 +106,7 @@ class SplitArgs(argparse.Action):
 
 
 # Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
@@ -272,6 +273,9 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, title
                              xs_cn[0, :], color=_order_to_color[order], hatch=_hatches[iorder], alpha=0.30)
 
     fig.tight_layout()
+
+    # Do not use characters defined in _fntrans for filenames
+    filename = filename.translate(_fntrans)
 
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)

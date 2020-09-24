@@ -93,6 +93,7 @@ class SplitArgs(argparse.Action):
 
 
 # Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
@@ -245,8 +246,8 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
         if not nostat:
             filename = filename+'.stat'
 
-    # Eliminate possible [] around units to avoid problems with filenames
-    filename = re.sub(r'[\[\]]','',filename)
+    # Do not use characters defined in _fntrans for filenames
+    filename = filename.translate(_fntrans)
 
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)

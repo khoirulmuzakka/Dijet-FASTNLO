@@ -119,6 +119,7 @@ class SplitArgs(argparse.Action):
 
 
 # Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 #_order_color = {'LO': 'g', 'NLO': 'b', 'NNLO': 'r'}
 _order_color = {'LO': 'olivedrab', 'NLO': 'dodgerblue', 'NNLO': 'orangered'}
@@ -337,8 +338,8 @@ for file in [logfile]:
                 scl = re.search('<(.*)>',line)
                 if scl:
                     scalename = scl.group(1)
-                    # Eliminate possible [] around units to avoid problems with filenames
-                    scalename = re.sub(r'[\[\]]','',scalename)
+                    # Do not use characters defined in _fntrans for filenames
+                    scalename = scalename.translate(_fntrans)
                     if verb: print('[fastnnlo_absolute]: Detected scale definition: {:s}'.format(scalename))
             # Scale factors
             elif re.search(r'xmur, xmuf', line):
