@@ -633,22 +633,50 @@ endif
 
 #
 #
-# HepMC, YODA, and Rivet:
+# YODA, HepMC, fastjet contrib, and Rivet:
 #------------------------------------------------------------------------------
 # ==> These enable the option --with-yoda of the fastNLO_toolkit to produce
 #     YODA formatted e.g. NLO predictions for direct comparison to data with Rivet
 #     Also these are required for use with Sherpa+MCgrid.
 #
-# HepMC (should be < 3.0.0, e.g. v2.06.09; needed by Rivet):
+# HepMC (should be < 3.0.0, e.g. v2.06.09; needed by Rivet-2.x.x):
 # Version 3.0.0 uses cmake and gives errors while compiling with ROOT v5.34.25!
 #------------------------------------------------------------------------------
 if ( $withoptional ) then
-   set arc="HepMC-2.06.09"
+#   set arc="HepMC-2.06.09"
+#   if ( ! -e ${arc}_installed  ) then
+#      tar xzf ${arc}.tar.gz
+#      cd ${arc}
+#      ./configure --prefix=${base} --with-momentum=GEV --with-length=MM
+#      make -j${cores} install
+#      cd ..
+#      touch ${arc}_installed
+#   endif
+#
+# HepMC3 (needed by Rivet-3.x.x):
+# Python is enabled by default. Requires cmake version 3.
+#------------------------------------------------------------------------------
+   set arc="HepMC3-3.2.2"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base} --with-momentum=GEV --with-length=MM
+      mkdir -p hepmc3-build
+      cd hepmc3-build
+      cmake -DHEPMC3_ENABLE_ROOTIO=OFF -DCMAKE_INSTALL_PREFIX=${base} -DHEPMC3_Python_SITEARCH27=${base}/lib/python2.7/site-packages -DHEPMC3_Python_SITEARCH36=${base}/lib/python3.6/site-packages -DHepMC3_DIR=${base} ..
       make -j${cores} install
+      cd ../..
+      touch ${arc}_installed
+   endif
+#
+# fastjet contrib (fjcontrib; needed by Rivet-3.x.x):
+#
+#------------------------------------------------------------------------------
+   set arc="fjcontrib-1.045"
+   if ( ! -e ${arc}_installed  ) then
+      tar xzf ${arc}.tar.gz
+      cd ${arc}
+      ./configure --prefix=${base}
+      make -j${cores} fragile-shared-install
       cd ..
       touch ${arc}_installed
    endif
@@ -656,8 +684,8 @@ if ( $withoptional ) then
 # YODA (>= 1.6.7 is recommended; needed by Rivet):
 # Python is enabled by default. If Python with ROOT interfacing is desired, use "--enable-root".
 #------------------------------------------------------------------------------
-   set arc="YODA-1.6.7"
-#   set arc="YODA-1.7.0" # Installation looks ok
+#   set arc="YODA-1.6.7"
+   set arc="YODA-1.8.3"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -670,13 +698,13 @@ if ( $withoptional ) then
 # Rivet (>= 2.5.4 is recommended; v1 is too old):
 # Python is enabled by default.
 #------------------------------------------------------------------------------
-   set arc="Rivet-2.5.4"
-#   set arc="Rivet-2.6.0"
+#   set arc="Rivet-2.5.4"
+   set arc="Rivet-3.1.2" # Needs HepMC3 and fastjet contrib
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
-#      tar xzf ${arc}-patched.tar.gz # 2.6.0 needs patch for nonunicode chars in two analysis.cc files
       cd ${arc}
-      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+#      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+      ./configure --prefix=${base} ${pyextopt} --with-hepmc3=`HepMC3-config --prefix` CPPFLAGS="${MYCPPFLAGS}"
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -712,8 +740,9 @@ if ( $withoptional ) then
 # ==> This enables the option --with-qcdnum of the fastNLO_toolkit to use
 #     the alpha_s evolutions within QCDNUM
 #
-#    set arc="qcdnum-17-01-12"
+#   set arc="qcdnum-17-01-12"
    set arc="qcdnum-17-01-14"
+#   set arc="qcdnum-17-01-15" # Provokes error in fastNLO Toolkit check
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
