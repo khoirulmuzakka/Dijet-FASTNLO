@@ -112,6 +112,12 @@ int main(int argc, char** argv) {
          man << "   Alternatives: LO, NLO, NNLO (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
+         man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
+         man << "   Default:      \"kScale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"kScale2\",  i.e. mur=muf=scale2," << endl;
+         man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2." << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -194,6 +200,7 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+
    //! --- Normalization
    string chnorm;
    if (argc > 5) {
@@ -205,6 +212,18 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-rootout"] << "Normalizing cross sections. " << endl;
    }
+
+   //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
+   string chflex = "kScale1";
+   if (argc > 6) {
+      chflex = (const char*) argv[6];
+   }
+   if (argc <= 6 || chflex == "_") {
+      shout["fnlo-tk-rootout"] << "Using default mur=muf=scale 1." << endl;
+   } else {
+      shout["fnlo-tk-rootout"] << "Using scale definition "+chflex << endl;
+   }
+
    //! ---  Too many arguments
    if (argc > 6) {
       error["fnlo-tk-rootout"] << "Too many arguments, aborting!" << endl;
@@ -319,7 +338,7 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   // TODO Why here?
+   //! --- Get all required info from table
    //! Get binning
    vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
 
@@ -327,13 +346,36 @@ int main(int argc, char** argv) {
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
    if (fnlo.GetIsFlexibleScaleTable()) {
-      fnlo.SetMuFFunctionalForm(kScale1);
-      fnlo.SetMuRFunctionalForm(kScale1);
-      //      fnlo.SetMuFFunctionalForm(kProd);
-      //      fnlo.SetMuRFunctionalForm(kProd);
-      warn["fnlo-read"] << "The average scale reported in this example as mu1 is derived "
-                        << "from only the first scale of this flexible-scale table." << endl
-                        << "                        Please check how this table was filled!" << endl;
+      if ( chflex == "kScale1" ) {
+         fnlo.SetMuFFunctionalForm(kScale1);
+         fnlo.SetMuRFunctionalForm(kScale1);
+         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu1 is derived "
+                                 << "from only the first scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "kScale2" ) {
+         fnlo.SetMuFFunctionalForm(kScale2);
+         fnlo.SetMuRFunctionalForm(kScale2);
+         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu2 is derived "
+                                 << "from only the second scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "scale12" ) {
+         fnlo.SetMuFFunctionalForm(kScale2);
+         fnlo.SetMuRFunctionalForm(kScale1);
+         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu1 is derived "
+                                 << "from only the first scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "scale21" ) {
+         fnlo.SetMuFFunctionalForm(kScale1);
+         fnlo.SetMuRFunctionalForm(kScale2);
+         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu2 is derived "
+                                 << "from only the second scale of this flexible-scale table." << endl
+                                 << "                        Please check how this table was filled!" << endl;
+      } else if ( chflex == "kProd" ) {
+         fnlo.SetMuFFunctionalForm(kProd);
+         fnlo.SetMuRFunctionalForm(kProd);
+      } else {
+         error["fnlo-tk-rootout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
+      }
    }
 
    //! --- Create ROOT file
@@ -350,8 +392,10 @@ int main(int argc, char** argv) {
    if ( chunc   != "none" ) BaseName = BaseName + "_" + chunc;
    if ( chnorm  != "no" )   BaseName = BaseName + "_norm";
    string RootFileName = BaseName + ".root";
+#ifdef WITH_ROOT
    //! --- Existing ROOT file will be overwritten!
    TFile *rootfile = new TFile(RootFileName.c_str(),"RECREATE");
+#endif
 
    //  Define histogram multiplicity and initialise histogram counter
    const unsigned int nMult = 3;
@@ -474,8 +518,10 @@ int main(int argc, char** argv) {
                }
             }
 
+#ifdef WITH_ROOT
             //! --- Book ROOT histos
             TH1D *histo[nMult*nHist];
+#endif
 
             //! Loop over no. of histograms
             unsigned int iobs = 0;
@@ -508,6 +554,7 @@ int main(int argc, char** argv) {
                   exit(1);
                }
 
+#ifdef WITH_ROOT
                // Arrays to fill ROOT histos
                // N+1 bin borders
                double xbins[nHistBins+1];
@@ -567,6 +614,7 @@ int main(int argc, char** argv) {
                histo[ih+iUnc]->SetContent(dyupp);
                histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
                histo[ih+iUnc]->GetYaxis()->SetTitle(titleu);
+#endif
 
                if (NDim == 1 ) {
                   iobs = 0;
@@ -592,6 +640,7 @@ int main(int argc, char** argv) {
       }
    }
 
+#ifdef WITH_ROOT
    //! --- Output
    //! Save histograms into the ROOT file
    rootfile->cd();
@@ -603,4 +652,5 @@ int main(int argc, char** argv) {
    shout << RootFileName + " with " << nHist << " histograms was successfully produced" << endl;
    yell << " #" << endl;
    yell << _CSEPSC << endl << endl;
+#endif
 }

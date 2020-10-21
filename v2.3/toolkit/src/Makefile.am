@@ -22,9 +22,9 @@ if HAVE_LHAPDF
    bin_PROGRAMS += fnlo-tk-statunc
    bin_PROGRAMS += fnlo-tk-yodaout
 #endif
-if HAVE_ROOT
+#if HAVE_ROOT
    bin_PROGRAMS += fnlo-tk-rootout
-endif
+#endif
 endif
 
 #
