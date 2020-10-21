@@ -118,7 +118,7 @@ _debug = False
 # Function plotting statistical uncertainties for each channel with respect to
 # the total at a chosen order
 #
-def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename, order, given_filename, scale_name, nice_scale_name, formats):
+def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename, order, given_filename, nice_scale_name, formats):
 
     fig = plt.figure(figsize=(7, 7))
     gs = gridspec.GridSpec(1, 1, fig)
@@ -154,10 +154,9 @@ def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablen
     fig.tight_layout()
 
     if given_filename is not None:
-        filename = '%s.statunc-%s.%s' % (given_filename, order, scale_name)
+        filename = '%s.statunc-%s.%s' % (given_filename, order, nice_scale_name)
     else:
-        filename = '%s.statunc-%s.%s' % (tablename, order, scale_name)
-        filename = filename+'.stat'
+        filename = '%s.statunc-%s.%s' % (tablename, order, nice_scale_name)
 
     # Do not use characters defined in _fntrans for filenames
     filename = filename.translate(_fntrans)
@@ -276,15 +275,21 @@ def main():
         print('[fastnnlo_statunc]: Using matplotlib version ', mpl.__version__)
         print('                     from location ', mpl.__file__)
 
-
-
-
     # Loop over table list
     for table in files:
+        # Table name
+        tablepath = os.path.split(table)[0]
+        if not tablepath:
+            tablepath = '.'
+        tablename = os.path.split(table)[1]
+        if tablename.endswith('.tab.gz'):
+            tablename = tablename.replace('.tab.gz', '', 1)
+        elif tablename.endswith('.tab'):
+            tablename = tablename.replace('.tab', '', 1)
+        else:
+            print('[fastnnlo_statunc]: Error! Wrong extension for table: ', table)
+            exit(1)
         print('[fastnnlo_statunc]: Analysing table: ', table)
-        # Get rid of extensions (.tab.gz or .tab)
-        tablename = os.path.splitext(os.path.basename(table))[0]
-        tablename = os.path.splitext(tablename)[0]
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -377,8 +382,11 @@ def main():
         sep = '.'
         parts = tablename.split(sep)
         parts[1] = order
-        datfile = sep.join(parts) + '.dat'
-        print('[fastnnlo_statunc]: Taking normalisation cross section from', datfile)
+        datfile = tablepath + '/' + sep.join(parts) + '.dat'
+        if not os.path.exists(datfile):
+            print('[fastnnlo_statunc]: Error! File for normalisation cross section not found:', datfile)
+            exit(1)
+        print('[fastnnlo_statunc]: Reading normalisation cross section from', datfile)
         cols = np.loadtxt(datfile, usecols=list(range(3, 5)))
         xs_norm = np.array(cols[:, 0])
 
@@ -389,7 +397,10 @@ def main():
         for lorder in _orders:
             parts = tablename.split(sep)
             parts[1] = lorder
-            datfile = sep.join(parts) + '.dat'
+            datfile = tablepath + '/' + sep.join(parts) + '.dat'
+            if not os.path.exists(datfile):
+                print('[fastnnlo_statunc]: Error! File for cross section of order ',lorder,' not found:', datfile)
+                exit(1)
             print('[fastnnlo_statunc]: Reading statistical uncertainties from', datfile)
             cols = np.loadtxt(datfile, usecols=list(range(3, 5)))
             xs_dat   = np.array(cols[:, 0])
@@ -399,13 +410,13 @@ def main():
             dxs.append(dxs_dat)
             dxsr_or.append(dxsr_dat)
 
-        # Read in statistical uncertainty for each channel, order, and exclusive order
+        # Read in statistical uncertainty for each channel
         dxsr_ch = []
         if args['datfiles'] is None or args['datfiles'][0] == '':
             for channel in _channels:
                 parts = tablename.split(sep)
                 parts[1] = channel
-                datfile = sep.join(parts) + '.dat'
+                datfile = tablepath + '/' + sep.join(parts) + '.dat'
                 datfilenames.append(datfile)
 
         lstat = (len(datfilenames) > 0)
@@ -415,7 +426,10 @@ def main():
 
         dxsr = []
         for fname in datfilenames:
-            print('[fastnnlo_statunc]: Taking statistical uncertainties from', fname)
+            if not os.path.exists(fname):
+                print('[fastnnlo_statunc]: Error! File for cross section not found:', fname)
+                exit(1)
+            print('[fastnnlo_statunc]: Reading statistical uncertainties from', fname)
             cols = np.loadtxt(fname, usecols=list(range(3, 5)))
             dxs_dat = np.array(cols[:, 1])
             dxsr_dat = np.divide(dxs_dat, xs_norm, out=np.ones_like(dxs_dat), where=xs_norm != 0)
@@ -444,10 +458,8 @@ def main():
         if _debug:
             print('dxsr_ch', dxsr_ch)
 
-        #        plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_ch, nostat, xlabel, ylabel, title, tablename,
-        #                 order_list, given_filename, scale_name, nice_scale_name, variation_type, formats)
         plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename,
-                 order, given_filename, scale_name, nice_scale_name, formats)
+                 order, given_filename, nice_scale_name, formats)
 
         stop_time = timeit.default_timer()
         timediff = stop_time-start_time

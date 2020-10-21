@@ -425,15 +425,19 @@ def main():
 
     # Loop over table list
     for table in files:
+        # Table name
+        tablepath = os.path.split(table)[0]
+        if not tablepath:
+            tablepath = '.'
+        tablename = os.path.split(table)[1]
+        if tablename.endswith('.tab.gz'):
+            tablename = tablename.replace('.tab.gz', '', 1)
+        elif tablename.endswith('.tab'):
+            tablename = tablename.replace('.tab', '', 1)
+        else:
+            print('[fastnnlo_scaledep]: Error! Wrong extension for table: ', table)
+            exit(1)
         print('[fastnnlo_scaledep]: Analysing table: ', table)
-        # Get rid of extensions (.tab.gz or .tab)
-        # Replace .tab or .tab.gz with .dat to also load NNLOJET results
-        #tablename = os.path.splitext(os.path.basename(table))[0]
-        #tablename = os.path.splitext(tablename)[0]
-        if table.endswith('.tab.gz'):
-            tablename = table.replace('.tab.gz', '', 1)
-        elif table.endswith('.tab'):
-            tablename = table.replace('.tab', '', 1)
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -586,7 +590,7 @@ def main():
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
-                    datfile = sep.join(parts) + '.dat'
+                    datfile = tablepath + '/' + sep.join(parts) + '.dat'
                     datfilenames.append(datfile)
 
             lstat = (len(datfilenames) > 0)
