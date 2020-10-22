@@ -225,7 +225,7 @@ int main(int argc, char** argv) {
    }
 
    //! ---  Too many arguments
-   if (argc > 6) {
+   if (argc > 7) {
       error["fnlo-tk-rootout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
