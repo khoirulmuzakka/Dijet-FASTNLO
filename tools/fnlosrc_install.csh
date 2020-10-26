@@ -169,8 +169,10 @@ if ( $#argv < 2 ) then
    echo "  7th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
    echo "  8th optional argument: Include optional packages for grid evaluation? def.=0"
    echo "  9th optional argument: Include optional python extensions to packages? def.=0"
-   echo " 10th optional argument: Include ROOT 5 (gcc<v5) or 6 (def.=0, alt.=[5,6] or"
-   echo "                         give path to desired bin/root-config in cvmfs,"
+   echo " 10th optional argument: Include ROOT extensions to packages (def.=0, alt.=[5,6] or"
+   echo "                         give path to bin/root-config of preinstalled ROOT)"
+   echo "                         0: no ROOT, 5: try src install of ROOT 5 (gcc <= v5), 6: try src install of ROOT 6"
+   echo "                         (requires cmake), path: try preinstalled ROOT by giving path to bin/root-config"
    echo "                         e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt"
    echo " 11th optional argument: No. of cores to be used, def.=8"
    echo " 12th optional argument: Activate multithread integrations for NNLOJET standalone installation, def. = 0"
@@ -254,6 +256,7 @@ if ( $#argv > 7 && $8 != "_" ) then
    set withoptional=$8
 endif
 echo "Optional packages: $tab $withoptional"
+
 # With optional Python extensions? On some systems compile errors occur!
 # Note: Python is quite useful for evaluating or preparing results, but
 #       not required for mass production on compute clusters.
@@ -263,27 +266,30 @@ if ( $#argv > 8 && $9 != "_" ) then
    set withpython=$9
 endif
 echo "Python support: $tab $withpython"
-# Install optional ROOT extensions? On some systems compile errors occur!
+
+# With optional ROOT extensions? On some systems compile errors occur!
 # Note: ROOT is quite useful for evaluating or preparing results, but
 #       not required for mass production on compute clusters.
 # BUT:  APPLgrid requires ROOT!
 # Dare to try ROOT from cvmfs, e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt ?
+# Be prepared for trouble when using ROOT!
 set rootbasepath="${base}/root"
 set rootbinpath="${base}/root/bin"
 set withroot=0
-set withcvmfsroot=0
+set withextroot=0
 if ( $#argv > 9 && $10 != "_" ) then
    set withroot=$10
    if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
-      set withcvmfsroot=$withroot
+      set withextroot=$withroot
    endif
 endif
 echo "ROOT support: $tab$tab $withroot"
-# Do we have paths in cvmfs?
-if ( $withcvmfsroot != "0" ) then
-   set rootbasepath="${withcvmfsroot}"
+# Do we have an extra path to ROOT?
+if ( $withextroot != "0" ) then
+   set rootbasepath="${withextroot}"
    set rootbinpath="${rootbasepath}/bin"
 endif
+
 # BUT LHAPDF version 6.1.6 still uses BOOST, uaargh!
 #        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
@@ -403,14 +409,14 @@ else
 endif
 # $PATH set from now on ...
 #
-# If $withroot equals 5 or 6, use local ROOT installation
+# If $withroot equals 5 or 6, do local ROOT src installation
 if ( $withroot == 5 || $withroot == 6 ) then
    setenv PATH ${rootbinpath}:${PATH}
    echo 'setenv PATH '"${rootbinpath}:"'${PATH}' >> fnlosrc_source.csh
    echo 'export PATH='"${rootbinpath}:"'${PATH}' >> fnlosrc_source.sh
 endif
-# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
-if ( $withcvmfsroot != "0" ) then
+# If $withextroot is set, use the preinstalled ROOT.
+if ( $withextroot != "0" ) then
    set rootoptpath="--with-root=${rootbasepath}"
    set rootenablepath="--enable-root=${rootbasepath}"
    setenv PATH ${rootbinpath}:${PATH}
@@ -484,8 +490,8 @@ if ( $withroot == 5 || $withroot == 6 ) then
    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 endif
-# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
-if ( $withcvmfsroot != "0" ) then
+# If $withextroot is set, use the preinstalled ROOT.
+if ( $withextroot != "0" ) then
     setenv LD_LIBRARY_PATH ${rootbasepath}/lib/root:${LD_LIBRARY_PATH}
     echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
     echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
@@ -585,49 +591,60 @@ endif
 # Skip any of these parts that is not desired.
 #==============================================================================
 #
-# Don't try for now to use cvmfs installation of ROOT
-#
 # ROOT (e.g. v5.34.25; optional use by YODA):
 # If Python support is desired, use "--enable-python".
 #------------------------------------------------------------------------------
 # ==> This enables the option --with-root of the fastNLO_toolkit to produce
 #     ROOT histograms from the calculated cross sections and uncertainties
 #
-if ( $withroot == 5 ) then
-#   set arc="root-5.34.25" # OK for gcc versions < 5
-   set arc="root-5.34.26" # Patched thanks to A. Wisecarver
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
-      mv root ${arc}
-   endif
-else if ( $withroot == 6 ) then
-#   set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
-   set arc="root-6.14.06"
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}.tar.gz
-   endif
-endif
-if ( ! -e ${arc}_installed ) then
-   cd ${arc}
+if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
+   echo ""
+   echo "ATTENTION: Trying ROOT preinstalled to ${rootbasepath} for optional ROOT extensions!"
+   echo "           For full ROOT usage you might want to source the thisroot.(csh) environment."
+   echo ""
+else if ( $withroot != 0 ) then
    if ( $withroot == 5 ) then
-      ./configure --prefix=${rootbasepath} --etcdir=${rootbasepath}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
-      make -j${cores} install
-      cd ..
-      touch ${arc}_installed
+      set arc="root-5.34.25" # OK for gcc versions < 5
+#      set arc="root-5.34.26" # Patched thanks to A. Wisecarver
+#      set arc="root-5.34.38" # Gives errors
+      if ( ! -e ${arc}_installed  ) then
+#         tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
+         tar xzf ${arc}.tar.gz # Needed for older versions 5
+         mv root ${arc}
+      endif
    else if ( $withroot == 6 ) then
-      mkdir mybuild
-      cd mybuild
-      cmake ..
-      cmake --build . -- -j${cores}
-      # As usual ROOT is buggy: CMAKE_INSTALL_BINDIR is not respected and everything ends in CMAKE_INSTALL_PREFIX!
-      #      cmake -DCMAKE_INSTALL_PREFIX=${base}/root -DCMAKE_INSTALL_BINDIR=${base}/bin -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
-      # Bug adapted version using addition of ${rootbasepath}/bin to PATH
-      cmake -DCMAKE_INSTALL_PREFIX=${rootbasepath} -P cmake_install.cmake
-      cd ..
-      cd ..
-      touch ${arc}_installed
-   else
-      cd ..
+#      set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
+      set arc="root-6.14.06" # Not sure that it works!
+#      set arc="root-6.20.00" # Needs CMake >= 3.9
+#      set arc="root-6.22.02" # Needs CMake >= 3.9
+      if ( ! -e ${arc}_installed  ) then
+         tar xzf ${arc}.tar.gz
+      endif
+   endif
+   if ( ! -e ${arc}_installed ) then
+      cd ${arc}
+      if ( $withroot == 5 ) then
+         ./configure --prefix=${rootbasepath} --etcdir=${rootbasepath}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
+         make -j${cores} install
+         cd ..
+         touch ${arc}_installed
+      else if ( $withroot == 6 ) then
+         mkdir -p mybuild
+         cd mybuild
+         cmake .. -DCMAKE_INSTALL_PREFIX=${rootbasepath} -Dgnuinstall=ON -Ddavix=OFF # davix tries to download nonexisting stuff, very bad!
+         make -j${cores} install
+#         cmake ..
+#         cmake --build . -- -j${cores}
+         # As usual ROOT is buggy: CMAKE_INSTALL_BINDIR is not respected and everything ends in CMAKE_INSTALL_PREFIX!
+         #      cmake -DCMAKE_INSTALL_PREFIX=${base}/root -DCMAKE_INSTALL_BINDIR=${base}/bin -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
+         # Bug adapted version using addition of ${rootbasepath}/bin to PATH
+#         cmake -DCMAKE_INSTALL_PREFIX=${rootbasepath} -P cmake_install.cmake
+         cd ..
+         cd ..
+         touch ${arc}_installed
+      else
+         cd ..
+      endif
    endif
 endif
 
@@ -662,7 +679,10 @@ if ( $withoptional ) then
       cd ${arc}
       mkdir -p hepmc3-build
       cd hepmc3-build
-      cmake -DHEPMC3_ENABLE_ROOTIO=OFF -DCMAKE_INSTALL_PREFIX=${base} -DHEPMC3_Python_SITEARCH27=${base}/lib/python2.7/site-packages -DHEPMC3_Python_SITEARCH36=${base}/lib/python3.6/site-packages -DHepMC3_DIR=${base} ..
+# Try to adapt the following line when Python support is desired AND cmake version is >= 3.7 (UNDOCUMENTED requirement, grrr)
+#      cmake -DHEPMC3_ENABLE_ROOTIO=OFF -DCMAKE_INSTALL_PREFIX=${base} -DHEPMC3_Python_SITEARCH27=${base}/lib/python2.7/site-packages -DHEPMC3_Python_SITEARCH36=${base}/lib/python3.6/site-packages -DHepMC3_DIR=${base} ..
+# HepMC3: Python bindings request a cmake policy of version 3.7 --> switch off Python support by default.
+      cmake -DCMAKE_INSTALL_PREFIX=${base} -DHepMC3_DIR=${base} -DHEPMC3_ENABLE_PYTHON=OFF -DHEPMC3_ENABLE_ROOTIO=OFF ..
       make -j${cores} install
       cd ../..
       touch ${arc}_installed
@@ -675,8 +695,9 @@ if ( $withoptional ) then
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base}
-      make -j${cores} fragile-shared-install
+      ./configure --prefix=${base} --fastjet-config=${base}/bin/fastjet-config
+      make -j${cores} install
+      make -j${cores} fragile-shared-install # From fjcontrib: Dirty hack to provide a shared library
       cd ..
       touch ${arc}_installed
    endif
@@ -704,6 +725,9 @@ if ( $withoptional ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
 #      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+# ATTENTION: Remove analysis giving compile errors with gcc5
+      rm -f analyses/pluginATLAS/*1790439*
+      rehash
       ./configure --prefix=${base} ${pyextopt} --with-hepmc3=`HepMC3-config --prefix` CPPFLAGS="${MYCPPFLAGS}"
       make -j${cores} install
       cd ..
@@ -826,18 +850,18 @@ if ( $withnnlojet ) then
 #------------------------------------------------------------------------------
 # APPLgrid requires ROOT!
 # APPLgrid also requires the static library libgfortran.a not present in numerous cases ...
-   if ( $withroot != "0" && ! $mpnnlo ) then
-      set arc="applgrid-1.5.6"
-      if ( ! -e ${arc}_installed  ) then
-         tar xzf ${arc}.tar.gz
-         cd ${arc}
-         ./configure --prefix=${base}
+#   if ( $withroot != "0" && ! $mpnnlo ) then
+#      set arc="applgrid-1.5.6"
+#      if ( ! -e ${arc}_installed  ) then
+#         tar xzf ${arc}.tar.gz
+#         cd ${arc}
+#         ./configure --prefix=${base}
 # Attention: No concurrent compilation with -j here!
-         make install
-         cd ..
-         touch ${arc}_installed
-      endif
-   endif
+#         make install
+#         cd ..
+#         touch ${arc}_installed
+#      endif
+#   endif
 #
 # nnlo-bridge to NNLOJet:
 #------------------------------------------------------------------------------
