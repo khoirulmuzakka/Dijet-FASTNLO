@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
       shout["fnlo-tk-yodaout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
       shout["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
-      shout["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
+      shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
       info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
       info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
       info["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
-      info["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
+      info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -v" << endl;
       yell << _CSEPSC << endl;
       yell << "" << endl;
       //! --- Usage info
@@ -132,6 +132,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-yodaout"] << "Evaluating table: "  <<  tablename << endl;
       }
    }
+
    //! --- PDF choice
    string PDFFile = "X";
    if (argc > 2) {
@@ -147,6 +148,7 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-yodaout"] << "Using PDF set   : " << PDFFile << endl;
    }
+
    //! --- Uncertainty choice
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
@@ -156,6 +158,7 @@ int main(int argc, char** argv) {
       chunc = (const char*) argv[3];
    }
    if (argc <= 3 || chunc == "_") {
+      chunc = "none";
       shout["fnlo-tk-yodaout"] << "No request given for uncertainty, none evaluated." << endl;
    } else {
       if ( chunc == "NN" ) {
@@ -194,6 +197,7 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
    string chord = "NLO";
@@ -202,6 +206,7 @@ int main(int argc, char** argv) {
       chord = (const char*) argv[4];
    }
    if (argc <= 4 || chord == "_") {
+      chord = "NLO";
       shout["fnlo-tk-yodaout"] << "No request given for fixed-order precision, using NLO." << endl;
    } else {
       if ( chord == "LO" ) {
@@ -233,7 +238,7 @@ int main(int argc, char** argv) {
       chnorm = (const char*) argv[5];
    }
    if (argc <= 5 || chnorm == "_") {
-      shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections," << endl;
+      shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
    }
@@ -246,7 +251,7 @@ int main(int argc, char** argv) {
    if (argc <= 6 || chflex == "_") {
       shout["fnlo-tk-yodaout"] << "Using default mur=muf=scale 1." << endl;
    } else {
-      shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex << endl;
+      shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex+"." << endl;
    }
 
    //! --- Nonperturbative correction
@@ -267,18 +272,20 @@ int main(int argc, char** argv) {
    }
    yell << _CSEPSC << endl;
 
-   //! --- fastNLO initialisation, read & evaluate table
-   //! Initialise a fastNLO instance with interface to LHAPDF
+   //! --- fastNLO initialisation, attach table
+   fastNLOTable table = fastNLOTable(tablename);
+   //! Print essential table information
+   table.PrintContributionSummary(0);
+
+   //! Initialise a fastNLO reader instance
    //! Note: This also initializes the cross section to the LO/NLO one!
    fastNLOLHAPDF* fnlo = NULL;
    if ( chunc != "AS" ) {
-      fnlo = new fastNLOLHAPDF(tablename,PDFFile,0);
+      fnlo = new fastNLOLHAPDF(table,PDFFile,0);
    } else {
+      //! Need to reopen here with Alphas interface instead of LHAPDF
       fnlo = new fastNLOAlphas(tablename,PDFFile,0);
    }
-
-   //! Print essential table information
-   fnlo->PrintContributionSummary(0);
 
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
@@ -297,6 +304,7 @@ int main(int argc, char** argv) {
          fnlo->SetContributionON(kFixedOrder, ilo, true);
       }
    }
+   unsigned int nOrder = 1;
    //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
@@ -314,6 +322,7 @@ int main(int argc, char** argv) {
       } else {
          fnlo->SetContributionON(kFixedOrder, inlo, false);
       }
+      nOrder = 2;
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
    int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
@@ -332,7 +341,10 @@ int main(int argc, char** argv) {
       } else {
          fnlo->SetContributionON(kFixedOrder, innlo, false);
       }
+      nOrder = 3;
    }
+   string sOrder = _OrdName[kFixedOrder][nOrder-1];
+
    //! Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    if (inpc1 > -1 && (chnp == "yes" || chnp == "np" ) ) {
@@ -375,27 +387,15 @@ int main(int argc, char** argv) {
       if ( chflex == "kScale1" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
       } else if ( chflex == "kScale2" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
       } else if ( chflex == "scale12" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
       } else if ( chflex == "scale21" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
       } else if ( chflex == "kProd" ) {
          fnlo->SetMuFFunctionalForm(kProd);
          fnlo->SetMuRFunctionalForm(kProd);
@@ -421,7 +421,7 @@ int main(int argc, char** argv) {
       LineName += "_dxa_s";
    } else if ( chunc != "none" ) {
       XsUnc = fnlo->GetPDFUncertainty(ePDFUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s %s)",chord.c_str(),PDFFile.c_str(),chunc.c_str());
       LineName += "_dxpdf";
    }
 
@@ -484,13 +484,12 @@ int main(int argc, char** argv) {
    }
 
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
-   //   string TabName = tablename.substr(0, tablename.size() - 4);
    string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
-   //   string FileName = chord + "_" + PDFName + "_" + chunc + "_" + chnorm + "_" + chnp;
    string FileName = PDFName;
    if ( chord  != "_" ) {FileName = chord + "_" + PDFName;}
-   if ( chunc  != "_" ) {FileName += "_" + chunc;}
+   if ( chunc  != "none" ) {FileName += "_" + chunc;}
    if ( chnorm != "_" ) {FileName += "_" + chnorm;}
+   if ( chflex != "_" ) {FileName += "_" + chflex;}
    if ( chnp   != "_" ) {FileName += "_" + chnp;}
    LineName = chord + "_" + PDFName + LineName;
 

@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-rootout"] << "Evaluating table: "  <<  tablename << endl;
       }
    }
+
    //! --- PDF choice
    string PDFFile;
    if (argc > 2) {
@@ -138,14 +139,15 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-rootout"] << "Using PDF set   : " << PDFFile << endl;
    }
+
    //! --- Uncertainty choice
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
-   string chunc;
+   string chunc = "none";
    if (argc > 3) {
       chunc = (const char*) argv[3];
    }
-   if (argc <= 3 || chunc == "_" || chunc == "none" ) {
+   if (argc <= 3 || chunc == "_") {
       chunc = "none";
       shout["fnlo-tk-rootout"] << "No request given for PDF uncertainty, none evaluated." << endl;
    } else {
@@ -176,9 +178,10 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+
    //! --- Fixed-order choice
    ESMOrder eOrder = kLeading;
-   string chord;
+   string chord = "ALL";
    if (argc > 4) {
       chord = (const char*) argv[4];
    }
@@ -208,7 +211,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 5 || chnorm == "_") {
       chnorm = "no";
-      shout["fnlo-tk-rootout"] << "Preparing unnormalized cross sections," << endl;
+      shout["fnlo-tk-rootout"] << "Preparing unnormalized cross sections." << endl;
    } else {
       shout["fnlo-tk-rootout"] << "Normalizing cross sections. " << endl;
    }
@@ -221,7 +224,7 @@ int main(int argc, char** argv) {
    if (argc <= 6 || chflex == "_") {
       shout["fnlo-tk-rootout"] << "Using default mur=muf=scale 1." << endl;
    } else {
-      shout["fnlo-tk-rootout"] << "Using scale definition "+chflex << endl;
+      shout["fnlo-tk-rootout"] << "Using scale definition "+chflex+"." << endl;
    }
 
    //! ---  Too many arguments
@@ -259,20 +262,21 @@ int main(int argc, char** argv) {
 
    //! Initialise a fastNLO reader instance with interface to LHAPDF
    //! Note: This also initializes the cross section to the LO/NLO one!
-   fastNLOLHAPDF fnlo(table,PDFFiles[0],0);
+   fastNLOLHAPDF* fnlo = NULL;
+   fnlo = new fastNLOLHAPDF(table,PDFFiles[0],0);
 
    //! Check on existence of LO (Id = -1 if not existing)
-   int ilo   = fnlo.ContrId(kFixedOrder, kLeading);
+   int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
    if (ilo < 0) {
       error["fnlo-tk-rootout"] << "LO not found, aborted!" << endl;
       exit(1);
    } else {
       info["fnlo-tk-rootout"] << "The LO contribution has Id: " << ilo << endl;
-      fnlo.SetContributionON(kFixedOrder, ilo, true);
+      fnlo->SetContributionON(kFixedOrder, ilo, true);
    }
    unsigned int nOrder = 1;
    //! Check on existence of NLO (Id = -1 if not existing)
-   int inlo  = fnlo.ContrId(kFixedOrder, kNextToLeading);
+   int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
       info["fnlo-tk-rootout"] << "No NLO contribution found!" << endl;
       if ( eOrder >= kNextToLeading ) {
@@ -281,15 +285,15 @@ int main(int argc, char** argv) {
       }
    } else {
       info["fnlo-tk-rootout"] << "The NLO contribution has Id: " << inlo << endl;
-      if ( eOrder >= kNextToLeading ) {
-         fnlo.SetContributionON(kFixedOrder, inlo, true);
+      if ( chord == "ALL" || eOrder >= kNextToLeading ) {
+         fnlo->SetContributionON(kFixedOrder, inlo, true);
       } else {
-         fnlo.SetContributionON(kFixedOrder, inlo, false);
+         fnlo->SetContributionON(kFixedOrder, inlo, false);
       }
       nOrder = 2;
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
-   int innlo = fnlo.ContrId(kFixedOrder, kNextToNextToLeading);
+   int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
    if (innlo < 0) {
       info["fnlo-tk-rootout"] << "No NNLO contribution found!" << endl;
       if ( eOrder >= kNextToNextToLeading ) {
@@ -298,18 +302,18 @@ int main(int argc, char** argv) {
       }
    } else {
       info["fnlo-tk-rootout"] << "The NNLO contribution has Id: " << innlo << endl;
-      if ( eOrder >= kNextToNextToLeading ) {
-         fnlo.SetContributionON(kFixedOrder, innlo, true);
+      if ( chord == "ALL" || eOrder >= kNextToNextToLeading ) {
+         fnlo->SetContributionON(kFixedOrder, innlo, true);
       } else {
-         fnlo.SetContributionON(kFixedOrder, innlo, false);
+         fnlo->SetContributionON(kFixedOrder, innlo, false);
       }
       nOrder = 3;
    }
    // //! Check on existence of non-perturbative corrections from LO MC
-   // int inpc1 = fnlo.ContrId(kNonPerturbativeCorrection, kLeading);
+   // int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    // if (inpc1 > -1) {
    //    info["fnlo-read"] << "Found non-perturbative correction factors. Switch on." << endl;
-   //    bool SetOn = fnlo.SetContributionON(kNonPerturbativeCorrection, inpc1, true);
+   //    bool SetOn = fnlo->SetContributionON(kNonPerturbativeCorrection, inpc1, true);
    //    if (!SetOn) {
    //       error["fnlo-tk-rootout"] << "NPC1 not found, nothing to be done!" << endl;
    //       error["fnlo-tk-rootout"] << "This should have been caught before!" << endl;
@@ -320,7 +324,7 @@ int main(int argc, char** argv) {
    //! Normalize?
    bool lNorm = false;
    if ( chnorm == "yes" || chnorm == "norm" ) {
-      if ( fnlo.IsNorm() ) {
+      if ( fnlo->IsNorm() ) {
          lNorm = true;
       } else {
          error["fnlo-read"] << "Normalization requested but not defined for this table, aborted!" << endl;
@@ -330,8 +334,8 @@ int main(int argc, char** argv) {
 
    //! --- Get all required info from table
    //! Determine number and dimensioning of observable bins in table
-   //   unsigned int NObsBin = fnlo.GetNObsBin();
-   const int NDim = fnlo.GetNumDiffBin();
+   //   unsigned int NObsBin = fnlo->GetNObsBin();
+   const int NDim = fnlo->GetNumDiffBin();
    if (NDim < 1 || NDim > 3) {
       error["fnlo-tk-rootout"] << "Found " << NDim << "-dimensional observable binning in table." << endl;
       error["fnlo-tk-rootout"] << "Only up to three dimensions currently possible, aborted!" << endl;
@@ -340,39 +344,27 @@ int main(int argc, char** argv) {
 
    //! --- Get all required info from table
    //! Get binning
-   vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
+   vector < pair < double, double > > bins = fnlo->GetObsBinsBounds(NDim-1);
 
    //! For flex-scale tables:
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
-   if (fnlo.GetIsFlexibleScaleTable()) {
+   if (fnlo->GetIsFlexibleScaleTable()) {
       if ( chflex == "kScale1" ) {
-         fnlo.SetMuFFunctionalForm(kScale1);
-         fnlo.SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+         fnlo->SetMuFFunctionalForm(kScale1);
+         fnlo->SetMuRFunctionalForm(kScale1);
       } else if ( chflex == "kScale2" ) {
-         fnlo.SetMuFFunctionalForm(kScale2);
-         fnlo.SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+         fnlo->SetMuFFunctionalForm(kScale2);
+         fnlo->SetMuRFunctionalForm(kScale2);
       } else if ( chflex == "scale12" ) {
-         fnlo.SetMuFFunctionalForm(kScale2);
-         fnlo.SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+         fnlo->SetMuFFunctionalForm(kScale2);
+         fnlo->SetMuRFunctionalForm(kScale1);
       } else if ( chflex == "scale21" ) {
-         fnlo.SetMuFFunctionalForm(kScale1);
-         fnlo.SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-rootout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table." << endl
-                                 << "                        Please check how this table was filled!" << endl;
+         fnlo->SetMuFFunctionalForm(kScale1);
+         fnlo->SetMuRFunctionalForm(kScale2);
       } else if ( chflex == "kProd" ) {
-         fnlo.SetMuFFunctionalForm(kProd);
-         fnlo.SetMuRFunctionalForm(kProd);
+         fnlo->SetMuFFunctionalForm(kProd);
+         fnlo->SetMuRFunctionalForm(kProd);
       } else {
          error["fnlo-tk-rootout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
       }
@@ -391,6 +383,7 @@ int main(int argc, char** argv) {
    if ( PDFFile != "X" )    BaseName = BaseName + "_" + PDFFile;
    if ( chunc   != "none" ) BaseName = BaseName + "_" + chunc;
    if ( chnorm  != "no" )   BaseName = BaseName + "_norm";
+   if ( chflex  != "_" )    BaseName = BaseName + "_" + chflex;
    string RootFileName = BaseName + ".root";
 #ifdef WITH_ROOT
    //! --- Existing ROOT file will be overwritten!
@@ -400,12 +393,15 @@ int main(int argc, char** argv) {
    //  Define histogram multiplicity and initialise histogram counter
    const unsigned int nMult = 3;
    unsigned int nHist       = 0;
+   unsigned int nHistAll    = 0;
 
    //! --- Now loop over PDF sets
    for (unsigned int iPDF=0; iPDF<PDFFiles.size(); iPDF++) {
 
       //! Initialize table with requested PDF set
-      fastNLOLHAPDF fnlo(table,PDFFiles[iPDF],0);
+      //      fastNLOLHAPDF fnlo(table,PDFFiles[iPDF],0);
+      fnlo->SetLHAPDFFilename(PDFFiles[iPDF]);
+      fnlo->SetLHAPDFMember(0);
 
       //! Do multiple fixed-order levels unless desired differently
       unsigned int iOrdMin = 0;
@@ -416,21 +412,21 @@ int main(int argc, char** argv) {
          iOrdMax = nOrder-1;
       } else if ( chord != "ALL" ) {
          iOrdMin = (unsigned int)eOrder+1;
-         iOrdMax = min((unsigned int)eOrder+1,nOrder);
+         iOrdMax = min(iOrdMin,nOrder);
       }
       for (unsigned int iOrder = iOrdMin; iOrder <= iOrdMax; iOrder++) {
 
          //! Starting default: All fixed-order levels on
          if (iOrder == 0 ) {
          } else if (iOrder == 1 ) {
-            if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, false);
-            if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, false);
+            if (  inlo > -1 ) fnlo->SetContributionON(kFixedOrder, inlo, false);
+            if ( innlo > -1 ) fnlo->SetContributionON(kFixedOrder, innlo, false);
          } else if (iOrder == 2) {
-            if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, false);
-            if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, true);
+            if (  inlo > -1 ) fnlo->SetContributionON(kFixedOrder, inlo, true);
+            if ( innlo > -1 ) fnlo->SetContributionON(kFixedOrder, innlo, false);
          } else if (iOrder == 3) {
-            if ( innlo > -1 ) fnlo.SetContributionON(kFixedOrder, innlo, true);
-            if (  inlo > -1 ) fnlo.SetContributionON(kFixedOrder, inlo, true);
+            if (  inlo > -1 ) fnlo->SetContributionON(kFixedOrder, inlo, true);
+            if ( innlo > -1 ) fnlo->SetContributionON(kFixedOrder, innlo, true);
          } else {
             error["fnlo-tk-rootout"] << "Orders beyond " << nOrder << " are not implemented yet, aborted!" << endl;
             exit(1);
@@ -439,7 +435,7 @@ int main(int argc, char** argv) {
          if (iOrder > 0) sOrder = _OrdName[kFixedOrder][iOrder-1];
 
          //! Re-calculate cross sections for new settings
-         fnlo.CalcCrossSection();
+         fnlo->CalcCrossSection();
 
          //! Do PDF and scale uncertainties
          unsigned int iOffs[3] = {1,6,8};
@@ -451,17 +447,17 @@ int main(int argc, char** argv) {
             //! PDF first
             if ( iUnc==0 ) {
                // Back up zeroth member result when no proper uncertainty choice was made (only approx. correct for NNPDF)
-               vector < double > xstmp = fnlo.GetCrossSection(lNorm);
-               XsUnc = fnlo.GetPDFUncertainty(PDFUncStyles[iPDF], lNorm);
+               vector < double > xstmp = fnlo->GetCrossSection(lNorm);
+               XsUnc = fnlo->GetPDFUncertainty(PDFUncStyles[iPDF], lNorm);
                if ( PDFUncStyles[iPDF] == kPDFNone ) XsUnc.xs = xstmp;
-               snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
+               snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str(),chunc.c_str());
                snprintf(titlel, sizeof(titlel), "-dsigma_%s/sigma",PDFFiles[iPDF].c_str());
                snprintf(titleu, sizeof(titleu), "+dsigma_%s/sigma",PDFFiles[iPDF].c_str());
             }
             //! 2P scale uncertainties
             else if ( iUnc==1 ) {
                eScaleUnc = kSymmetricTwoPoint;
-               XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
+               XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 2P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
                snprintf(titlel, sizeof(titlel), "-dsigma_2P/sigma");
                snprintf(titleu, sizeof(titleu), "+dsigma_2P/sigma");
@@ -469,7 +465,7 @@ int main(int argc, char** argv) {
             //! 6P scale uncertainties
             else if ( iUnc==2 ) {
                eScaleUnc = kAsymmetricSixPoint;
-               XsUnc = fnlo.GetScaleUncertainty(eScaleUnc, lNorm);
+               XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 6P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
                snprintf(titlel, sizeof(titlel), "-dsigma_6P/sigma");
                snprintf(titleu, sizeof(titleu), "+dsigma_6P/sigma");
@@ -483,7 +479,7 @@ int main(int argc, char** argv) {
                yell << _DSEPSC << endl;
                yell <<  buffer << endl;
                yell << _SSEPSC << endl;
-               shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
+               shout << "bin      cross_section           lower_uncertainty       upper_uncertainty" << endl;
                yell << _SSEPSC << endl;
                for ( unsigned int iobs=0;iobs<XsUnc.xs.size();iobs++ ) {
                   printf("%5.i      %#18.11E      %#18.11E      %#18.11E\n",iobs+1,XsUnc.xs[iobs],XsUnc.dxsl[iobs],XsUnc.dxsu[iobs]);
@@ -493,7 +489,7 @@ int main(int argc, char** argv) {
 
             //! --- Initialize dimension bin counter
             unsigned int NDimBins[NDim];
-            NDimBins[0] = fnlo.GetNDim0Bins();
+            NDimBins[0] = fnlo->GetNDim0Bins();
 
             if ( iUnc==0 ) {
                //! --- 1D
@@ -507,7 +503,7 @@ int main(int argc, char** argv) {
                //! --- 3D
                else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
                   for (unsigned int j=0; j<NDimBins[0]; j++) {
-                     nHist += fnlo.GetNDim1Bins(j);
+                     nHist += fnlo->GetNDim1Bins(j);
                   }
                }
                //! -- Not implemented
@@ -528,7 +524,6 @@ int main(int argc, char** argv) {
             unsigned int i = 0;
             unsigned int j = 0;
             for (unsigned int ih=0; ih<nHist; ih++) {
-               //               cout << "AAAAA: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
                unsigned int nHistBins = 0;
                //! --- 1D table
                if (NDim == 1) { // One histogram only
@@ -538,13 +533,13 @@ int main(int argc, char** argv) {
                //! --- 2D table
                else if (NDim == 2) { // One histogram per 2nd dimension bin
                   // No. of bins in differential distribution equals no. of observable bins in 2nd dimension
-                  NDimBins[1] = fnlo.GetNDim1Bins(i);
+                  NDimBins[1] = fnlo->GetNDim1Bins(i);
                   nHistBins = NDimBins[1];
                }
                //! --- 3D table
                else if (NDim == 3) { // One histogram for each 3rd dimension bin of each 2nd dimension bin
-                  NDimBins[1] = fnlo.GetNDim1Bins(i);
-                  NDimBins[2] = fnlo.GetNDim2Bins(i,j);
+                  NDimBins[1] = fnlo->GetNDim1Bins(i);
+                  NDimBins[2] = fnlo->GetNDim2Bins(i,j);
                   nHistBins = NDimBins[2];
                }
                //! ---  Not yet implemented
@@ -593,8 +588,9 @@ int main(int argc, char** argv) {
                   sprintf(histno,"h%07i",iHist);
                   histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
                   histo[ih+iUnc]->SetContent(ycont);
-                  histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
-                  histo[ih+iUnc]->GetYaxis()->SetTitle(fnlo.GetXSDescr().c_str());
+                  histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo->GetDimLabels()[NDim-1].c_str());
+                  histo[ih+iUnc]->GetYaxis()->SetTitle(fnlo->GetXSDescr().c_str());
+                  nHistAll++;
                }
 
                // Lower uncertainty
@@ -603,8 +599,9 @@ int main(int argc, char** argv) {
                sprintf(histno,"h%07i",iHist);
                histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
                histo[ih+iUnc]->SetContent(dylow);
-               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo->GetDimLabels()[NDim-1].c_str());
                histo[ih+iUnc]->GetYaxis()->SetTitle(titlel);
+               nHistAll++;
 
                // Upper uncertainty
                iOff  = iOffs[iUnc]+1;
@@ -612,8 +609,9 @@ int main(int argc, char** argv) {
                sprintf(histno,"h%07i",iHist);
                histo[ih+iUnc] = new TH1D(histno,BaseName.c_str(),nHistBins,xbins);
                histo[ih+iUnc]->SetContent(dyupp);
-               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo.GetDimLabels()[NDim-1].c_str());
+               histo[ih+iUnc]->GetXaxis()->SetTitle(fnlo->GetDimLabels()[NDim-1].c_str());
                histo[ih+iUnc]->GetYaxis()->SetTitle(titleu);
+               nHistAll++;
 #endif
 
                if (NDim == 1 ) {
@@ -634,7 +632,6 @@ int main(int argc, char** argv) {
                      j = 0;
                   }
                }
-               //               cout << "ZZZZZ: ih, iobs, i, j = " << ih << ", " << iobs << ", " << i << ", " << j << endl;
             }
          }
       }
@@ -649,7 +646,7 @@ int main(int argc, char** argv) {
    yell << "" << endl;
    yell << _CSEPSC << endl;
    yell << " #" << endl;
-   shout << RootFileName + " with " << nHist << " histograms was successfully produced" << endl;
+   shout << RootFileName + " with " << nHistAll << " histograms was successfully produced" << endl;
    yell << " #" << endl;
    yell << _CSEPSC << endl << endl;
 #endif
