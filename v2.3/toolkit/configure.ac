@@ -461,7 +461,7 @@ if test "x$with_root" != "xno"; then
    else
       AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
       if test "x$ROOTBIN" = "x"; then
-         AC_MSG_ERROR([root-config not found in ROOTSYS/bin path to $TMPNAM! Configuration aborted!])
+         AC_MSG_ERROR([root-config not found in $ROOTSYS/bin path to $TMPNAM! Configuration aborted!])
       fi
    fi
    AC_MSG_NOTICE([******************************************])

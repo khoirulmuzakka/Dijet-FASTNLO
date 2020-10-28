@@ -492,9 +492,9 @@ if ( $withroot == 5 || $withroot == 6 ) then
 endif
 # If $withextroot is set, use the preinstalled ROOT.
 if ( $withextroot != "0" ) then
-    setenv LD_LIBRARY_PATH ${rootbasepath}/lib/root:${LD_LIBRARY_PATH}
-    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+    setenv LD_LIBRARY_PATH ${rootbasepath}/lib:${LD_LIBRARY_PATH}
+    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 endif
 # If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
 if ( $withcvmfslhapdf != "0" ) then
