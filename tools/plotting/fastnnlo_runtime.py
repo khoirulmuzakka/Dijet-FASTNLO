@@ -74,6 +74,8 @@ def main():
         plot_elapsed_time(loginformation, outputpath)
         plot_events_per_hour(loginformation, outputpath)
 
+    exit(0)
+
 def arguments():
 
     # Define arguments and options
