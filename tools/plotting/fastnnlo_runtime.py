@@ -3,6 +3,7 @@
 
 
 import argparse
+import glob
 import sys
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
@@ -95,10 +96,13 @@ def arguments():
 
 def get_files(files):
 
-    # check if logfiles argument is from law and return accordingly
-    if len(files)==1 and files[0].count('log') > 1:
-        return files[0][2:-2].split('\', \'')
-
+    # check if logfiles argument is one filename glob or a list of files
+    if len(files)==1:
+        if files[0].count('*') > 0:
+            files = glob.glob(files[0])
+    if len(files)==1:
+        print('fastnnlo_runtime: ERROR! Aborted, only one log file found: {}'.format(files[0]))
+        exit(3)
     else:
         return files
 
@@ -163,7 +167,7 @@ def plot_elapsed_time(informationdict, out_path):
 
     # set saving location
     filename = out_path[0] + ('' if out_path[0][-1] == '/' else '/')
-    filename += channel + '_Hist_Elapsed_time.png'
+    filename += channel + '.Hist_Elapsed_time.png'
 
     # set figure
     fig = plt.figure(figsize=(16, 12))
@@ -211,7 +215,7 @@ def plot_events_per_hour(informationdict, out_path):
 
     # set saving location
     filename = out_path[0] + ('' if out_path[0][-1] == '/' else '/')
-    filename += channel + '_Hist_Events_per_hour.png'
+    filename += channel + '.Hist_Events_per_hour.png'
 
     # set figure
     fig = plt.figure(figsize=(16, 12))
