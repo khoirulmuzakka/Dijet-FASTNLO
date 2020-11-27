@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
-
+import glob
 import argparse
 import sys
 import matplotlib as mpl
@@ -92,16 +92,15 @@ def arguments():
     return vars(parser.parse_args())
 
 
-
 def get_files(files):
-
     # check if logfiles argument is from law and return accordingly
-    if len(files)==1 and files[0].count('log') > 1:
-        return files[0][2:-2].split('\', \'')
+    if len(files)==1:
+        files = glob.glob(files[0])
+        if len(files)==1:
+            print('fastnnlo_runtime: ERROR! Aborted, only one log file found: {}'.format(files[0]))
+            exit(3)
 
-    else:
-        return files
-
+    return files
 
 def get_loginformation(files):
 
