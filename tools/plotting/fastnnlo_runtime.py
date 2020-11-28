@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
-
+import glob
 import argparse
 import glob
 import sys
@@ -93,19 +93,15 @@ def arguments():
     return vars(parser.parse_args())
 
 
-
 def get_files(files):
-
     # check if logfiles argument is one filename glob or a list of files
     if len(files)==1:
-        if files[0].count('*') > 0:
-            files = glob.glob(files[0])
-    if len(files)==1:
-        print('fastnnlo_runtime: ERROR! Aborted, only one log file found: {}'.format(files[0]))
-        exit(3)
-    else:
-        return files
+        files = glob.glob(files[0])
+        if len(files)==1:
+            print('fastnnlo_runtime: ERROR! Aborted, only one log file found: {}'.format(files[0]))
+            exit(3)
 
+    return files
 
 def get_loginformation(files):
 
@@ -174,16 +170,17 @@ def plot_elapsed_time(informationdict, out_path):
     ax = fig.gca()
 
     # plot histogram
-    n, batches, _ = ax.hist(time, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.2f} hours'.format(CPUtime))
+    n, batches, _ = ax.hist(time, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
 
     # plot mean and median
-    ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.2f}$\pm${2:0.2f} {1}'.format(mean, unit, std))
-    ax.vlines(median, 0, max(n), colors='green', linestyles='dashed', label=r'Median: {0:0.2f}$\pm${2:0.2f} {1}'.format(median, unit, iqd))
+    ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1f}$\pm${2:0.1f} {1}'.format(mean, unit, std))
+    ax.vlines(median, 0, max(n), colors='green', linestyles='dashed', label=r'Median: {0:0.1f}$\pm${2:0.1f} {1}'.format(median, unit, iqd))
 
     # finish and save figure
-    ax.set_title('Elapsed time of ' + channel + ' Channel', fontsize=15)
-    ax.set_xlabel('time in ' + unit, fontsize=20)
-    ax.set_ylabel('frequency', fontsize=20)
+    ax.set_title('Elapsed time of ' + channel + ' production', fontsize=20)
+    ax.set_xlabel('CPU time [' + unit + ']', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
+    ax.set_ylabel('frequency', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
+    ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=20)
 
     ax.legend(loc='best', fontsize=20)
@@ -222,16 +219,17 @@ def plot_events_per_hour(informationdict, out_path):
     ax = fig.gca()
 
     # plot histogram
-    n, batches, _ = ax.hist(eph, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.2f} hours'.format(CPUtime))
+    n, batches, _ = ax.hist(eph, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
 
     # plot mean and median
-    ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.2e}$\pm${1:0.2e} events/hour'.format(mean, std))
+    ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1e}$\pm${1:0.1e} events/hour'.format(mean, std))
     ax.vlines(median, 0, max(n), colors='green', linestyles='dashed', label=r'Median: {0:0.2e}$\pm${1:0.2e} events/hour'.format(median, iqd))
 
     # finish and save figure
-    ax.set_title('Events per hour of ' + channel + ' Channel', fontsize=15)
-    ax.set_xlabel('events/hour', fontsize=20)
-    ax.set_ylabel('frequency', fontsize=20)
+    ax.set_title('Events per hour of ' + channel + ' production', fontsize=20)
+    ax.set_xlabel('events/hour', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
+    ax.set_ylabel('frequency', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
+    ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=20)
 
     ax.legend(loc='best', fontsize=20)
