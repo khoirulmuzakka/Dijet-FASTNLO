@@ -94,6 +94,7 @@ class SplitArgs(argparse.Action):
 
 # Some global definitions
 _fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
+_sntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': '', '/': '÷'}) # Scalename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
@@ -239,10 +240,10 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
 
     if given_filename is not None:
         filename = '%s.scaleunc-%s.%s.%s' % (given_filename,
-                                             vartype, ordernames[1:], scale_name)
+                                             vartype, ordernames[1:], scale_name.translate(_sntrans))
     else:
         filename = '%s.scaleunc-%s.%s.%s.%s' % (
-            tablename, vartype, ordernames[1:], pdfset, scale_name)
+            tablename, vartype, ordernames[1:], pdfset, scale_name.translate(_sntrans))
         if not nostat:
             filename = filename+'.stat'
 
