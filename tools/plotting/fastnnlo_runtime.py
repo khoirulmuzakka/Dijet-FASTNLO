@@ -17,7 +17,7 @@ from matplotlib import cm
 # For this to work we try the Cairo backend, which can do all of these plus the raster format png.
 # If this is not usable, we fall back to the Agg backend capable only of png for nice web plots.
 #ngbackends = mpl.rcsetup.non_interactive_bk
-#print('[fastnnlo_pdfunc]: Non GUI backends are: ', ngbackends)
+#print('[fastnnlo_runtime]: Non GUI backends are: ', ngbackends)
 # 1st try cairo
 backend = 'cairo'
 usecairo = True
@@ -28,13 +28,13 @@ except ImportError:
         import cairo
     except ImportError:
         usecairo = False
-#        print('[fastnnlo_pdfunc]: Can not use cairo backend :-(')
+#        print('[fastnnlo_runtime]: Can not use cairo backend :-(')
 #        print('                   cairocffi or pycairo are required to be installed')
     else:
         if cairo.version_info < (1, 11, 0):
             # Introduced create_for_data for Py3.
             usecairo = False
-#            print('[fastnnlo_pdfunc]: Can not use cairo backend :-(')
+#            print('[fastnnlo_runtime]: Can not use cairo backend :-(')
 #            print('                   cairo {} is installed; cairo>=1.11.0 is required'.format(cairo.version))
 if usecairo:
     mpl.use('cairo')
@@ -51,8 +51,17 @@ import matplotlib.pyplot as plt
 # numpy
 import numpy as np
 
+# Action class to allow comma-separated (or empty) list in options
+class SplitArgs(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values:
+            setattr(namespace, self.dest, values[0].split(','))
+        else:
+            setattr(namespace, self.dest, [''])
+
 # Some global definitions
 _debug = True
+_formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 
 #####################################################################################
 
@@ -74,8 +83,19 @@ def main():
     outputname = args['filename']
     print('[fastnnlo_runtime]: Filename argument is: {}'.format(outputname))
 
-    # extract further args
-    format = args['format']
+    # Plot formats to use
+    formats = args['format']
+    if formats is None:
+        formats = ['png']
+    for fmt in formats:
+        if fmt not in _formats:
+            print('[fastnnlo_runtime]: Illegal format specified, aborted!')
+            print('[fastnnlo_runtime]: Format list:', args['format'])
+            exit(1)
+        elif fmt != 'png' and not usecairo:
+            print('[fastnnlo_runtime]: Vector format plots not possible without cairo backend, aborted!')
+            print('[fastnnlo_runtime]: Format list:', args['format'])
+            exit(1)
 
     # get all the information from logfiles as dict
     # dict contains: runtime, runtime_unit, channel, events
@@ -83,12 +103,12 @@ def main():
 
     # plot all the information
     if args['CPUtime']:
-        plot_elapsed_time(loginformation, outputpath, outputname, format)
+        plot_elapsed_time(loginformation, outputpath, outputname, formats)
     if args['Events']:
-        plot_events_per_hour(loginformation, outputpath, outputname, format)
+        plot_events_per_hour(loginformation, outputpath, outputname, formats)
     if not args['CPUtime'] and not args['Events']:
-        plot_elapsed_time(loginformation, outputpath, outputname, format)
-        plot_events_per_hour(loginformation, outputpath, outputname, format)
+        plot_elapsed_time(loginformation, outputpath, outputname, formats)
+        plot_events_per_hour(loginformation, outputpath, outputname, formats)
 
     exit(0)
 
@@ -110,9 +130,8 @@ def arguments():
                         help='Plot only the elapsed time')
     parser.add_argument('--Events', dest='Events', action='store_true',
                         help='Plot only the events per hour')
-    parser.add_argument('--format', required=False, nargs=1, type=str, default='png',
+    parser.add_argument('--format', required=False, nargs=1, type=str, action=SplitArgs,
                         help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
-
     return vars(parser.parse_args())
 
 
@@ -178,13 +197,12 @@ def get_loginformation(files):
 
     return information
 
-def plot_elapsed_time(informationdict, out_path, out_name, *args, **kwargs):
+def plot_elapsed_time(informationdict, out_path, out_name, formats):
 
     time = informationdict['runtime']
     unit = informationdict['runtime_unit']
     channel = informationdict['channel']
     basename = 'runtime'
-    baseext  = args[0][0]
 
     # get relevant values
     mean = np.mean(time)
@@ -193,18 +211,6 @@ def plot_elapsed_time(informationdict, out_path, out_name, *args, **kwargs):
     iqd = np.subtract(*np.percentile(time, [75, 25], interpolation='linear'))/2.
 
     CPUtime = np.sum(time) / (1 if unit == 'hours' else 60)
-
-    # set saving location
-    filename = out_path + ('' if out_path[-1] == '/' else '/')
-    chnlabel = channel
-    if out_name:
-        filename += out_name + '.' + basename + '.' + baseext
-        chnlabel = out_name
-    else:
-        filename += channel  + '.' + basename + '.' + baseext
-
-    if _debug:
-        print('[fastnnlo_runtime]: DEBUG: Runtime plot name is {}'.format(filename))
 
     # set figure
     fig = plt.figure(figsize=(16, 12))
@@ -218,6 +224,9 @@ def plot_elapsed_time(informationdict, out_path, out_name, *args, **kwargs):
     ax.vlines(median, 0, max(n), colors='green', linestyles='dashed', label=r'Median: {0:0.1f}$\pm${2:0.1f} {1}'.format(median, unit, iqd))
 
     # finish and save figure
+    chnlabel = channel
+    if out_name:
+        chnlabel = out_name
     ax.set_title('Elapsed time of ' + chnlabel + ' production', fontsize=20)
     ax.set_xlabel('CPU time [' + unit + ']', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
     ax.set_ylabel('frequency', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20)
@@ -228,17 +237,23 @@ def plot_elapsed_time(informationdict, out_path, out_name, *args, **kwargs):
     ax.grid()
     ax.set_axisbelow(True)
 
-    print('[fastnnlo_runtime]: Saving runtime plot {}'.format(filename))
-    fig.savefig(filename)
+    # set saving location
+    for fmt in formats:
+        filename = out_path + ('' if out_path[-1] == '/' else '/')
+        if out_name:
+            filename += out_name + '.' + basename + '.' + fmt
+        else:
+            filename += channel  + '.' + basename + '.' + fmt
+        print('[fastnnlo_runtime]: Saving runtime plot {}'.format(filename))
+        fig.savefig(filename)
 
-def plot_events_per_hour(informationdict, out_path, out_name, *args, **kwargs):
+def plot_events_per_hour(informationdict, out_path, out_name, formats):
 
     time = informationdict['runtime']
     unit = informationdict['runtime_unit']
     channel = informationdict['channel']
     events = informationdict['events']
     basename = 'evtrate'
-    baseext  = args[0][0]
 
     if unit == 'hours':
         eph = events/time
@@ -252,15 +267,6 @@ def plot_events_per_hour(informationdict, out_path, out_name, *args, **kwargs):
     iqd = np.subtract(*np.percentile(eph, [75, 25], interpolation='linear'))/2.
 
     CPUtime = np.sum(time) / (1 if unit == 'hours' else 60)
-
-    # set saving location
-    filename = out_path + ('' if out_path[-1] == '/' else '/')
-    chnlabel = channel
-    if out_name:
-        filename += out_name + '.' + basename + '.' + baseext
-        chnlabel = out_name
-    else:
-        filename += channel  + '.' + basename + '.' + baseext
 
     # set figure
     fig = plt.figure(figsize=(16, 12))
@@ -284,9 +290,15 @@ def plot_events_per_hour(informationdict, out_path, out_name, *args, **kwargs):
     ax.grid()
     ax.set_axisbelow(True)
 
-    print('[fastnnlo_runtime]: Saving event rate plot {}'.format(filename))
-    fig.savefig(filename)
-
+    # set saving location
+    for fmt in formats:
+        filename = out_path + ('' if out_path[-1] == '/' else '/')
+        if out_name:
+            filename += out_name + '.' + basename + '.' + fmt
+        else:
+            filename += channel  + '.' + basename + '.' + fmt
+        print('[fastnnlo_runtime]: Saving event rate plot {}'.format(filename))
+        fig.savefig(filename)
 
 if __name__ == "__main__":
     main()
