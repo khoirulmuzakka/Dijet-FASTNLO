@@ -124,13 +124,27 @@ def get_loginformation(files):
 
     for file in files:
         event = False
+        run_time_temp = []
+
         with open(file) as origin:
             for line in origin:
                 # extract elapsed time with time unit
-                if 'Elapsed time' in line:
-                    line = line.split()
-                    run_time.append(float(line[3]))
-                    unit = line[4]
+                if 'Time elapsed' in line:
+                    line = line.split(':')
+                    hours = float(line[1])
+                    minutes = float(line[2])
+                    seconds = float(line[3])
+
+
+                    if hours != 0.:
+                        print('a')
+                        run_time_temp.append(hours + minutes/60 + seconds/360)
+                        unit = 'hours'
+                    else:
+                        print('b')
+                        run_time_temp.append(minutes + seconds/60)
+                        unit = 'minutes'
+
                 # extract channel name
                 if 'Tablename' in line and not channel:
                     line = line.split()
@@ -142,23 +156,20 @@ def get_loginformation(files):
                     number_events.append(float(line[4][10:]))
                     event = True
 
-    # found bug in logfiles where elapsed time is negativ
-    # temporary fix
+        run_time.append(run_time_temp[-1])
+
+
     run_time = np.array(run_time)
     number_events = np.array(number_events)
-    run_time_arr = run_time[run_time > 0]
-    number_events_arr = number_events[run_time > 0]
-
 
     information = {
-        'runtime': run_time_arr,
+        'runtime': run_time,
         'runtime_unit': unit,
         'channel': channel,
-        'events': number_events_arr
+        'events': number_events
     }
 
     return information
-
 
 def plot_elapsed_time(informationdict, out_path, out_name):
 
