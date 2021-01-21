@@ -74,18 +74,21 @@ def main():
     outputname = args['filename']
     print('[fastnnlo_runtime]: Filename argument is: {}'.format(outputname))
 
+    # extract further args
+    format = args['format']
+
     # get all the information from logfiles as dict
     # dict contains: runtime, runtime_unit, channel, events
     loginformation = get_loginformation(logfiles)
 
     # plot all the information
     if args['CPUtime']:
-        plot_elapsed_time(loginformation, outputpath, outputname)
+        plot_elapsed_time(loginformation, outputpath, outputname, format)
     if args['Events']:
-        plot_events_per_hour(loginformation, outputpath, outputname)
+        plot_events_per_hour(loginformation, outputpath, outputname, format)
     if not args['CPUtime'] and not args['Events']:
-        plot_elapsed_time(loginformation, outputpath, outputname)
-        plot_events_per_hour(loginformation, outputpath, outputname)
+        plot_elapsed_time(loginformation, outputpath, outputname, format)
+        plot_events_per_hour(loginformation, outputpath, outputname, format)
 
     exit(0)
 
@@ -95,13 +98,20 @@ def arguments():
     parser = argparse.ArgumentParser(epilog='Skript to plot elapsed time of fastNLO channels', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # positional argument
-    parser.add_argument('logfiles', nargs='+', type=str, help='Either input is a single string from LAW Task or it is a list')
+    parser.add_argument('logfiles', nargs='+', type=str,
+                        help='Either input is a single string from LAW Task or it is a list')
 
     # optional arguments
-    parser.add_argument('-f', '--filename', type=str, help='Redefine part of output filename')
-    parser.add_argument('-o', '--output', type=str, default='./', help='Set here the outputpath')
-    parser.add_argument('--CPUtime', dest='CPUtime', action='store_true', help='Plot only the elapsed time')
-    parser.add_argument('--Events', dest='Events', action='store_true', help='Plot only the events per hour')
+    parser.add_argument('-f', '--filename', type=str,
+                        help='Redefine part of output filename')
+    parser.add_argument('-o', '--output', type=str, default='./',
+                        help='Set here the outputpath')
+    parser.add_argument('--CPUtime', dest='CPUtime', action='store_true',
+                        help='Plot only the elapsed time')
+    parser.add_argument('--Events', dest='Events', action='store_true',
+                        help='Plot only the events per hour')
+    parser.add_argument('--format', required=False, nargs=1, type=str, default='png',
+                        help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
 
     return vars(parser.parse_args())
 
@@ -135,13 +145,10 @@ def get_loginformation(files):
                     minutes = float(line[2])
                     seconds = float(line[3])
 
-
                     if hours != 0.:
-                        print('a')
                         run_time_temp.append(hours + minutes/60 + seconds/360)
                         unit = 'hours'
                     else:
-                        print('b')
                         run_time_temp.append(minutes + seconds/60)
                         unit = 'minutes'
 
@@ -171,13 +178,13 @@ def get_loginformation(files):
 
     return information
 
-def plot_elapsed_time(informationdict, out_path, out_name):
+def plot_elapsed_time(informationdict, out_path, out_name, *args, **kwargs):
 
     time = informationdict['runtime']
     unit = informationdict['runtime_unit']
     channel = informationdict['channel']
     basename = 'runtime'
-    baseext  = 'png'
+    baseext  = args[0][0]
 
     # get relevant values
     mean = np.mean(time)
@@ -224,14 +231,14 @@ def plot_elapsed_time(informationdict, out_path, out_name):
     print('[fastnnlo_runtime]: Saving runtime plot {}'.format(filename))
     fig.savefig(filename)
 
-def plot_events_per_hour(informationdict, out_path, out_name):
+def plot_events_per_hour(informationdict, out_path, out_name, *args, **kwargs):
 
     time = informationdict['runtime']
     unit = informationdict['runtime_unit']
     channel = informationdict['channel']
     events = informationdict['events']
     basename = 'evtrate'
-    baseext  = 'png'
+    baseext  = args[0][0]
 
     if unit == 'hours':
         eph = events/time
