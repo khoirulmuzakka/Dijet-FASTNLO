@@ -60,7 +60,7 @@ class SplitArgs(argparse.Action):
             setattr(namespace, self.dest, [''])
 
 # Some global definitions
-_debug = True
+_debug = False
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 
 #####################################################################################
