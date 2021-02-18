@@ -334,7 +334,11 @@ def plot_events_per_hour(infodict, out_path, out_name, formats):
             evrs.append(ephchn[masks[_channel_number[chn]]][:,0])
             lastch = chn
     if len(unique_channels) == 1:
-        n, batches, _ = ax.hist(evrs, log=True, bins=20, edgecolor='black', color=_channel_colors[_channel_number[lastch]], label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
+
+        # plot each unique number in different color
+        for ev_num in set(events):
+            n, batches, _ = ax.hist(evrs[0][events == ev_num], histtype='barstacked', log=True, stacked=True, bins=logbins, edgecolor='black', label='# Events: {}'.format(ev_num))
+        
         # plot mean and median
         ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1e}$\pm${1:0.1e} events/hour'.format(mean, std))
         ax.vlines(median, 0, max(n), colors='green', linestyles='dashdot', label=r'Median: {0:0.2e}$\pm${1:0.2e} events/hour'.format(median, iqd))
@@ -343,6 +347,8 @@ def plot_events_per_hour(infodict, out_path, out_name, formats):
         n, batches, _ = ax.hist(evrs, histtype='barstacked', log=True, stacked=True, bins=logbins, edgecolor='black', color=_channel_colors, label=_channels)
         ax.set_xlim(0.9*ephmin, 1.1*ephmax)
         ax.set_xscale('log')
+
+    
 
     # finish and save figure
     chnlabel = channels[0]
