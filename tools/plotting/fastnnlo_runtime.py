@@ -237,7 +237,15 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
     times = infodict['runtime']
     unit = infodict['runtime_unit']
     channels = infodict['channels']
+    events   = infodict['events']
 
+    # prepare histogram input
+    unique_channels = set(channels)
+    if len(unique_channels) == 0:
+        print('fastnnlo_runtime: ERROR! Aborted, no channel info found.')
+        exit(11)
+
+    bins = np.linspace(min(times), max(times), 100)
     # get relevant values
     mean = np.mean(times)
     std = np.std(times)
@@ -251,11 +259,23 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
     ax = fig.gca()
 
     # plot histogram
-    n, batches, _ = ax.hist(times, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
 
-    # plot mean and median
-    ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1f}$\pm${2:0.1f} {1}'.format(mean, unit, std))
-    ax.vlines(median, 0, max(n), colors='green', linestyles='dashdot', label=r'Median: {0:0.1f}$\pm${2:0.1f} {1}'.format(median, unit, iqd))
+    if len(unique_channels) == 1:
+        plt.text
+        # plot each unique number in different color
+        for ev_num in set(events):
+            n, batches, _ = ax.hist(times[events == ev_num], histtype='barstacked', log=True, stacked=True, bins=bins, edgecolor='black', label='# Events: {}'.format(ev_num))
+        
+        # plot mean and median
+        ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1f}$\pm${1:0.1f}'.format(mean, std))
+        ax.vlines(median, 0, max(n), colors='green', linestyles='dashdot', label=r'Median: {0:0.2f}$\pm${1:0.2f}'.format(median, iqd))
+        ax.ticklabel_format(axis='x', style='plain', useOffset=False)
+    else:
+        n, batches, _ = ax.hist(times, bins=20, color='deepskyblue', edgecolor='black')
+        ax.set_xscale('log')
+
+
+  
 
     # finish and save figure
     chnlabel = channels[0]
@@ -268,7 +288,7 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
     ax.tick_params(axis='both', which='major', labelsize=20)
     ax.ticklabel_format(axis='x', style='plain', useOffset=False)
 
-    ax.legend(loc='best', fontsize=20)
+    ax.legend(title='Total CPU time: {0:0.0f}hours'.format(CPUtime), loc='best', fontsize=20, title_fontsize=20)
     ax.grid()
     ax.set_axisbelow(True)
 
@@ -337,7 +357,7 @@ def plot_events_per_hour(infodict, out_path, out_name, formats):
 
         # plot each unique number in different color
         for ev_num in set(events):
-            n, batches, _ = ax.hist(evrs[0][events == ev_num], histtype='barstacked', log=True, stacked=True, bins=logbins, edgecolor='black', label='# Events: {}'.format(ev_num))
+            n, batches, _ = ax.hist(evrs[0][events == ev_num], histtype='barstacked', log=True, stacked=True, bins=50, edgecolor='black', label='# Events: {}'.format(ev_num))
         
         # plot mean and median
         ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1e}$\pm${1:0.1e} events/hour'.format(mean, std))
