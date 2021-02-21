@@ -260,7 +260,7 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
 
     # plot histogram
 
-    if len(unique_channels) > 1 or unique_channels[0] == 'ALL':
+    if len(unique_channels) > 1 or [unique_channels] == 'ALL':
         n, batches, _ = ax.hist(times, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
         ax.legend(loc='best', fontsize=20)
     else:
