@@ -260,22 +260,20 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
 
     # plot histogram
 
-    if len(unique_channels) == 1:
+    if len(unique_channels) > 1 or unique_channels[0] == 'ALL':
+        n, batches, _ = ax.hist(times, bins=20, color='deepskyblue', edgecolor='black', label='Total CPU time: {0:0.0f} hours'.format(CPUtime))
+        ax.legend(loc='best', fontsize=20)
+    else:
         plt.text
         # plot each unique number in different color
         for ev_num in set(events):
             n, batches, _ = ax.hist(times[events == ev_num], histtype='barstacked', log=True, stacked=True, bins=bins, edgecolor='black', label='# Events: {}'.format(ev_num))
-        
+
         # plot mean and median
         ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1f}$\pm${1:0.1f}'.format(mean, std))
         ax.vlines(median, 0, max(n), colors='green', linestyles='dashdot', label=r'Median: {0:0.2f}$\pm${1:0.2f}'.format(median, iqd))
         ax.ticklabel_format(axis='x', style='plain', useOffset=False)
-    else:
-        n, batches, _ = ax.hist(times, bins=20, color='deepskyblue', edgecolor='black')
-        ax.set_xscale('log')
-
-
-  
+        ax.legend(title='Total CPU time: {0:0.0f}hours'.format(CPUtime), loc='best', fontsize=20, title_fontsize=20)
 
     # finish and save figure
     chnlabel = channels[0]
@@ -286,9 +284,7 @@ def plot_elapsed_time(infodict, out_path, out_name, formats):
     ax.set_ylabel('# jobs', horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0, fontsize=20, labelpad=20)
     ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=20)
-    ax.ticklabel_format(axis='x', style='plain', useOffset=False)
 
-    ax.legend(title='Total CPU time: {0:0.0f}hours'.format(CPUtime), loc='best', fontsize=20, title_fontsize=20)
     ax.grid()
     ax.set_axisbelow(True)
 
@@ -358,7 +354,7 @@ def plot_events_per_hour(infodict, out_path, out_name, formats):
         # plot each unique number in different color
         for ev_num in set(events):
             n, batches, _ = ax.hist(evrs[0][events == ev_num], histtype='barstacked', log=True, stacked=True, bins=50, edgecolor='black', label='# Events: {}'.format(ev_num))
-        
+
         # plot mean and median
         ax.vlines(mean, 0, max(n), colors='red', linestyles='dashed', label=r'Mean: {0:0.1e}$\pm${1:0.1e} events/hour'.format(mean, std))
         ax.vlines(median, 0, max(n), colors='green', linestyles='dashdot', label=r'Median: {0:0.2e}$\pm${1:0.2e} events/hour'.format(median, iqd))
@@ -367,8 +363,6 @@ def plot_events_per_hour(infodict, out_path, out_name, formats):
         n, batches, _ = ax.hist(evrs, histtype='barstacked', log=True, stacked=True, bins=logbins, edgecolor='black', color=_channel_colors, label=_channels)
         ax.set_xlim(0.9*ephmin, 1.1*ephmax)
         ax.set_xscale('log')
-
-    
 
     # finish and save figure
     chnlabel = channels[0]
