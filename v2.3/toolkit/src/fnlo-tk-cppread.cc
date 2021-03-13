@@ -126,7 +126,8 @@ int main(int argc, char** argv) {
          man << "   Alternatives: \"kScale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
          man << "                 \"scale21\", i.e. mur=scale2, muf=scale1," << endl;
-         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2." << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2," << endl;
+         man << "                 \"kQuadraticSum\", i.e. mur=muf=sqrt(scale1^2+scale2^2)." << endl;
          man << "[Nf]: Set no. of flavours to use in alpha_s evolution, def. = 5" << endl;
          man << "   Alternatives: 3,4,6, and 0 i.e. Nf matching at thresholds." << endl;
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
@@ -1151,6 +1152,9 @@ int main(int argc, char** argv) {
             } else if ( chflex == "kProd" ) {
                fnlo->SetMuFFunctionalForm(kProd);
                fnlo->SetMuRFunctionalForm(kProd);
+            } else if ( chflex == "kQuadraticSum" ) {
+               fnlo->SetMuFFunctionalForm(kQuadraticSum);
+               fnlo->SetMuRFunctionalForm(kQuadraticSum);
             } else {
                error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
                exit(1);
