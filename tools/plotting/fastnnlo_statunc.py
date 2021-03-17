@@ -3,7 +3,7 @@
 #
 ########################################################################
 #
-# Plot the statistical uncertainty of all channels
+# Plot the statistical uncertainty and cross section share of all channels
 #
 # Created by K. Rabbertz, 07.10.2020
 #
@@ -115,21 +115,20 @@ _debug = False
 
 
 #
-# Function plotting statistical uncertainties for each channel with respect to
-# the total at a chosen order
+# Function plotting statistical uncertainties and signed cross-section shares
+# for each channel with respect to the total at a chosen order
 #
-def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename, order, given_filename, nice_scale_name, formats):
+def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename, order, given_filename, nice_scale_name, formats, chnshare, xsr_ch, xsr_or, ylabel2):
+
+    # For plotting shifted results, 'next to each other', handling via shift from bincenter
+    # Always seven _channels
+    shift_list = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]
 
     fig = plt.figure(figsize=(7, 7))
     gs = gridspec.GridSpec(1, 1, fig)
     ax1 = plt.subplot(gs[0, :])
     ax1.set_autoscalex_on(True)
     plt.setp(ax1.get_xticklabels(), visible=True)
-
-    # For plotting shifted results, 'next to each other', handling via shift from bincenter
-    # Always seven _channels
-    shift_list = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]
-
     ax1.set_xscale('log', nonposx='clip')
     ax1.set_yscale('log', nonposy='clip')
     ax1.set_ylim(0.00001, 0.1)
@@ -148,25 +147,69 @@ def plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablen
         ax1.errorbar(x_axis*shift, dxsr_ch[xs_index], yerr=yerror, elinewidth=1, linewidth=0.0,
                      ms=6, marker=_channel_symbol[channel_item], color=_channel_color[channel_item], fmt='.', label=channel_item)
     ax1.errorbar(x_axis*shift, dxsr_or[_text_to_order[order]], yerr=yerror, elinewidth=1, linewidth=0.0,
-                 ms=6, marker='X', color='k', fmt='.', label='total')
+                 ms=6, marker='P', color='k', fmt='.', label='total')
     ax1.legend(fontsize=10, numpoints=1)
 
     fig.tight_layout()
 
     if given_filename is not None:
-        filename = '%s.statunc-%s.%s' % (given_filename, order, nice_scale_name)
+        filename  = '%s.statunc-%s.%s' % (given_filename, order, nice_scale_name)
     else:
-        filename = '%s.statunc-%s.%s' % (tablename, order, nice_scale_name)
+        filename  = '%s.statunc-%s.%s' % (tablename, order, nice_scale_name)
 
     # Do not use characters defined in _fntrans for filenames
-    filename = filename.translate(_fntrans)
+    filename  = filename.translate(_fntrans)
 
     for fmt in formats:
-        figname = '%s.%s' % (filename, fmt)
+        figname  = '%s.%s' % (filename, fmt)
         fig.savefig(figname)
         print('[fastnnlo_statunc]: Plot saved as:', figname)
-#        print(plt.get_fignums())
+
     plt.close(fig)
+
+    # Plot signed cross-section shares if desired
+    if chnshare:
+
+        fig2 = plt.figure(figsize=(7, 7))
+        gs2 = gridspec.GridSpec(1, 1, fig2)
+        ax2 = plt.subplot(gs2[0, :])
+        ax2.set_autoscalex_on(True)
+        plt.setp(ax2.get_xticklabels(), visible=True)
+        ax2.set_xscale('log', nonposx='clip')
+        ax2.set_ylim(-1.0, 1.5)
+        ax2.set_xlabel(r'%s' %xlabel, horizontalalignment='right', x=1.0, verticalalignment='top', y=1.0)
+        ax2.set_ylabel(r'%s(%s)' % (ylabel2, order), horizontalalignment='right', x=1.0,
+                       verticalalignment='top', y=1.0, rotation=90, labelpad=24)
+        ax2.set_title('%s' % title, loc='left')
+
+        # Plot signed cross-section shares per channel
+        xs_index = -1
+        for channel_item, shift in zip(_channels, shift_list):
+            xs_index += 1
+            yerror = 0*xsr_ch[xs_index, :]
+            ax2.errorbar(x_axis*shift, xsr_ch[xs_index], yerr=yerror, elinewidth=1, linewidth=0.0,
+                         ms=6, marker=_channel_symbol[channel_item], color=_channel_color[channel_item], fmt='.', label=channel_item)
+        ax2.errorbar(x_axis*shift, xsr_or[_text_to_order['NLO']], yerr=yerror, elinewidth=1, linewidth=0.0,
+                 ms=6, marker='X', color='k', fmt='.', label='NLO')
+        plt.axhline(y=1.0, linestyle='--', linewidth=1.0, color='black')
+        ax2.legend(fontsize=10, numpoints=1)
+
+        fig2.tight_layout()
+
+        if given_filename is not None:
+            filename = '%s.chnshare-%s.%s' % (given_filename, order, nice_scale_name)
+        else:
+            filename = '%s.chnshare-%s.%s' % (tablename, order, nice_scale_name)
+
+        # Do not use characters defined in _fntrans for filenames
+        filename  = filename.translate(_fntrans)
+
+        for fmt in formats:
+            figname  = '%s.%s' % (filename, fmt)
+            fig2.savefig(figname)
+            print('[fastnnlo_statunc]: Plot saved as:', figname)
+
+        plt.close(fig2)
 
 
 ########################################################################
@@ -188,6 +231,8 @@ def main():
                         help='Output filename (optional).')
     parser.add_argument('--format', required=False, nargs=1, type=str, action=SplitArgs,
                         help='Comma-separated list of plot formats to use: eps, pdf, png, svg. If nothing is chosen, png is used.')
+    parser.add_argument('--noshares', action="store_true",
+                        help='By default also plot signed cross-section share for each channel.')
     parser.add_argument('-o', '--order', default='LO', type=str,
                         help='Order to normalise to: LO, NLO, or NNLO. If nothing is chosen, LO is used.')
     parser.add_argument('-s', '--scale', default=0, required=False, nargs='?', type=int,
@@ -207,7 +252,7 @@ def main():
     # Print header
     print("\n###########################################################################################")
     print("# fastnnlo_statunc:")
-    print("# Plot the statistical uncertainty composition")
+    print("# Plot the statistical uncertainty and cross section composition")
     print("###########################################################################################\n")
 
     # Parse arguments
@@ -275,6 +320,11 @@ def main():
         print('[fastnnlo_statunc]: Using matplotlib version ', mpl.__version__)
         print('                     from location ', mpl.__file__)
 
+    # Also plot cross-section shares
+    chnshare = not args['noshares']
+    if chnshare:
+        print('[fastnnlo_statunc]: Also plot signed cross-section shares for each channel.')
+
     # Loop over table list
     for table in files:
         # Table name
@@ -313,8 +363,9 @@ def main():
         if verb:
             print('[fastnnlo_statunc]: x-label:', xlabel)
 
-        # Generic y label
-        ylabel = '$\Delta\sigma_\mathrm{stat}\,/\,\sigma$'
+        # Generic y labels
+        ylabel  = '$\Delta\sigma_\mathrm{stat}\,/\,\sigma$'
+        ylabel2 = '$\sigma_\mathrm{chan}\,/\,\sigma$'
 
         # Creating x-axis
         bin_bounds = np.array(fnlo.GetObsBinsBounds(0))
@@ -391,8 +442,9 @@ def main():
         xs_norm = np.array(cols[:, 0])
 
         # Read in cross section and statistical uncertainty for each order and exclusive order
-        xs      = []
-        dxs     = []
+        xs_or   = []
+        xsr_or  = []
+        dxs_or  = []
         dxsr_or = []
         for lorder in _orders:
             parts = tablename.split(sep)
@@ -404,13 +456,18 @@ def main():
             print('[fastnnlo_statunc]: Reading statistical uncertainties from', datfile)
             cols = np.loadtxt(datfile, usecols=list(range(3, 5)))
             xs_dat   = np.array(cols[:, 0])
+            xsr_dat  = np.divide(xs_dat, xs_norm, out=np.ones_like(xs_dat), where=xs_norm != 0)
             dxs_dat  = np.array(cols[:, 1])
             dxsr_dat = np.divide(dxs_dat, xs_norm, out=np.ones_like(dxs_dat), where=xs_norm != 0)
-            xs.append(xs_dat)
-            dxs.append(dxs_dat)
+            xs_or.append(xs_dat)
+            xsr_or.append(xsr_dat)
+            dxs_or.append(dxs_dat)
             dxsr_or.append(dxsr_dat)
 
-        # Read in statistical uncertainty for each channel
+        # Read in cross section and statistical uncertainty for each channel
+        xs_ch   = []
+        xsr_ch  = []
+        dxs_ch  = []
         dxsr_ch = []
         if args['datfiles'] is None or args['datfiles'][0] == '':
             for channel in _channels:
@@ -424,6 +481,7 @@ def main():
             print('[fastnnlo_statunc]: Mismatch between required channels and no. of filenames for statistical uncertainties, aborted!')
             exit(1)
 
+        xsr  = []
         dxsr = []
         for fname in datfilenames:
             if not os.path.exists(fname):
@@ -431,9 +489,16 @@ def main():
                 exit(1)
             print('[fastnnlo_statunc]: Reading statistical uncertainties from', fname)
             cols = np.loadtxt(fname, usecols=list(range(3, 5)))
-            dxs_dat = np.array(cols[:, 1])
+            xs_dat   = np.array(cols[:, 0])
+            xsr_dat  = np.divide(xs_dat, xs_norm, out=np.ones_like(xs_dat), where=xs_norm != 0)
+            dxs_dat  = np.array(cols[:, 1])
             dxsr_dat = np.divide(dxs_dat, xs_norm, out=np.ones_like(dxs_dat), where=xs_norm != 0)
+            xs_ch.append(xs_dat)
+            xsr_ch.append(xsr_dat)
+            dxs_ch.append(dxs_dat)
+            xsr.append(xsr_dat)
             dxsr.append(dxsr_dat)
+        xsr_ch  = np.array(xsr)
         dxsr_ch = abs(np.array(dxsr))
         # Empty list for use with next table in automatic mode
         if args['datfiles'] is None or args['datfiles'][0] == '':
@@ -459,7 +524,7 @@ def main():
             print('dxsr_ch', dxsr_ch)
 
         plotting(x_axis, xmin, xmax, dxsr_ch, dxsr_or, xlabel, ylabel, title, tablename,
-                 order, given_filename, nice_scale_name, formats)
+                 order, given_filename, nice_scale_name, formats, chnshare, xsr_ch, xsr_or, ylabel2)
 
         stop_time = timeit.default_timer()
         timediff = stop_time-start_time
