@@ -11,7 +11,7 @@
 #include <algorithm> //c++98
 #include <utility>   //c++11
 #include "fastnlotk/fastNLOEvent.h"
-#include "fastnlotk/fastNLOGeneratorConstants.h"
+#include "fastnlotk/fastNLOTableConstants.h"
 #include "fastnlotk/speaker.h"
 #include "fnlo_int_nlojet/pdf-hhc-dummy.h"
 #include <bits/hhc-phasespace.h>

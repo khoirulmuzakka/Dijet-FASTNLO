@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ##############################################
@@ -10,29 +10,70 @@
 #
 #############################################
 #
+# python2 compatibility
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 import argparse
 import glob
 import os
 import re
 import string
 import sys
-# Use matplotlib with Cairo offline backend for eps, pdf, png, or svg output
 import matplotlib as mpl
-# mpl.use('Agg')
-mpl.use('Cairo')
 import matplotlib.gridspec as gridspec
+from matplotlib.ticker import (FormatStrFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 import matplotlib.lines as mpllines
 import matplotlib.patches as mplpatches
-import matplotlib.pyplot as plt
-from matplotlib.ticker import (
-    FormatStrFormatter, ScalarFormatter, AutoMinorLocator, MultipleLocator)
 from matplotlib import cm
+# We do not want any interactive plotting! Figures are saved to files instead.
+# This also avoids the ANNOYANCE of frequently missing Tkinter/tkinter (python2/3) GUI backends!
+# To produce scalable graphics for publication use eps, pdf, or svg as file format.
+# For this to work we try the Cairo backend, which can do all of these plus the raster format png.
+# If this is not usable, we fall back to the Agg backend capable only of png for nice web plots.
+#ngbackends = mpl.rcsetup.non_interactive_bk
+#print('[fastnnlo_scaleunc]: Non GUI backends are: ', ngbackends)
+# 1st try cairo
+backend = 'cairo'
+usecairo = True
+try:
+    import cairocffi as cairo
+except ImportError:
+    try:
+        import cairo
+    except ImportError:
+        usecairo = False
+#        print('[fastnnlo_scaleunc]: Can not use cairo backend :-(')
+#        print('                   cairocffi or pycairo are required to be installed')
+    else:
+        if cairo.version_info < (1, 11, 0):
+            # Introduced create_for_data for Py3.
+            usecairo = False
+#            print('[fastnnlo_scaleunc]: Can not use cairo backend :-(')
+#            print('                   cairo {} is installed; cairo>=1.11.0 is required'.format(cairo.version))
+if usecairo:
+    mpl.use('cairo')
+else:
+    backend = 'agg'
+    useagg = True
+    try:
+        mpl.use(backend, force=True)
+        print('[fastnnlo_scaleunc]: Warning! Could not import cairo backend :-( Using agg instead for raster plots only!')
+    except:
+        useagg = False
+        print('[fastnnlo_scaleunc]: Can not use agg backend :-(')
+        raise ImportError('[fastnnlo_scaleunc]: Neither cairo nor agg backend found :-( Cannot produce any plots. Good bye!')
+    mpl.use('agg')
+import matplotlib.pyplot as plt
 # numpy
 import numpy as np
-# fastNLO for direct evaluation of interpolation grid
+# fastNLO for direct evaluation of interpolation grids
+# ATTENTION: fastNLO python extension is required for Python 3!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
+#import warnings
+#warnings.filterwarnings("error")
 
 # params = {'xtick.labelsize':'large',
 #          'xtick.major.size': 5,
@@ -48,22 +89,24 @@ from fastnlo import SetGlobalVerbosity
 # exit(1)
 
 # Redefine ScalarFormatter
-
-
 class ScalarFormatterForceFormat(ScalarFormatter):
     # Override function that finds format to use.
     def _set_format(self, vmin, vmax):
         self.format = "%1.2f"  # Give format here
 
+
 # Action class to allow comma-separated list in options
-
-
 class SplitArgs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
+        if values:
+            setattr(namespace, self.dest, values[0].split(','))
+        else:
+            setattr(namespace, self.dest, [''])
         setattr(namespace, self.dest, values.split(','))
 
 
-# Some global definitions for orders to show
+# Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
@@ -231,6 +274,9 @@ def plotting(x_axis, xmin, xmax, iobs, xs_cn, xs_fl, xs_fu, dxsr_cn, xind, title
 
     fig.tight_layout()
 
+    # Do not use characters defined in _fntrans for filenames
+    filename = filename.translate(_fntrans)
+
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)
         fig.savefig(figname)
@@ -309,7 +355,7 @@ def main():
         print('[fastnnlo_scaledep]: Evaluate table up to highest available order.')
     else:
         for ord in args['order']:
-            if _text_to_order.has_key(ord):
+            if ord in _text_to_order.keys():
                 iorders.append(_text_to_order[ord])
             else:
                 print('[fastnnlo_scaledep]: Illegal order specified, aborted!')
@@ -349,7 +395,7 @@ def main():
     if formats is None:
         formats = ['png']
     for fmt in formats:
-        if not _formats.has_key(fmt):
+        if fmt not in _formats.keys():
             print('[fastnnlo_scaledep]: Illegal format specified, aborted!')
             print('[fastnnlo_scaledep]: Format list:', args['format'])
             exit(1)
@@ -379,15 +425,19 @@ def main():
 
     # Loop over table list
     for table in files:
+        # Table name
+        tablepath = os.path.split(table)[0]
+        if not tablepath:
+            tablepath = '.'
+        tablename = os.path.split(table)[1]
+        if tablename.endswith('.tab.gz'):
+            tablename = tablename.replace('.tab.gz', '', 1)
+        elif tablename.endswith('.tab'):
+            tablename = tablename.replace('.tab', '', 1)
+        else:
+            print('[fastnnlo_scaledep]: Error! Wrong extension for table: ', table)
+            exit(1)
         print('[fastnnlo_scaledep]: Analysing table: ', table)
-        # Get rid of extensions (.tab.gz or .tab)
-        # Replace .tab or .tab.gz with .dat to also load NNLOJET results
-        #tablename = os.path.splitext(os.path.basename(table))[0]
-        #tablename = os.path.splitext(tablename)[0]
-        if table.endswith('.tab.gz'):
-            tablename = string.replace(table, '.tab.gz', '', 1)
-        elif table.endswith('.tab'):
-            tablename = string.replace(table, '.tab', '', 1)
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -540,7 +590,7 @@ def main():
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
-                    datfile = sep.join(parts) + '.dat'
+                    datfile = tablepath + '/' + sep.join(parts) + '.dat'
                     datfilenames.append(datfile)
 
             lstat = (len(datfilenames) > 0)

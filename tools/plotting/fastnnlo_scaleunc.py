@@ -68,7 +68,7 @@ import matplotlib.pyplot as plt
 # numpy
 import numpy as np
 # fastNLO for direct evaluation of interpolation grids
-# TODO: Currently installed only for Python 2!
+# ATTENTION: fastNLO python extension is required for Python 3!
 import fastnlo
 from fastnlo import fastNLOLHAPDF
 from fastnlo import SetGlobalVerbosity
@@ -93,6 +93,8 @@ class SplitArgs(argparse.Action):
 
 
 # Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
+_sntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': '', '/': '÷'}) # Scalename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
@@ -238,15 +240,15 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_scale_unc, abs_scale_unc, dxsr_cn, 
 
     if given_filename is not None:
         filename = '%s.scaleunc-%s.%s.%s' % (given_filename,
-                                             vartype, ordernames[1:], scale_name)
+                                             vartype, ordernames[1:], scale_name.translate(_sntrans))
     else:
         filename = '%s.scaleunc-%s.%s.%s.%s' % (
-            tablename, vartype, ordernames[1:], pdfset, scale_name)
+            tablename, vartype, ordernames[1:], pdfset, scale_name.translate(_sntrans))
         if not nostat:
             filename = filename+'.stat'
 
-    # Eliminate possible [] around units to avoid problems with filenames
-    filename = re.sub(r'[\[\]]','',filename)
+    # Do not use characters defined in _fntrans for filenames
+    filename = filename.translate(_fntrans)
 
     for fmt in formats:
         figname = '%s.%s' % (filename, fmt)
@@ -397,10 +399,19 @@ def main():
 
     # Loop over table list
     for table in files:
+        # Table name
+        tablepath = os.path.split(table)[0]
+        if not tablepath:
+            tablepath = '.'
+        tablename = os.path.split(table)[1]
+        if tablename.endswith('.tab.gz'):
+            tablename = tablename.replace('.tab.gz', '', 1)
+        elif tablename.endswith('.tab'):
+            tablename = tablename.replace('.tab', '', 1)
+        else:
+            print('[fastnnlo_scaleunc]: Error! Wrong extension for table: ', table)
+            exit(1)
         print('[fastnnlo_scaleunc]: Analysing table: ', table)
-        # Get rid of extensions (.tab.gz or .tab)
-        tablename = os.path.splitext(os.path.basename(table))[0]
-        tablename = os.path.splitext(tablename)[0]
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -507,7 +518,7 @@ def main():
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
-                    datfile = sep.join(parts) + '.dat'
+                    datfile = tablepath + '/' + sep.join(parts) + '.dat'
                     datfilenames.append(datfile)
 
             lstat = (len(datfilenames) > 0)

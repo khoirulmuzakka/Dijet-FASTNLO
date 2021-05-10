@@ -665,7 +665,7 @@ void fastNLOCreate::SetScenConstsDefaults() {
    fScenConsts.CenterOfMassEnergy = 7000.;
    fScenConsts.PDF1 = 2212;
    fScenConsts.PDF2 = 2212;
-   fScenConsts.OutputFilename = "table";
+   fScenConsts.OutputFilename = "fastnlo";
    fScenConsts.OutputPrecision = 8;
 #ifdef HAVE_LIBZ
    fScenConsts.OutputCompression = true;
@@ -678,13 +678,13 @@ void fastNLOCreate::SetScenConstsDefaults() {
    fScenConsts.FlexibleScaleTable = false;
    fScenConsts.NFlexScales = 2;
    fScenConsts.FlexConstScale2 = PDG_MZ;
-   fScenConsts.InclusiveJets = false;
-   fScenConsts.ReduceXmin = 0.;
    fScenConsts.ScaleVariationFactors.clear();
    fScenConsts.ReadBinningFromSteering = false;
    fScenConsts.IgnoreWarmupBinningCheck = false;
    fScenConsts.ApplyPDFReweighting = true;
    fScenConsts.CheckScaleLimitsAgainstBins = true;
+   fScenConsts.InclusiveJets = false;
+   fScenConsts.ReduceXmin = 0.;
    fScenConsts.X_Kernel = "Lagrange";
    fScenConsts.X_DistanceMeasure = "sqrtlog10";
    fScenConsts.X_NNodes = 15;

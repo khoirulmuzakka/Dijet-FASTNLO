@@ -92,13 +92,16 @@ class SplitArgs(argparse.Action):
 
 
 # Some global definitions
+_fntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': ''}) # Filename translation table
+_sntrans = str.maketrans({'[': '', ']': '', '(': '', ')': '', ',': '', '/': '÷'}) # Scalename translation table
 _formats = {'eps': 0, 'pdf': 1, 'png': 2, 'svg': 3}
 _text_to_order = {'LO': 0, 'NLO': 1, 'NNLO': 2}
 _order_to_text = {0: 'LO', 1: 'NLO', 2: 'NNLO'}
 _order_color = {'LO': 'g', 'NLO': 'b', 'NNLO': 'r'}
 #_colors = ['tab:orange', 'tab:green', 'tab:purple', 'tab:blue', 'tab:brown']
 #_colors         = ['darkorange', 'limegreen', 'mediumpurple', 'steelblue', 'saddlebrown']
-_colors = ['orange', 'blue', 'green', 'purple', 'brown']
+#_colors = ['orange', 'blue', 'green', 'purple', 'brown']
+_colors = ['orange', 'green', 'purple', 'blue', 'brown']
 #_symbols = ['s', 'X', 'o', '^', 'v']
 _symbols = ['s', 'x', 'o', '^', 'v']
 _hatches = ['-', '//', '\\', '|', '.']
@@ -223,7 +226,7 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         ax2 = plt.subplot(gs[2, :], sharex=ax1)
         # Set common x axis bounds for both
         ax2.set_xlim(left=xmin, right=xmax)
-        ax2.set_ylim(0.85, 1.15)
+#        ax2.set_ylim(0.85, 1.15)
 #        ax2.get_xaxis().set_minor_formatter(axfmt)
         ax2.set_yscale('linear', nonposy='clip')
 #        ax2.set_yscale('log', nonposy='clip')
@@ -267,16 +270,16 @@ def plotting(x_axis, xmin, xmax, xs_all, rel_pdf_unc, abs_pdf_unc, dxsr_cn, nost
         ordernames += '_%s' % order_item
 
         if given_filename is not None:
-            filename = '%s.pdfunc-%s.%s' % (given_filename,
-                                            order_item, pdffilenames[1:])
+            filename = '%s.pdfunc-%s.%s.%s' % (given_filename,
+                                               order_item, pdffilenames[1:], scale_name.translate(_sntrans))
         else:
             filename = '%s.pdfunc-%s.%s.%s' % (tablename,
-                                               order_item, pdffilenames[1:], scale_name)
+                                               order_item, pdffilenames[1:], scale_name.translate(_sntrans))
             if not nostat:
                 filename = filename+'.stat'
 
-        # Eliminate possible [] around units to avoid problems with filenames
-        filename = re.sub(r'[\[\]]','',filename)
+        # Do not use characters defined in _fntrans for filenames
+        filename = filename.translate(_fntrans)
 
         for fmt in formats:
             figname = '%s.%s' % (filename, fmt)
@@ -429,10 +432,19 @@ def main():
 
     # Loop over table list
     for table in files:
+        # Table name
+        tablepath = os.path.split(table)[0]
+        if not tablepath:
+            tablepath = '.'
+        tablename = os.path.split(table)[1]
+        if tablename.endswith('.tab.gz'):
+            tablename = tablename.replace('.tab.gz', '', 1)
+        elif tablename.endswith('.tab'):
+            tablename = tablename.replace('.tab', '', 1)
+        else:
+            print('[fastnnlo_pdfunc]: Error! Wrong extension for table: ', table)
+            exit(1)
         print('[fastnnlo_pdfunc]: Analysing table: ', table)
-        # Get rid of extensions (.tab.gz or .tab)
-        tablename = os.path.splitext(os.path.basename(table))[0]
-        tablename = os.path.splitext(tablename)[0]
 
         ###################### Start EVALUATION with fastNLO library ###################################################
         # SetGlobalVerbosity(0) # Does not work since changed to default in the following call
@@ -535,7 +547,7 @@ def main():
                 for order in order_list:
                     parts = tablename.split(sep)
                     parts[1] = order
-                    datfile = sep.join(parts) + '.dat'
+                    datfile = tablepath + '/' + sep.join(parts) + '.dat'
                     datfilenames.append(datfile)
 
             lstat = (len(datfilenames) > 0)

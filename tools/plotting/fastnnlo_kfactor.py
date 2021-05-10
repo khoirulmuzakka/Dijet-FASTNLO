@@ -45,16 +45,25 @@ def main():
     parser.add_argument('-f', '--filename', default=None, type=str,
                         help='Output filename (optional).')
 
-    # parse arguemnts
+    # Parse arguemnts
     args = vars(parser.parse_args())
 
-    # table name
-    tablename = os.path.splitext(os.path.basename(args['table']))[0]
-    # to get rid of extension (.tab.gz or .tab)
-    tablename = os.path.splitext(tablename)[0]
-    print 'Table: ', tablename, '\n'
+    # Table name
+    table = args['table']
+    tablepath = os.path.split(table)[0]
+    if not tablepath:
+        tablepath = '.'
+    tablename = os.path.split(table)[1]
+    if tablename.endswith('.tab.gz'):
+        tablename = tablename.replace('.tab.gz', '', 1)
+    elif tablename.endswith('.tab'):
+        tablename = tablename.replace('.tab', '', 1)
+    else:
+        print('[fastnnlo_kfactor]: Error! Wrong extension for table: ', table)
+        exit(1)
+    print('[fastnnlo_kfactor]: Analysing table: ', table)
 
-    # pdfset name
+    # PDF set name
     pdfset = os.path.basename(args['pdfset'])
     pdfname = os.path.splitext(pdfset)[0]
     print 'PDF Set: ', pdfname, '\n'
@@ -102,7 +111,7 @@ def main():
         allplots = True
 
     ############### Start EVALUATION with fastNLO library ###################################
-    fnlo = fastnlo.fastNLOLHAPDF(args['table'], args['pdfset'], args['member'])
+    fnlo = fastnlo.fastNLOLHAPDF(table, args['pdfset'], args['member'])
 
     # Dictionary containing the fastNLO settings for certain orders
     orders = {'LO': [True, False, False], 'NLO': [
@@ -260,7 +269,8 @@ def main():
     plt.tight_layout()
     fig0.tight_layout()
 
-    # naming of the plot		##include more information on process etc here!!
+    # naming of the plot
+    ##include more information on process etc here!!
     if args['filename'] is not None:
         plotname = '%s_kfactor.png' % args['filename']
     else:

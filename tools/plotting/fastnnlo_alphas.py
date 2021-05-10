@@ -171,15 +171,20 @@ def main():
     args = vars(parser.parse_args())
 
     # Table name
-    tablename = os.path.splitext(os.path.basename(args['table']))[0]
-    # to get rid of extension (.tab.gz or .tab)
-    tablename = os.path.splitext(tablename)[0]
+    table = args['table']
+    if table.endswith('.tab.gz'):
+        tablename = table.replace('.tab.gz', '', 1)
+    elif table.endswith('.tab'):
+        tablename = table.replace('.tab', '', 1)
+    else:
+        print '[fastnnlo_alphas]: Error! Wrong extension for table: ', table
+        exit(1)
     print '\n'
-    print '[fastnnlo_alphas]: Analysing table:	', tablename
+    print '[fastnnlo_alphas]: Analysing table: ', table
 
     # PDF set name
     pdfset = os.path.basename(args['pdfset'])
-    print '[fastnnlo_alphas]: Using PDF set:	', pdfset
+    print '[fastnnlo_alphas]: Using PDF set: ', pdfset
 
     # Orders to be shown
     iorders = []
@@ -208,7 +213,7 @@ def main():
     ###################################### Start EVALUATION with fastNLO library #################################################
     # Take the general information (bin_bounds, labels, order_existence, etc.) from first given pdfset.
     # use fastNLOALphas() instead of fastNLOLHAPDF() in order to change alpha_s
-    fnlo = fastnlo.fastNLOAlphas(args['table'], pdfset, args['member'])
+    fnlo = fastnlo.fastNLOAlphas(table, pdfset, args['member'])
 
     # Get labeling for the x-axis
     # Dimensionality of the table:

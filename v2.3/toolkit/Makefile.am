@@ -26,10 +26,11 @@ dist-hook:
 # Installation of DOXYGEN documentation
 # Docu is not remade anymore at each occasion!
 # To be sure to have the actual one, do a 'make clean' first
+# Include extra files even when doxygen not present on current system
+EXTRA_DIST += aminclude.am doxygen.cfg
 if HAVE_DOXYGEN
 if DX_COND_doc
 include aminclude.am
-EXTRA_DIST += aminclude.am doxygen.cfg
 all-local-doxygen: doxygen-run doxygen-pdf
 	touch doc/doxygen/fastnlo_toolkit.tag
 	touch doc/doxygen/fastnlo_toolkit.pdf

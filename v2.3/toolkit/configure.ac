@@ -461,7 +461,7 @@ if test "x$with_root" != "xno"; then
    else
       AC_PATH_PROG([ROOTBIN],[root-config],[],[$ROOTSYS/bin])
       if test "x$ROOTBIN" = "x"; then
-         AC_MSG_ERROR([root-config not found in ROOTSYS/bin path to $TMPNAM! Configuration aborted!])
+         AC_MSG_ERROR([root-config not found in $ROOTSYS/bin path to $TMPNAM! Configuration aborted!])
       fi
    fi
    AC_MSG_NOTICE([******************************************])
@@ -628,13 +628,24 @@ AC_ARG_ENABLE([pyext],
         [Optionally build Python module to interface C++ library. Default is no.])],
         [],
         [enable_pyext="no"])
+AC_ARG_ENABLE([pyext3],
+        [AC_HELP_STRING([--enable-pyext3],
+        [Optionally build Python3 module to interface C++ library. Default is no. Overrides enable_pyext.])],
+        [],
+        [enable_pyext3="no"])
 # Basic Python checks
-if test "x$enable_pyext" = "xyes"; then
-   AX_PYTHON_DEVEL([>='2.3.1'])
-   AM_PATH_PYTHON
+if test "x$enable_pyext3" = "xyes"; then
+   AM_PATH_PYTHON([3])
+   AX_PYTHON_DEVEL
+else
+   if test "x$enable_pyext" = "xyes"; then
+      AM_PATH_PYTHON
+      AX_PYTHON_DEVEL([>='2.3.1'])
+   fi
 fi
+
 # Check on existence of SWIG to interface to Python
-if test "x$enable_pyext" = "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
+if test \( "x$enable_pyext" = "xyes" -o "x$enable_pyext3" = "xyes" \) -a ! -e pyext/FastNLOReader_wrap.cpp; then
    AC_PATH_PROG(SWIG, swig)
    if test "x$SWIG" =  "x"; then
       AC_MSG_ERROR([swig not found, interfacing to Python not possible! Please install swig first or disable Python extension. Configuration aborted!])
@@ -642,14 +653,21 @@ if test "x$enable_pyext" = "xyes" -a ! -e pyext/FastNLOReader_wrap.cpp; then
       AC_MSG_NOTICE([swig found, interface to Python possible.])
    fi
 fi
+
 AC_MSG_NOTICE([******************************************])
-if test "x$enable_pyext" = "xyes"; then
-   AC_MSG_NOTICE([All Python checks successful. Requested Python extension will be built.])
+
+if test "x$enable_pyext3" = "xyes"; then
+   AC_MSG_NOTICE([All Python3 checks successful. Requested Python3 extension will be built.])
 else
-   AC_MSG_NOTICE([No Python extension requested. Continue without pyext.])
+   if test "x$enable_pyext" = "xyes"; then
+      AC_MSG_NOTICE([All Python checks successful. Requested Python extension will be built.])
+   else
+      AC_MSG_NOTICE([No Python extension requested. Continue without pyext.])
+   fi
 fi
+
 AC_MSG_NOTICE([******************************************])
-AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes"])
+AM_CONDITIONAL(ENABLE_PYEXT, [test "x$enable_pyext" = "xyes" -o "x$enable_pyext3" = "xyes"])
 
 # Fortran extension
 AC_MSG_NOTICE([******************************************])

@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
       shout["fnlo-tk-yodaout"] << "For an explanation of command line arguments type:" << endl;
       shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
       shout["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
-      shout["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
+      shout["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -v" << endl;
       yell << _CSEPSC << endl;
       exit(1);
    } else {
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
       info["fnlo-tk-yodaout"] << "For more explanations type:" << endl;
       info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -h" << endl;
       info["fnlo-tk-yodaout"] << "For version number printout type:" << endl;
-      info["fnlo-tk-yodaout"] << "./fnlo-tk-rootout -v" << endl;
+      info["fnlo-tk-yodaout"] << "./fnlo-tk-yodaout -v" << endl;
       yell << _CSEPSC << endl;
       yell << "" << endl;
       //! --- Usage info
@@ -117,10 +117,12 @@ int main(int argc, char** argv) {
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
          man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
-         man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
-         man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
+         man << "   Default:      \"kScale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"kScale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
-         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1," << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2," << endl;
+         man << "                 \"kQuadraticSum\", i.e. mur=muf=sqrt(scale1^2+scale2^2)." << endl;
          man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"np\"" << endl;
          man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
@@ -133,6 +135,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-yodaout"] << "Evaluating table: "  <<  tablename << endl;
       }
    }
+
    //! --- PDF choice
    string PDFFile = "X";
    if (argc > 2) {
@@ -148,6 +151,7 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-yodaout"] << "Using PDF set   : " << PDFFile << endl;
    }
+
    //! --- Uncertainty choice
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
@@ -200,6 +204,7 @@ int main(int argc, char** argv) {
          exit(1);
       }
    }
+
    //! --- Fixed-order choice
    ESMOrder eOrder = kNextToLeading;
    string chord = "NLO";
@@ -240,14 +245,13 @@ int main(int argc, char** argv) {
       chnorm = (const char*) argv[5];
    }
    if (argc <= 5 || chnorm == "_") {
-      chnorm = "no";
-      shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections," << endl;
+      shout["fnlo-tk-yodaout"] << "Preparing unnormalized cross sections." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Normalizing cross sections. " << endl;
    }
 
    //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
-   string chflex = "scale1";
+   string chflex = "kScale1";
    if (argc > 6) {
       chflex = (const char*) argv[6];
    }
@@ -255,7 +259,7 @@ int main(int argc, char** argv) {
       chflex = "scale1";
       shout["fnlo-tk-yodaout"] << "Using default mur=muf=scale 1." << endl;
    } else {
-      shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex << endl;
+      shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex+"." << endl;
    }
 
    //! --- Nonperturbative correction
@@ -303,18 +307,20 @@ int main(int argc, char** argv) {
       SetGlobalVerbosity(WARNING);
    }
 
-   //! --- fastNLO initialisation, read & evaluate table
-   //! Initialise a fastNLO instance with interface to LHAPDF
+   //! --- fastNLO initialisation, attach table
+   fastNLOTable table = fastNLOTable(tablename);
+   //! Print essential table information
+   table.PrintContributionSummary(0);
+
+   //! Initialise a fastNLO reader instance
    //! Note: This also initializes the cross section to the LO/NLO one!
    fastNLOLHAPDF* fnlo = NULL;
    if ( chunc != "AS" ) {
-      fnlo = new fastNLOLHAPDF(tablename,PDFFile,0);
+      fnlo = new fastNLOLHAPDF(table,PDFFile,0);
    } else {
+      //! Need to reopen here with Alphas interface instead of LHAPDF
       fnlo = new fastNLOAlphas(tablename,PDFFile,0);
    }
-
-   //! Print essential table information
-   fnlo->PrintContributionSummary(0);
 
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
@@ -333,6 +339,7 @@ int main(int argc, char** argv) {
          fnlo->SetContributionON(kFixedOrder, ilo, true);
       }
    }
+   unsigned int nOrder = 1;
    //! Check on existence of NLO (Id = -1 if not existing)
    int inlo  = fnlo->ContrId(kFixedOrder, kNextToLeading);
    if (inlo < 0) {
@@ -350,6 +357,7 @@ int main(int argc, char** argv) {
       } else {
          fnlo->SetContributionON(kFixedOrder, inlo, false);
       }
+      nOrder = 2;
    }
    //! Check on existence of NNLO (Id = -1 if not existing)
    int innlo = fnlo->ContrId(kFixedOrder, kNextToNextToLeading);
@@ -368,7 +376,10 @@ int main(int argc, char** argv) {
       } else {
          fnlo->SetContributionON(kFixedOrder, innlo, false);
       }
+      nOrder = 3;
    }
+   string sOrder = _OrdName[kFixedOrder][nOrder-1];
+
    //! Check on existence of non-perturbative corrections from LO MC
    int inpc1 = fnlo->ContrId(kNonPerturbativeCorrection, kLeading);
    if (inpc1 > -1 && (chnp == "yes" || chnp == "np" ) ) {
@@ -408,30 +419,24 @@ int main(int argc, char** argv) {
    //! Possibility to redefine primary scale Q for mu_r and mu_f from the up to two stored scales
    //! Default choice is the first scale via enum 'kScale1'
    if (fnlo->GetIsFlexibleScaleTable()) {
-      if ( chflex == "scale1" ) {
+      if ( chflex == "kScale1" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table. "
-                                 << "Please check how this table was filled!" << endl;
-      } else if ( chflex == "scale2" ) {
+      } else if ( chflex == "kScale2" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table. "
-                                 << "Please check how this table was filled!" << endl;
       } else if ( chflex == "scale12" ) {
          fnlo->SetMuFFunctionalForm(kScale2);
          fnlo->SetMuRFunctionalForm(kScale1);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu1 is derived "
-                                 << "from only the first scale of this flexible-scale table. "
-                                 << "Please check how this table was filled!" << endl;
       } else if ( chflex == "scale21" ) {
          fnlo->SetMuFFunctionalForm(kScale1);
          fnlo->SetMuRFunctionalForm(kScale2);
-         info["fnlo-tk-yodaout"] << "The average scale reported in this example as mu2 is derived "
-                                 << "from only the second scale of this flexible-scale table. "
-                                 << "Please check how this table was filled!" << endl;
+      } else if ( chflex == "kProd" ) {
+         fnlo->SetMuFFunctionalForm(kProd);
+         fnlo->SetMuRFunctionalForm(kProd);
+      } else if ( chflex == "kQuadraticSum" ) {
+         fnlo->SetMuFFunctionalForm(kQuadraticSum);
+         fnlo->SetMuRFunctionalForm(kQuadraticSum);
       } else {
          error["fnlo-tk-yodaout"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
       }
@@ -458,7 +463,7 @@ int main(int argc, char** argv) {
       LineName += "_dxst";
    } else if ( chunc != "none" ) {
       XsUnc = fnlo->GetPDFUncertainty(ePDFUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative PDF uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s %s)",chord.c_str(),PDFFile.c_str(),chunc.c_str());
       LineName += "_dxpdf";
    } else {
       XsUnc = fnlo->GetScaleUncertainty(kScaleNone, lNorm);
@@ -525,13 +530,12 @@ int main(int argc, char** argv) {
    }
 
    //! --- Naming the file (and the legend line!) according to calculation order, PDF, and uncertainty choice
-   //   string TabName = tablename.substr(0, tablename.size() - 4);
    string PDFName  = PDFFile.substr(0, min(11,(int)PDFFile.size()) );
-   //   string FileName = chord + "_" + PDFName + "_" + chunc + "_" + chnorm + "_" + chnp;
    string FileName = PDFName;
    if ( chord  != "_" ) {FileName = chord + "_" + PDFName;}
-   if ( chunc  != "_" ) {FileName += "_" + chunc;}
+   if ( chunc  != "none" ) {FileName += "_" + chunc;}
    if ( chnorm != "_" ) {FileName += "_" + chnorm;}
+   if ( chflex != "_" ) {FileName += "_" + chflex;}
    if ( chnp   != "_" ) {FileName += "_" + chnp;}
    LineName = chord + "_" + PDFName + LineName;
 

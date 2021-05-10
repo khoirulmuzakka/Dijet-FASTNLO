@@ -122,10 +122,12 @@ int main(int argc, char** argv) {
          man << "[norm]: Normalize if applicable, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"norm\"" << endl;
          man << "[flexscale]: Central scale choice for flex-scale tables." << endl;
-         man << "   Default:      \"scale1\",  i.e. mur=muf=scale1," << endl;
-         man << "   Alternatives: \"scale2\",  i.e. mur=muf=scale2," << endl;
+         man << "   Default:      \"kScale1\",  i.e. mur=muf=scale1," << endl;
+         man << "   Alternatives: \"kScale2\",  i.e. mur=muf=scale2," << endl;
          man << "                 \"scale12\", i.e. mur=scale1, muf=scale2," << endl;
-         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1." << endl;
+         man << "                 \"scale21\", i.e. mur=scale2, muf=scale1," << endl;
+         man << "                 \"kProd\", i.e. mur=muf=scale1*scale2," << endl;
+         man << "                 \"kQuadraticSum\", i.e. mur=muf=sqrt(scale1^2+scale2^2)." << endl;
          man << "[Nf]: Set no. of flavours to use in alpha_s evolution, def. = 5" << endl;
          man << "   Alternatives: 3,4,6, and 0 i.e. Nf matching at thresholds." << endl;
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
@@ -244,7 +246,7 @@ int main(int argc, char** argv) {
    }
 
    //--- Scale choice (flex-scale tables only; ignored for fix-scale tables)
-   string chflex;
+   string chflex = "kScale1";
    if (argc > 6) {
       chflex = (const char*) argv[6];
    }
@@ -1146,13 +1148,13 @@ int main(int argc, char** argv) {
             continue;
          }
          if (fnlo->GetIsFlexibleScaleTable()) {
-            if ( chflex == "scale1" ) {
+            if ( chflex == "kScale1" ) {
                fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale1);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                       << "from only the first scale of this flexible-scale table. "
-                                       << "Please check how this table was filled!" << endl;
-            } else if ( chflex == "scale2" ) {
+                                       << "from only the first scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "kScale2" ) {
                fnlo->SetMuFFunctionalForm(kScale2);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
@@ -1168,8 +1170,14 @@ int main(int argc, char** argv) {
                fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
-                                       << "from only the second scale of this flexible-scale table. "
-                                       << "Please check how this table was filled!" << endl;
+                                       << "from only the second scale of this flexible-scale table." << endl
+                                       << "                        Please check how this table was filled!" << endl;
+            } else if ( chflex == "kProd" ) {
+               fnlo->SetMuFFunctionalForm(kProd);
+               fnlo->SetMuRFunctionalForm(kProd);
+            } else if ( chflex == "kQuadraticSum" ) {
+               fnlo->SetMuFFunctionalForm(kQuadraticSum);
+               fnlo->SetMuRFunctionalForm(kQuadraticSum);
             } else {
                error["fnlo-tk-cppread"] << "Unknown scale choice " << chflex << ", aborted!" << endl;
                exit(1);

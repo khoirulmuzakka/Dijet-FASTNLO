@@ -149,27 +149,33 @@ if ( $#argv < 2 ) then
    echo ""
    echo "#=============================================================================="
    echo "Usage: $0 basedir [optional_argument_2] [optional_argument_3] ..."
-   echo " 1st argument: Base dir for installations, absolute path to e.g. ${HOME}/local"
-   echo " 2nd optional argument: Base path to additional software to be taken from cvmfs,"
-   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481."
-   echo "                        Set to _ to skip this setting."
-   echo " 3rd optional argument: Sub path to GCC setup script in cvmfs software distribution."
-   echo "                        The minimally required version is gcc 4.8.1!"
-   echo "                        e.g. external/gcc/4.8.1/etc/profile.d/init"
-   echo "                        (.csh or .sh are added automatically)."
-   echo "                        Set to _ to skip this setting."
-   echo " 4th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
-   echo " 5th optional argument: Include grid creation with NNLOJET? def.=0"
-   echo " 6th optional argument: Include optional packages for grid evaluation? def.=0"
-   echo " 7th optional argument: Include optional python extensions to packages? def.=0"
-   echo " 8th optional argument: Include ROOT 5 (gcc<v5) or 6 (def.=0, alt.=[5,6] or"
-   echo "                        give path to desired bin/root-config in cvmfs,"
-   echo "                        e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt"
-   echo " 9th optional argument: Include LHAPDF6 from CVMFS (def.=0, or "
-   echo "                        give path to desired bin/lhapdf-config in cvmfs"
-   echo "                        e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481/external/lhapdf6/6.1.5"
-   echo "10th optional argument: No. of cores to be used, def.=8"
-   echo "11th optional argument: Activate multithread integrations for NNLOJET standalone installation, def. = 0"
+   echo "  1st argument: Base dir for installations, absolute path to e.g. ${HOME}/local"
+   echo "  2nd optional argument: Base path to additional software to be taken from cvmfs,"
+   echo "                         e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc700"
+   echo "                         or   /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8"
+   echo "                         Set to _ to only use your local system and skip this setting."
+   echo "  3rd optional argument: Sub path to GCC setup script in cvmfs software distribution."
+   echo "                         The minimally required version is gcc 4.8.1(!)"
+   echo "                         e.g. external/gcc/7.0.0-omkpbe2/etc/profile.d/init"
+   echo "                         or   x86_64-slc6/setup"
+   echo "                         (.csh or .sh are added automatically)."
+   echo "                         Set to _ to use your system compiler and skip this setting."
+   echo "  4th optional argument: Include LHAPDF6 from CVMFS? def.=0"
+   echo "                         By default this script installs its own version of LHAPDF."
+   echo "                         Give path to desired bin/lhapdf-config in cvmfs to try using another one,"
+   echo "                         e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481/external/lhapdf6/6.1.5"
+   echo "  5th optional argument: Include grid creation with NLOJet++? def.=1"
+   echo "  6th optional argument: Include grid creation with NNLOJET? def.=0"
+   echo "  7th optional argument: Include grid creation with Sherpa+MCgrid? def.=0"
+   echo "  8th optional argument: Include optional packages for grid evaluation? def.=0"
+   echo "  9th optional argument: Include optional python extensions to packages? def.=0"
+   echo " 10th optional argument: Include ROOT extensions to packages (def.=0, alt.=[5,6] or"
+   echo "                         give path to bin/root-config of preinstalled ROOT)"
+   echo "                         0: no ROOT, 5: try src install of ROOT 5 (gcc <= v5), 6: try src install of ROOT 6"
+   echo "                         (requires cmake), path: try preinstalled ROOT by giving path to bin/root-config"
+   echo "                         e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt"
+   echo " 11th optional argument: No. of cores to be used, def.=8"
+   echo " 12th optional argument: Activate multithread integrations for NNLOJET standalone installation, def. = 0"
    echo "#=============================================================================="
    echo ""
    exit 0
@@ -200,57 +206,10 @@ else
 endif
 # gcc from CMVFS (e.g. external/gcc/4.8.1/etc/profile.d/init.[c]sh)?
 set gccsetup="_"
-if ( $#argv > 2 ) then
+if ( $#argv > 2 && $3 != "_" ) then
    set gccsetup=$3
 endif
 echo "gcc setup: $tab$tab $gccsetup"
-# With interface to Sherpa via MCGrid?
-set withsherpa=0
-if ( $#argv > 3 ) then
-   set withsherpa=$4
-endif
-echo "Sherpa usage: $tab$tab $withsherpa"
-# With interface to NNLOJET? Attention! NNLOJET is not yet publically available!
-set withnnlojet=0
-if ( $#argv > 4 ) then
-   set withnnlojet=$5
-# Previous: set revision=3738
-# Used for fnl2332d:       set revision=4585
-# Bug in Z+jet RV channel: set revision=4708
-   set revision=5088
-endif
-echo "NNLOJET usage: $tab$tab $withnnlojet"
-# With optional packages for grid evaluation?
-set withoptional=0
-if ( $#argv > 5 ) then
-   set withoptional=$6
-endif
-echo "Optional packages: $tab $withoptional"
-# With optional Python extensions? On some systems compile errors occur!
-# Note: Python is quite useful for evaluating or preparing results, but
-#       not required for mass production on compute clusters.
-# BUT: BlackHat needs Python!
-set withpython=0
-if ( $#argv > 6 ) then
-   set withpython=$7
-endif
-echo "Python support: $tab $withpython"
-# Install optional ROOT extensions? On some systems compile errors occur!
-# Note: ROOT is quite useful for evaluating or preparing results, but
-#       not required for mass production on compute clusters.
-# BUT:  APPLgrid requires ROOT!
-# Dare to try ROOT from cvmfs, e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt ?
-set rootbasepath="${base}/root"
-set rootbinpath="${base}/root/bin"
-set withroot=0
-set withcvmfsroot=0
-if ( $#argv > 7 && $8 != "_") then
-   set withroot=$8
-   if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
-      set withcvmfsroot=$withroot
-   endif
-endif
-echo "ROOT support: $tab$tab $withroot"
 # Use CVMFS software repository also for LHAPDF if requested
 # Do NOT use 6.2.1. This CVMFS installation is buggy and does not find the PDF sets!
 # Dare to try LHAPDF from cvmfs, e.g. external/lhapdf6/6.1.5/bin?
@@ -258,15 +217,79 @@ set lhapdfbasepath="${base}"
 set lhapdfbinpath="${base}/bin"
 #set lhapdfdatapath="${base}"
 set withcvmfslhapdf=0
-if ( $#argv > 8 && $9 != "_" ) then
-   set withcvmfslhapdf=$9
+if ( $#argv > 3 && $4 != "_" ) then
+   set withcvmfslhapdf=$4
 endif
 echo "LHAPDF from CVMFS: $tab $withcvmfslhapdf"
-# Do we have paths in cvmfs?
-if ( $withcvmfsroot != "0" ) then
-   set rootbasepath="${withcvmfsroot}"
+#
+# Interfaces
+#
+# With interface to NLOJet++?
+set withnlojetpp=1
+if ( $#argv > 4 && $5 != "_" ) then
+   set withnlojetpp=$5
+endif
+echo "NLOJet++ usage: $tab$tab $withnlojetpp"
+# With interface to NNLOJET? Attention! NNLOJET is not yet publically available!
+set withnnlojet=0
+if ( $#argv > 5 && $6 != "_" ) then
+   set withnnlojet=$6
+# Previous: set revision=3738
+# Used for fnl2332d:       set revision=4585
+# Bug in Z+jet RV channel: set revision=4708
+# Bug in DIS & pp jets VV: set revision=5088
+   set revision=5918
+endif
+echo "NNLOJET usage: $tab$tab $withnnlojet"
+# With interface to Sherpa via MCGrid?
+set withsherpa=0
+if ( $#argv > 6 && $7 != "_" ) then
+   set withsherpa=$7
+endif
+echo "Sherpa usage: $tab$tab $withsherpa"
+#
+# Optional
+#
+# With optional packages for grid evaluation?
+set withoptional=0
+if ( $#argv > 7 && $8 != "_" ) then
+   set withoptional=$8
+endif
+echo "Optional packages: $tab $withoptional"
+
+# With optional Python extensions? On some systems compile errors occur!
+# Note: Python is quite useful for evaluating or preparing results, but
+#       not required for mass production on compute clusters.
+# BUT: BlackHat needs Python!
+set withpython=0
+if ( $#argv > 8 && $9 != "_" ) then
+   set withpython=$9
+endif
+echo "Python support: $tab $withpython"
+
+# With optional ROOT extensions? On some systems compile errors occur!
+# Note: ROOT is quite useful for evaluating or preparing results, but
+#       not required for mass production on compute clusters.
+# BUT:  APPLgrid requires ROOT!
+# Dare to try ROOT from cvmfs, e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt ?
+# Be prepared for trouble when using ROOT!
+set rootbasepath="${base}/root"
+set rootbinpath="${base}/root/bin"
+set withroot=0
+set withextroot=0
+if ( $#argv > 9 && $10 != "_" ) then
+   set withroot=$10
+   if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
+      set withextroot=$withroot
+   endif
+endif
+echo "ROOT support: $tab$tab $withroot"
+# Do we have an extra path to ROOT?
+if ( $withextroot != "0" ) then
+   set rootbasepath="${withextroot}"
    set rootbinpath="${rootbasepath}/bin"
 endif
+
 # BUT LHAPDF version 6.1.6 still uses BOOST, uaargh!
 #        set lhapdfbasepath=${MYCVMFS}/external/lhapdf/6.1.6
 #        set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.1.6
@@ -277,10 +300,10 @@ if ( $withcvmfslhapdf != "0" ) then
 #   set lhapdfdatapath=${MYCVMFS}/external/lhapdf/6.2.1
 endif
 
-# Default is with OpenMPI if either NNLOJET or Sherpa are requested
+# Default is with OpenMPI if Sherpa is requested
 set withmpi=0
 set withmpiinstall=0
-if ( $withsherpa || $withnnlojet ) then
+if ( $withsherpa ) then
    set withmpi=1
    # Default is with OpenMPI installation to ensure proper configuration
    set withmpiinstall=1 # def.=1
@@ -291,32 +314,31 @@ endif
 
 # Number of cores to be used
 set cores=8
-if ( $#argv > 9 ) then
-   set cores=$10
+if ( $#argv > 10 && $11 != "_" ) then
+   set cores=$11
 endif
 echo "No. of cores: $tab$tab $cores"
 
 # Do multithread integrations with NNLOJET?
-set mpinnlo=0
-if ( $#argv > 10 ) then
-   set mpinnlo=$11
+# NNLOJET uses OpenMP, which must be supported by the compiler. It does NOT use OpenMPI.
+set mpnnlo=0
+if ( $#argv > 11 && $12 != "_" ) then
+   set mpnnlo=$12
 endif
-echo "Multithreaded NNLOJET: $tab $mpinnlo"
+echo "Multithreaded NNLOJET: $tab $mpnnlo"
 
-if ( $mpinnlo ) then
+if ( $mpnnlo ) then
    if ( ! $withnnlojet ) then
       echo "ERROR! Please select NNLOJET installation!"
       exit 1
    endif
-   if ( ! $withmpi ) then
-      echo "ERROR! Please select installation with MPI usage!"
-      exit 1
-   endif
+   set withnlojetpp=0
    set withsherpa=0
    set withoptional=0
    set withpython=0
    set withroot=0
-   echo "ATTENTION: Only OpenMPI, LHAPDF, and NNLOJET in multithreaded mode will be installed!"
+   echo "ATTENTION: Only LHAPDF and NNLOJET in multithreaded mode will be installed!"
+   echo "           NNLOJET multithread operations do not (yet) work together with fastNLO grid production."
 endif
 
 # With interface to HERWIG7? Not yet implemented!
@@ -387,14 +409,14 @@ else
 endif
 # $PATH set from now on ...
 #
-# If $withroot equals 5 or 6, use local ROOT installation
+# If $withroot equals 5 or 6, do local ROOT src installation
 if ( $withroot == 5 || $withroot == 6 ) then
    setenv PATH ${rootbinpath}:${PATH}
    echo 'setenv PATH '"${rootbinpath}:"'${PATH}' >> fnlosrc_source.csh
    echo 'export PATH='"${rootbinpath}:"'${PATH}' >> fnlosrc_source.sh
 endif
-# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
-if ( $withcvmfsroot != "0" ) then
+# If $withextroot is set, use the preinstalled ROOT.
+if ( $withextroot != "0" ) then
    set rootoptpath="--with-root=${rootbasepath}"
    set rootenablepath="--enable-root=${rootbasepath}"
    setenv PATH ${rootbinpath}:${PATH}
@@ -407,14 +429,14 @@ if ( $withcvmfslhapdf != "0" ) then
    echo 'setenv PATH '"${lhapdfbinpath}:"'${PATH}' >> fnlosrc_source.csh
    echo 'export PATH='"${lhapdfbinpath}:"'${PATH}' >> fnlosrc_source.sh
 endif
-# Just in case: NNLOJET executable
+# Just in case: NNLOJET executables
 if ( $withnnlojet ) then
    setenv NNLOJET_BIN_PATH ${base}/src/NNLOJET_rev${revision}/driver
-   setenv PATH ${NNLOJET_BIN_PATH}:${PATH}
+   setenv PATH ${NNLOJET_BIN_PATH}:${NNLOJET_BIN_PATH}/bin:${PATH}
    echo 'setenv NNLOJET_BIN_PATH '"${NNLOJET_BIN_PATH}" >> fnlosrc_source.csh
    echo 'export NNLOJET_BIN_PATH='"${NNLOJET_BIN_PATH}" >> fnlosrc_source.sh
-   echo 'setenv PATH ${NNLOJET_BIN_PATH}:${PATH}'       >> fnlosrc_source.csh
-   echo 'export PATH=${NNLOJET_BIN_PATH}:${PATH}'       >> fnlosrc_source.sh
+   echo 'setenv PATH ${NNLOJET_BIN_PATH}:${NNLOJET_BIN_PATH}/bin:${PATH}' >> fnlosrc_source.csh
+   echo 'export PATH=${NNLOJET_BIN_PATH}:${NNLOJET_BIN_PATH}/bin:${PATH}' >> fnlosrc_source.sh
 endif
 echo ""
 echo "ATTENTION: PATH environment complemented!"
@@ -468,11 +490,11 @@ if ( $withroot == 5 || $withroot == 6 ) then
    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 endif
-# If $withcvmfsroot is set, use the ROOT installation from CVMFS.
-if ( $withcvmfsroot != "0" ) then
-    setenv LD_LIBRARY_PATH ${rootbasepath}/lib/root:${LD_LIBRARY_PATH}
-    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
-    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib/root:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
+# If $withextroot is set, use the preinstalled ROOT.
+if ( $withextroot != "0" ) then
+    setenv LD_LIBRARY_PATH ${rootbasepath}/lib:${LD_LIBRARY_PATH}
+    echo 'setenv LD_LIBRARY_PATH '"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.csh
+    echo 'export LD_LIBRARY_PATH='"${rootbasepath}/lib:"'${LD_LIBRARY_PATH}' >> fnlosrc_source.sh
 endif
 # If $withcvmfslhapdf is set, use the LHAPDF installation and PDF sets from CVMFS.
 if ( $withcvmfslhapdf != "0" ) then
@@ -497,14 +519,15 @@ endif
 #
 #
 #==============================================================================
-# Mandatory and sincerely recommended packages
+# Mandatory and/or sincerely recommended packages
 #==============================================================================
 #
 # fastjet (any version >= 3 should work):
 # Use the "--enable-allplugins" options to enable use of e.g. older Tevatron jet algorithms.
 #------------------------------------------------------------------------------
-if ( ! $mpinnlo ) then
-   set arc="fastjet-3.3.0"
+if ( ($withnlojetpp || $withsherpa) && ! $mpnnlo ) then
+#   set arc="fastjet-3.3.0" # Last one ok; test 3.3.4
+   set arc="fastjet-3.3.4"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -519,7 +542,8 @@ endif
 #
 #------------------------------------------------------------------------------
 if ( $withcvmfslhapdf == "0" ) then
-   set arc="LHAPDF-6.2.1"
+#   set arc="LHAPDF-6.2.1"# Test 6.3.0
+   set arc="LHAPDF-6.3.0"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -535,7 +559,7 @@ if ( $withcvmfslhapdf == "0" ) then
          else
             setenv PYTHONPATH ${PYTHONPATHADD}
          endif
-         ${base}/bin/lhapdf install NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
+         ${base}/bin/lhapdf install NNPDF23_nnlo_as_0118 NNPDF31_nlo_as_0118 NNPDF31_nnlo_as_0118 CT14nlo CT14nnlo
       else
          echo ""
          echo "ATTENTION: LHAPDF has been installed without any PDF sets!"
@@ -567,70 +591,113 @@ endif
 # Skip any of these parts that is not desired.
 #==============================================================================
 #
-# Don't try for now to use cvmfs installation of ROOT
-#
 # ROOT (e.g. v5.34.25; optional use by YODA):
 # If Python support is desired, use "--enable-python".
 #------------------------------------------------------------------------------
 # ==> This enables the option --with-root of the fastNLO_toolkit to produce
 #     ROOT histograms from the calculated cross sections and uncertainties
 #
-if ( $withroot == 5 ) then
-#   set arc="root-5.34.25" # OK for gcc versions < 5
-   set arc="root-5.34.26" # Patched thanks to A. Wisecarver
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
-      mv root ${arc}
-   endif
-else if ( $withroot == 6 ) then
-#   set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
-   set arc="root-6.14.06"
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}.tar.gz
-   endif
-endif
-if ( ! -e ${arc}_installed ) then
-   cd ${arc}
+if ( $withroot != 0 && $withroot != 5 && $withroot != 6 ) then
+   echo ""
+   echo "ATTENTION: Trying ROOT preinstalled to ${rootbasepath} for optional ROOT extensions!"
+   echo "           For full ROOT usage you might want to source the thisroot.(csh) environment."
+   echo ""
+else if ( $withroot != 0 ) then
    if ( $withroot == 5 ) then
-      ./configure --prefix=${rootbasepath} --etcdir=${rootbasepath}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
-      make -j${cores} install
-      cd ..
-      touch ${arc}_installed
+      set arc="root-5.34.25" # OK for gcc versions < 5
+#      set arc="root-5.34.26" # Patched thanks to A. Wisecarver
+#      set arc="root-5.34.38" # Gives errors
+      if ( ! -e ${arc}_installed  ) then
+#         tar xzf ${arc}-patched.tar.gz # Needed for older versions 5
+         tar xzf ${arc}.tar.gz # Needed for older versions 5
+         mv root ${arc}
+      endif
    else if ( $withroot == 6 ) then
-      mkdir mybuild
-      cd mybuild
-      cmake ..
-      cmake --build . -- -j${cores}
-      # As usual ROOT is buggy: CMAKE_INSTALL_BINDIR is not respected and everything ends in CMAKE_INSTALL_PREFIX!
-      #      cmake -DCMAKE_INSTALL_PREFIX=${base}/root -DCMAKE_INSTALL_BINDIR=${base}/bin -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
-      # Bug adapted version using addition of ${rootbasepath}/bin to PATH
-      cmake -DCMAKE_INSTALL_PREFIX=${rootbasepath} -P cmake_install.cmake
-      cd ..
-      cd ..
-      touch ${arc}_installed
-   else
-      cd ..
+#      set arc="root-6.08.06" # OK for gcc >= 5. Needs CMake >= 3.4.3!
+      set arc="root-6.14.06" # Not sure that it works!
+#      set arc="root-6.20.00" # Needs CMake >= 3.9
+#      set arc="root-6.22.02" # Needs CMake >= 3.9
+      if ( ! -e ${arc}_installed  ) then
+         tar xzf ${arc}.tar.gz
+      endif
+   endif
+   if ( ! -e ${arc}_installed ) then
+      cd ${arc}
+      if ( $withroot == 5 ) then
+         ./configure --prefix=${rootbasepath} --etcdir=${rootbasepath}/etc ${pythonopt} --enable-minuit2 --disable-xrootd
+         make -j${cores} install
+         cd ..
+         touch ${arc}_installed
+      else if ( $withroot == 6 ) then
+         mkdir -p mybuild
+         cd mybuild
+         cmake .. -DCMAKE_INSTALL_PREFIX=${rootbasepath} -Dgnuinstall=ON -Ddavix=OFF # davix tries to download nonexisting stuff, very bad!
+         make -j${cores} install
+#         cmake ..
+#         cmake --build . -- -j${cores}
+         # As usual ROOT is buggy: CMAKE_INSTALL_BINDIR is not respected and everything ends in CMAKE_INSTALL_PREFIX!
+         #      cmake -DCMAKE_INSTALL_PREFIX=${base}/root -DCMAKE_INSTALL_BINDIR=${base}/bin -DCMAKE_INSTALL_DATAROOTDIR=${base}/share -P cmake_install.cmake
+         # Bug adapted version using addition of ${rootbasepath}/bin to PATH
+#         cmake -DCMAKE_INSTALL_PREFIX=${rootbasepath} -P cmake_install.cmake
+         cd ..
+         cd ..
+         touch ${arc}_installed
+      else
+         cd ..
+      endif
    endif
 endif
 
 #
 #
-# HepMC, YODA, and Rivet:
+# YODA, HepMC, fastjet contrib, and Rivet:
 #------------------------------------------------------------------------------
 # ==> These enable the option --with-yoda of the fastNLO_toolkit to produce
 #     YODA formatted e.g. NLO predictions for direct comparison to data with Rivet
 #     Also these are required for use with Sherpa+MCgrid.
 #
-# HepMC (should be < 3.0.0, e.g. v2.06.09; needed by Rivet):
+# HepMC (should be < 3.0.0, e.g. v2.06.09; needed by Rivet-2.x.x):
 # Version 3.0.0 uses cmake and gives errors while compiling with ROOT v5.34.25!
 #------------------------------------------------------------------------------
 if ( $withoptional ) then
-   set arc="HepMC-2.06.09"
+#   set arc="HepMC-2.06.09"
+#   if ( ! -e ${arc}_installed  ) then
+#      tar xzf ${arc}.tar.gz
+#      cd ${arc}
+#      ./configure --prefix=${base} --with-momentum=GEV --with-length=MM
+#      make -j${cores} install
+#      cd ..
+#      touch ${arc}_installed
+#   endif
+#
+# HepMC3 (needed by Rivet-3.x.x):
+# Python is enabled by default. Requires cmake version 3.
+#------------------------------------------------------------------------------
+   set arc="HepMC3-3.2.2"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
-      ./configure --prefix=${base} --with-momentum=GEV --with-length=MM
+      mkdir -p hepmc3-build
+      cd hepmc3-build
+# Try to adapt the following line when Python support is desired AND cmake version is >= 3.7 (UNDOCUMENTED requirement, grrr)
+#      cmake -DHEPMC3_ENABLE_ROOTIO=OFF -DCMAKE_INSTALL_PREFIX=${base} -DHEPMC3_Python_SITEARCH27=${base}/lib/python2.7/site-packages -DHEPMC3_Python_SITEARCH36=${base}/lib/python3.6/site-packages -DHepMC3_DIR=${base} ..
+# HepMC3: Python bindings request a cmake policy of version 3.7 --> switch off Python support by default.
+      cmake -DCMAKE_INSTALL_PREFIX=${base} -DHepMC3_DIR=${base} -DHEPMC3_ENABLE_PYTHON=OFF -DHEPMC3_ENABLE_ROOTIO=OFF ..
       make -j${cores} install
+      cd ../..
+      touch ${arc}_installed
+   endif
+#
+# fastjet contrib (fjcontrib; needed by Rivet-3.x.x):
+#
+#------------------------------------------------------------------------------
+   set arc="fjcontrib-1.045"
+   if ( ! -e ${arc}_installed  ) then
+      tar xzf ${arc}.tar.gz
+      cd ${arc}
+      ./configure --prefix=${base} --fastjet-config=${base}/bin/fastjet-config
+      make -j${cores} install
+      make -j${cores} fragile-shared-install # From fjcontrib: Dirty hack to provide a shared library
       cd ..
       touch ${arc}_installed
    endif
@@ -638,8 +705,8 @@ if ( $withoptional ) then
 # YODA (>= 1.6.7 is recommended; needed by Rivet):
 # Python is enabled by default. If Python with ROOT interfacing is desired, use "--enable-root".
 #------------------------------------------------------------------------------
-   set arc="YODA-1.6.7"
-#   set arc="YODA-1.7.0" # Installation looks ok
+#   set arc="YODA-1.6.7"
+   set arc="YODA-1.8.3"
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -652,13 +719,16 @@ if ( $withoptional ) then
 # Rivet (>= 2.5.4 is recommended; v1 is too old):
 # Python is enabled by default.
 #------------------------------------------------------------------------------
-   set arc="Rivet-2.5.4"
-#   set arc="Rivet-2.6.0"
+#   set arc="Rivet-2.5.4"
+   set arc="Rivet-3.1.2" # Needs HepMC3 and fastjet contrib
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
-#      tar xzf ${arc}-patched.tar.gz # 2.6.0 needs patch for nonunicode chars in two analysis.cc files
       cd ${arc}
-      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+#      ./configure --prefix=${base} ${pyextopt} CPPFLAGS="${MYCPPFLAGS}"
+# ATTENTION: Remove analysis giving compile errors with gcc5
+      rm -f analyses/pluginATLAS/*1790439*
+      rehash
+      ./configure --prefix=${base} ${pyextopt} --with-hepmc3=`HepMC3-config --prefix` CPPFLAGS="${MYCPPFLAGS}"
       make -j${cores} install
       cd ..
       touch ${arc}_installed
@@ -694,8 +764,9 @@ if ( $withoptional ) then
 # ==> This enables the option --with-qcdnum of the fastNLO_toolkit to use
 #     the alpha_s evolutions within QCDNUM
 #
-#    set arc="qcdnum-17-01-12"
+#   set arc="qcdnum-17-01-12"
    set arc="qcdnum-17-01-14"
+#   set arc="qcdnum-17-01-15" # Provokes error in fastNLO Toolkit check
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -713,12 +784,14 @@ endif
 #
 # fastNLO Toolkit:
 #------------------------------------------------------------------------------
-if ( ! $mpinnlo ) then
+if ( ! $mpnnlo ) then
 #   set arc="fastnlo_toolkit-2.3.1-2585"
 #   set arc="fastnlo_toolkit-2.3.1-2657"
-   set arc="fastnlo_toolkit-2.3.1-2753"
+#   set arc="fastnlo_toolkit-2.3.1-2753"
+   set arc="fastnlo_toolkit-2.3.1-2771"
+   set rev=""
    if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}.tar.gz
+      tar xzf ${arc}${rev}.tar.gz
       cd ${arc}
 # options depending on previous choices: --with-yoda --with-hoppet --with-qcdnum --with-root
 # option to use python interface to library: --enable-pyext
@@ -726,7 +799,7 @@ if ( ! $mpinnlo ) then
       if ( $withoptional ) then
          ./configure --prefix=${base} --with-yoda --with-hoppet --with-qcdnum ${rootoptpath} ${pyextopt}
       else
-        ./configure --prefix=${base} --with-yoda ${rootoptpath} ${pyextopt}
+        ./configure --prefix=${base} ${rootoptpath} ${pyextopt}
       endif
       make -j${cores} install
       cd ..
@@ -737,30 +810,33 @@ if ( ! $mpinnlo ) then
 #==============================================================================
 # fastNLO use with NLOJet++
 #==============================================================================
+   if ( $withnlojetpp ) then
 #
 # NLOJet++ (patched version from fastNLO web page is required: NLOJet-4.1.3-patched2):
 #------------------------------------------------------------------------------
-   set arc="nlojet++-4.1.3"
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}-patched2.tar.gz
-      cd ${arc}
-      ./configure --prefix=${base}
-      make -j${cores} install
-      cd ..
-      touch ${arc}_installed
-   endif
+      set arc="nlojet++-4.1.3"
+      if ( ! -e ${arc}_installed  ) then
+         tar xzf ${arc}-patched2.tar.gz
+         cd ${arc}
+         ./configure --prefix=${base}
+         make -j${cores} install
+         cd ..
+         touch ${arc}_installed
+      endif
 #
 # fastNLO Interface NLOJet++:
 #------------------------------------------------------------------------------
-#   set arc="fastnlo_interface_nlojet-2.3.1pre-2424"
-   set arc="fastnlo_interface_nlojet-2.3.1pre-2657"
-   if ( ! -e ${arc}_installed  ) then
-      tar xzf ${arc}.tar.gz
-      cd ${arc}
-      ./configure --prefix=${base}
-      make -j${cores} install
-      cd ..
-      touch ${arc}_installed
+#      set arc="fastnlo_interface_nlojet-2.3.1pre-2424"
+#      set arc="fastnlo_interface_nlojet-2.3.1pre-2657"
+      set arc="fastnlo_interface_nlojet-2.3.1pre-2771"
+      if ( ! -e ${arc}_installed  ) then
+         tar xzf ${arc}.tar.gz
+         cd ${arc}
+         ./configure --prefix=${base}
+         make -j${cores} install
+         cd ..
+         touch ${arc}_installed
+      endif
    endif
 endif
 #
@@ -774,28 +850,30 @@ if ( $withnnlojet ) then
 #------------------------------------------------------------------------------
 # APPLgrid requires ROOT!
 # APPLgrid also requires the static library libgfortran.a not present in numerous cases ...
-   if ( $withroot != "0" && ! $mpinnlo ) then
-      set arc="applgrid-1.5.6"
-      if ( ! -e ${arc}_installed  ) then
-         tar xzf ${arc}.tar.gz
-         cd ${arc}
-         ./configure --prefix=${base}
+#   if ( $withroot != "0" && ! $mpnnlo ) then
+#      set arc="applgrid-1.5.6"
+#      if ( ! -e ${arc}_installed  ) then
+#         tar xzf ${arc}.tar.gz
+#         cd ${arc}
+#         ./configure --prefix=${base}
 # Attention: No concurrent compilation with -j here!
-         make install
-         cd ..
-         touch ${arc}_installed
-      endif
-   endif
+#         make install
+#         cd ..
+#         touch ${arc}_installed
+#      endif
+#   endif
 #
 # nnlo-bridge to NNLOJet:
 #------------------------------------------------------------------------------
-   if ( ! $mpinnlo ) then
-      set arc="nnlo-bridge-0.0.40"
+   if ( ! $mpnnlo ) then
+#      set arc="nnlo-bridge-0.0.40"# updated scale settings for jetpt scale
+      set arc="nnlo-bridge-0.0.46"
 # Previous buggy:    set rev="-rev1683M3"       ; fixed in 0.0.39
 # Improve interface --> M7: set rev="-rev1683M5"; fixed in 0.0.39
 #      set rev="-rev1683M7"                       ; fixed in 0.0.39
 # M1: Two printout fixes
-      set rev="M1"
+#      set rev="M1"
+      set rev=""
       if ( ! -e ${arc}_installed  ) then
          tar xzf ${arc}${rev}.tar.gz
          cd ${arc}
@@ -808,26 +886,29 @@ if ( $withnnlojet ) then
 #
 # NNLOJET
 #------------------------------------------------------------------------------
-# Set for single-thread usage of NNLOJET
-   if ( $withmpi && ! $mpinnlo ) then
+# Single-thread usage of NNLOJET
+   setenv OMP_STACKSIZE 999999
+   setenv OMP_NUM_THREADS 1
+# or multi-thread usage of NNLOJET; values should be adapted to respective system
+   if ( $mpnnlo ) then
       setenv OMP_STACKSIZE 999999
-      setenv OMP_NUM_THREADS 1
-      echo 'setenv OMP_STACKSIZE 999999' >> fnlosrc_source.csh
-      echo 'setenv OMP_NUM_THREADS 1' >> fnlosrc_source.csh
-      echo 'export OMP_STACKSIZE=999999' >> fnlosrc_source.sh
-      echo 'export OMP_NUM_THREADS=1' >> fnlosrc_source.sh
-      echo ""
-      echo "ATTENTION: OpenMP environment set to default for NNLOJET!"
-      echo "   OMP_STACKSIZE and OMP_NUM_THREADS have been set to:"
-      echo "   $OMP_STACKSIZE and $OMP_NUM_THREADS"
-      echo ""
+      setenv OMP_NUM_THREADS 4
    endif
+   echo 'setenv OMP_STACKSIZE '"$OMP_STACKSIZE" >> fnlosrc_source.csh
+   echo 'setenv OMP_NUM_THREADS '"$OMP_NUM_THREADS" >> fnlosrc_source.csh
+   echo 'export OMP_STACKSIZE='"$OMP_STACKSIZE" >> fnlosrc_source.sh
+   echo 'export OMP_NUM_THREADS='"$OMP_NUM_THREADS" >> fnlosrc_source.sh
+   echo ""
+   echo "ATTENTION: OpenMP environment set for NNLOJET!"
+   echo "   OMP_STACKSIZE and OMP_NUM_THREADS have been set to:"
+   echo "   $OMP_STACKSIZE and $OMP_NUM_THREADS"
+   echo ""
    set arc="NNLOJET_rev"${revision}
    if ( ! -e ${arc}_installed  ) then
    tar xzf ${arc}.tar.gz
    cd ${arc}/driver
    make depend
-   if ( $mpinnlo ) then
+   if ( $mpnnlo ) then
       make -j${cores}
    else
       make -j${cores} fillgrid=1

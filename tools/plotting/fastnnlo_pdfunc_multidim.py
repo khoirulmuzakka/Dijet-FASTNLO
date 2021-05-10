@@ -50,12 +50,12 @@ def dimensionhandler(fnlo, verb):
     ndim = fnlo.GetNumDiffBin()
     if verb:
         print '\n'
-        print '[fastnnlo_pdfunc]: Table Dimensions: ', ndim
+        print '[fastnnlo_pdfunc_multidim]: Table Dimensions: ', ndim
 
     # Labels of all the dimensions:
     dimlabels = fnlo.GetDimLabels()
     if verb:
-        print '[fastnnlo_pdfunc]: Dimension Labels: ', dimlabels
+        print '[fastnnlo_pdfunc_multidim]: Dimension Labels: ', dimlabels
 
     # choose binning dimension (innermost, fnlo name: 'IODimI'. For number of observable bin (starting from 1) see for instance fnlo-tk-cppread output and code)
     # number of dimensions minus 1 (starting indexing at 0)
@@ -64,7 +64,7 @@ def dimensionhandler(fnlo, verb):
     # Label of binning dimension:
     xlabel = fnlo.GetDimLabel(binningdim)
     if verb:
-        print '[fastnnlo_pdfunc]: x-label: ', xlabel
+        print '[fastnnlo_pdfunc_multidim]: x-label: ', xlabel
 
     # Depending on table dimension, a different amount of plots will be needed
     # --> check if lower bin bound is lower than previous lower bin bound (indicates new phase space slice in table)
@@ -129,8 +129,8 @@ def dimensionhandler(fnlo, verb):
 
     if verb:
         # , all_bin_bounds.T, '\n'
-        print '[fastnnlo_pdfunc]: Bin bounds for all plots: \n'
-        #print '[fastnnlo_pdfunc]: bin_bounds.flatten()', all_bin_bounds.flatten(), '\n'
+        print '[fastnnlo_pdfunc_multidim]: Bin bounds for all plots: \n'
+        #print '[fastnnlo_pdfunc_multidim]: bin_bounds.flatten()', all_bin_bounds.flatten(), '\n'
 
     # Creating x-axis and 'x-errors'
     xmin_list = []
@@ -138,7 +138,7 @@ def dimensionhandler(fnlo, verb):
     x_errors = []  # stays list because the contained arrays are of different length
     for n in range(0, nplot):
         if verb:
-            print '[fastnnlo_pdfunc]: ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----'
+            print '[fastnnlo_pdfunc_multidim]: ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----'
             print 'shape of all_bin_bounds: ', np.shape(all_bin_bounds)
             print '%s. plot (%s bins) bin bounds (lower, upper): \n' % (
                 n, len(all_bin_bounds[n]))
@@ -149,7 +149,7 @@ def dimensionhandler(fnlo, verb):
         xmin_list.append(0.95*min(all_bin_bounds[n].ravel()))
         xmax_list.append(1.05*max(all_bin_bounds[n].ravel()))
         if verb:
-            print '[fastnnlo_pdfunc]: xmin=%s, xmax=%s. \n' % (
+            print '[fastnnlo_pdfunc_multidim]: xmin=%s, xmax=%s. \n' % (
                 xmin_list[n], xmax_list[n])
 
         # Preparing x-errors (via bin bounds) --> x_errors[n, 0, :] are initially negative (positive via -1*), x_errors[n, 1, :] positive
@@ -158,7 +158,7 @@ def dimensionhandler(fnlo, verb):
         x_errors.append(x_errors_tmp)
 
         if verb:
-            print 'fastnnlo_pdfunc]: x_errors for plot %s: \n' % n, x_errors[n], '\n'
+            print 'fastnnlo_pdfunc_multidim]: x_errors for plot %s: \n' % n, x_errors[n], '\n'
 
     return ndim, binningdim, xlabel, all_bin_bounds, x_axis_list, xmin_list, xmax_list, x_errors, nplot, dimlabels, tmp_len_list, bbDimO, bbDimM
 
@@ -192,8 +192,8 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
         elif len(pdfsets) == 5:
             shift_list = [0.96, 0.98, 1.00, 1.02, 1.04]
         else:
-            print '[fastnnlo_pdfunc]: Too many PDFs to produce combined plot. Aborted!'
-            print '[fastnnlo_pdfunc]: Max. possible: 5. Number of given PDF Sets: %s' % len(
+            print '[fastnnlo_pdfunc_multidim]: Too many PDFs to produce combined plot. Aborted!'
+            print '[fastnnlo_pdfunc_multidim]: Max. possible: 5. Number of given PDF Sets: %s' % len(
                 pdfsets)
             sys.exit()
 
@@ -208,7 +208,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
             fig = plt.figure(figsize=(7, 7))
             ax1 = plt.subplot(gs[:-1, :])
 
-            print '[fastnnlo_pdfunc]: Producing %s plot.' % order_item
+            print '[fastnnlo_pdfunc_multidim]: Producing %s plot.' % order_item
             color = iter(cm.rainbow(np.linspace(0, 1, len(pdfsets))))
             patches = []  # later needed for legend
 
@@ -272,7 +272,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                     tablename, order_item, plotnr, dimspeci, pdfnames[1:])
 
             fig.savefig('%s.png' % filename)
-            print '[fastnnlo_pdfunc]: %s plot saved as: %s.png' % (
+            print '[fastnnlo_pdfunc_multidim]: %s plot saved as: %s.png' % (
                 order_item, filename)
             plt.close()
 
@@ -371,10 +371,10 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                     tablename, plotnr, dimspeci, pdfnames[1:])
 
             fig2.savefig('%s.png' % filename, bbox_inches='tight')
-            print '[fastnnlo_pdfunc]: Summary plot saved as: %s.png' % filename
+            print '[fastnnlo_pdfunc_multidim]: Summary plot saved as: %s.png' % filename
 
         else:
-            print '[fastnnlo_pdfunc]: For less than 3 orders --> no summary plot produced.'
+            print '[fastnnlo_pdfunc_multidim]: For less than 3 orders --> no summary plot produced.'
 
     elif (len(pdfsets) == 1):  # plotting with given or default pdf, one plot contains all given/default orders
         # For plotting several orders 'next to each other', handling via shift from bincenter
@@ -385,8 +385,8 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
         elif len(order_list) == 3:
             shift_list = [0.98, 1.00, 1.02]
         else:
-            print '[fastnnlo_pdfunc]: Too many orders to plot. Aborted!'
-            print '[fastnnlo_pdfunc]: Requested orders: %s' % order_list
+            print '[fastnnlo_pdfunc_multidim]: Too many orders to plot. Aborted!'
+            print '[fastnnlo_pdfunc_multidim]: Requested orders: %s' % order_list
             sys.exit()
 
         # this is necessary because the orders in order_list are unsorted (order_index is not tied to specific order)
@@ -444,7 +444,7 @@ def plotting(pdfsets, order_list, xs_chosen, abs_pdf_unc, rel_pdf_unc, xlabel, t
                 tablename, pdfsets[0], plotnr, dimspeci, ordernames[1:])
 
         fig.savefig('%s.png' % filename)
-        print '[fastnnlo_pdfunc]: Saved as: %s.png' % filename
+        print '[fastnnlo_pdfunc_multidim]: Saved as: %s.png' % filename
 
 
 ######################################################################################################################################
@@ -475,30 +475,38 @@ def main():
     args = vars(parser.parse_args())
 
     # Table name
-    tablename = os.path.splitext(os.path.basename(args['table']))[0]
-    # to get rid of extension (.tab.gz or .tab)
-    tablename = os.path.splitext(tablename)[0]
-    print '\n'
-    print '[fastnnlo_pdfunc]: Analysing table:      ', tablename
+    table = args['table']
+    tablepath = os.path.split(table)[0]
+    if not tablepath:
+        tablepath = '.'
+    tablename = os.path.split(table)[1]
+    if tablename.endswith('.tab.gz'):
+        tablename = tablename.replace('.tab.gz', '', 1)
+    elif tablename.endswith('.tab'):
+        tablename = tablename.replace('.tab', '', 1)
+    else:
+        print('[fastnnlo_pdfunc_multidim]: Error! Wrong extension for table: ', table)
+        exit(1)
+    print('[fastnnlo_pdfunc_multidim]: Analysing table: ', table)
 
     # PDF set name
     pdfsets = []
     for ipdf in args['pdfset']:
         pdfsets.append(os.path.basename(ipdf))
-    print '[fastnnlo_pdfunc]: Using PDF set(s):     ', pdfsets
+    print '[fastnnlo_pdfunc_multidim]: Using PDF set(s):     ', pdfsets
 
     # Orders that will be plotted
     iorders = []
     iordmin = 0
     iordmax = _text_to_order['NNLO']
     if args['order'] is None:
-        print '[fastnnlo_pdfunc]: Evaluate table up to highest available order.'
+        print '[fastnnlo_pdfunc_multidim]: Evaluate table up to highest available order.'
     else:
         for order in args['order']:
             iorders.append(_text_to_order[order])
         iordmin = min(iorders)
         iordmax = max(iorders)
-        print '[fastnnlo_pdfunc]: Evaluate table in the following order(s): ', args[
+        print '[fastnnlo_pdfunc_multidim]: Evaluate table in the following order(s): ', args[
             'order']
 
     # Given output filename
@@ -509,7 +517,7 @@ def main():
 
     ######################################## Start EVALUATION with fastNLO library #######################################
     # Take the general information (bin_bounds, labels, order_existence, etc.) from first given pdfset.
-    fnlo = fastnlo.fastNLOLHAPDF(args['table'], pdfsets[0], args['member'])
+    fnlo = fastnlo.fastNLOLHAPDF(table, pdfsets[0], args['member'])
 
     # Get labeling, dimensionality, bin_bounds of table etc. via dimensionhandler()
     ndim, binningdim, xlabel, all_bin_bounds, x_axis_list, xmin_list, xmax_list, x_errors, nplot, dimlabels, tmp_len_list, bbDimO, bbDimM = dimensionhandler(
@@ -526,7 +534,7 @@ def main():
             _order_existence[iorders[i]] = fnlo.SetContributionON(
                 fastnlo.kFixedOrder, iorders[i], True)
             if _order_existence[iorders[i]] == False:
-                sys.exit('[fastnnlo_pdfunc]: Chosen order %s is not available in given table. Aborted! \n' %
+                sys.exit('[fastnnlo_pdfunc_multidim]: Chosen order %s is not available in given table. Aborted! \n' %
                          _order_to_text[iorders[i]])
             else:
                 order_list.append(_order_to_text[iorders[i]])
@@ -536,14 +544,14 @@ def main():
             _order_existence[i] = fnlo.SetContributionON(
                 fastnlo.kFixedOrder, i, True)
             if _order_existence[i] == False:
-                print '[fastnnlo_pdfunc]: Given table does not contain %s. \n' % _order_to_text[i]
+                print '[fastnnlo_pdfunc_multidim]: Given table does not contain %s. \n' % _order_to_text[i]
             elif _order_existence[i] == True:
                 if verb:
-                    print '[fastnnlo_pdfunc]: Given table contains %s. \n' % _order_to_text[i]
+                    print '[fastnnlo_pdfunc_multidim]: Given table contains %s. \n' % _order_to_text[i]
                 order_list.append(_order_to_text[i])
                 iordmax = i  # update highest existing order
 
-    print '[fastnnlo_pdfunc]: List of orders that will be investigated: ', order_list, '\n \n'
+    print '[fastnnlo_pdfunc_multidim]: List of orders that will be investigated: ', order_list, '\n \n'
 
     # Start individual evaluation for each of the given PDF sets
     # will contain for each given pdf the total cross section for LO, NLO, NNLO (or requested orders)
@@ -559,8 +567,8 @@ def main():
         print '-----------------------------------------------------------------------------------------------'
         print '#############################  %s  ########################################' % pdf
         print '-----------------------------------------------------------------------------------------------'
-        print '[fastnnlo_pdfunc]: Calculate XS and uncertainty for %s \n' % pdf
-        fnlo = fastnlo.fastNLOLHAPDF(args['table'], pdf, args['member'])
+        print '[fastnnlo_pdfunc_multidim]: Calculate XS and uncertainty for %s \n' % pdf
+        fnlo = fastnlo.fastNLOLHAPDF(table, pdf, args['member'])
 
         # in earlier versions: calculated cross sections for ALL available orders (not only the selected ones!) and filled array xs_all
         # in this version: only calculate the cross section for the chosen orders, produce array xs_chosen.
@@ -573,8 +581,8 @@ def main():
                 else:
                     fnlo.SetContributionON(fastnlo.kFixedOrder, j, False)
             if verb:
-                print '[fastnnlo_pdfunc]: Calculate XS for order: %s' % n
-                print '[fastnnlo_pdfunc]: ---- ---- ---- ---- ---- ---- ---- \n'
+                print '[fastnnlo_pdfunc_multidim]: Calculate XS for order: %s' % n
+                print '[fastnnlo_pdfunc_multidim]: ---- ---- ---- ---- ---- ---- ---- \n'
 
             fnlo.CalcCrossSection()
             xs_list_tmp.append(fnlo.GetCrossSection())
@@ -587,9 +595,9 @@ def main():
             # rel_pdf_unc_item[2,:]=(-1)*rel_pdf_unc_item[2,:]    #####only for testing
             rel_unc_list_tmp.append(rel_pdf_unc_item)
             if verb:
-                print '[fastnnlo_pdfunc]: Cross section in %s: \n' % n, np.array(
+                print '[fastnnlo_pdfunc_multidim]: Cross section in %s: \n' % n, np.array(
                     xs_list_tmp)[-1], '\n'  # print most recent xs
-                print '[fastnnlo_pdfunc]: Relative PDF uncertainty in %s: \n' % n
+                print '[fastnnlo_pdfunc_multidim]: Relative PDF uncertainty in %s: \n' % n
                 # has 3 entries: central value (xs), unc_high, unc_low
                 print rel_pdf_unc_item, '\n'
                 print '-----------------------------------------------------------------------------------------------'
@@ -610,8 +618,8 @@ def main():
     ########                                                                                                #########
 
     if verb:
-        print '[fastnnlo_pdfunc]: Cross section summary. '
-        print '[fastnnlo_pdfunc]: For each pdf %s xs_chosen contains XS corresponding to %s.' % (
+        print '[fastnnlo_pdfunc_multidim]: Cross section summary. '
+        print '[fastnnlo_pdfunc_multidim]: For each pdf %s xs_chosen contains XS corresponding to %s.' % (
             pdfsets, order_list)
         print xs_chosen, '\n \n'
         # print 'Size xs_chosen: ', np.shape(xs_chosen) ###test
@@ -634,7 +642,7 @@ def main():
                 xs_chosen[p, k, :]  # absolute uncertainties upwards (high)
 
     if verb:
-        print '[fastnnlo_pdfunc]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n' % (
+        print '[fastnnlo_pdfunc_multidim]: Absolute PDF uncertainties downwards, upwards for %s in %s: \n' % (
             pdfsets, order_list)
         print abs_pdf_unc, '\n'
 
