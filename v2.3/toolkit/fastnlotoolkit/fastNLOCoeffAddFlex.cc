@@ -518,7 +518,7 @@ void fastNLOCoeffAddFlex::Print(int iprint) const {
 //________________________________________________________________________________________________________________ //
 
 // Erase observable bin
-void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
+void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx, int ITabVersionRead) {
    debug["fastNLOCoeffAddFlex::EraseBin"]<<"Erasing table entries in CoeffAddFlex for bin index " << iObsIdx << endl;
    if ( ScaleNode1.size() == 0 ) {
       say::error["EraseBin"]<<"All bins deleted already. Aborted!" << endl;
@@ -532,11 +532,11 @@ void fastNLOCoeffAddFlex::EraseBin(unsigned int iObsIdx) {
    if ( SigmaTildeMuRRDep.size() != 0 ) SigmaTildeMuRRDep.erase(SigmaTildeMuRRDep.begin()+iObsIdx);
    if ( SigmaTildeMuFFDep.size() != 0 ) SigmaTildeMuFFDep.erase(SigmaTildeMuFFDep.begin()+iObsIdx);
    if ( SigmaTildeMuRFDep.size() != 0 ) SigmaTildeMuRFDep.erase(SigmaTildeMuRFDep.begin()+iObsIdx);
-   fastNLOCoeffAddBase::EraseBin(iObsIdx);
+   fastNLOCoeffAddBase::EraseBin(iObsIdx,ITabVersionRead);
 }
 
 // Catenate observable bin
-void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx) {
+void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int iObsIdx, int ITabVersionRead) {
    debug["fastNLOCoeffAddFlex::CatBin"]<<"Catenating observable bin in CoeffAddFlex corresponding to bin index " << iObsIdx << endl;
    if ( ScaleNode1.size() == 0 ) {
       say::error["CatBin"]<<"Initial flex-scale table is empty. Aborted!" << endl;
@@ -575,5 +575,5 @@ void fastNLOCoeffAddFlex::CatBin(const fastNLOCoeffAddFlex& other, unsigned int 
       SigmaTildeMuRFDep.resize(nold+1);
       SigmaTildeMuRFDep[nold] = other.SigmaTildeMuRFDep[iObsIdx];
    }
-   fastNLOCoeffAddBase::CatBin(other, iObsIdx);
+   fastNLOCoeffAddBase::CatBin(other, iObsIdx, ITabVersionRead);
 }

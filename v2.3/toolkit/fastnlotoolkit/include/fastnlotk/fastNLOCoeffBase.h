@@ -38,6 +38,10 @@ public:
 
    void SetCoeffAddDefaults();
 
+   /// ___________________________________________________________________________________________________
+   /// Some info getters & setters for contribution modifications
+   /// ___________________________________________________________________________________________________
+
    int GetIDataFlag() const {return IDataFlag;}
    void SetIDataFlag(int n){IDataFlag = n;}
 
@@ -61,9 +65,11 @@ public:
 
    bool GetIsFlexibleScale() const { return (NScaleDep>=3) && (IAddMultFlag==0); }
 
+   /// get/set contribution and code description
    std::vector<std::string > GetContributionDescription() const { return CtrbDescript; }
-   void SetContributionDescription(std::vector<std::string > descr ) { CtrbDescript = descr; };           //! Set contribution description
+   void SetContributionDescription(std::vector<std::string > descr );
    std::vector<std::string > GetCodeDescription() const { return CodeDescript; }
+   void SetCodeDescription(std::vector<std::string > descr );
 
    bool IsLO() const {return IContrFlag1==1 && IContrFlag2==1;}
    bool IsNLO() const {return IContrFlag1==1 && IContrFlag2==2;}
@@ -75,12 +81,13 @@ public:
 
    // Added to include CoeffInfoBlocks
    bool HasCoeffInfoBlock() const {return NCoeffInfoBlocks>0;}
-   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1);
-   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2);
+   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1) const;
+   bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2) const;
    int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1);
    int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2);
    std::vector < double > GetCoeffInfoContent(int Index) const { return CoeffInfoBlockContent[Index]; };
    int GetNCoeffInfoBlocks() const {return NCoeffInfoBlocks;}
+   void AddCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2, std::vector<std::string> Description, std::string datfile);
 
 protected:
    void ReadBase(std::istream& table, int ITabVersionRead);
@@ -108,6 +115,7 @@ protected:
    std::vector < int > ICoeffInfoBlockFlag2;
    std::vector < int > NCoeffInfoBlockDescr;
    std::vector < std::vector < std::string > > CoeffInfoBlockDescript;
+   std::vector < int > NCoeffInfoBlockCont;
    fastNLO::v2d CoeffInfoBlockContent;
 };
 

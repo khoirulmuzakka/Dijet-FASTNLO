@@ -36,10 +36,9 @@ bool fastNLOCoeffAddBase::CheckCoeffConstants(const fastNLOCoeffBase* c, bool qu
       return false;
    } else {
       // Unknown contribution
-      say::error["fastNLOCoeffAddBase::CheckCoeffConstants"]
-         << "Unknown contribution type, aborting! "
-         << "IAddMultFlag = " << c->GetIAddMultFlag()
-         << ", IDataFlag ="   << c->GetIDataFlag() <<endl;
+      say::error["fastNLOCoeffAddBase::CheckCoeffConstants"] << "Unknown contribution type, aborting! "
+                                                             << "IAddMultFlag = " << c->GetIAddMultFlag()
+                                                             << ", IDataFlag ="   << c->GetIDataFlag() <<endl;
       exit(1);
    }
 }
@@ -53,13 +52,13 @@ fastNLOCoeffAddBase* fastNLOCoeffAddBase::Clone() const {
 
 ///________________________________________________________________________________________________________________ //
 void fastNLOCoeffAddBase::Read(istream& table, int ITabVersionRead){
-   debug["ReadCoeffAddBase::Read"]<<"Start reading table ..."<<endl;
+   debug["Read"]<<"Start reading table ..."<<endl;
    fastNLOCoeffBase::ReadBase(table, ITabVersionRead);
    CheckCoeffConstants(this);
    ReadCoeffAddBase(table, ITabVersionRead);
    fastNLOCoeffBase::ReadCoeffInfoBlocks(table, ITabVersionRead);
    EndReadCoeff(table, ITabVersionRead);
-   debug["ReadCoeffAddBase::Read"]<<"Finished reading table ..."<<endl;
+   debug["Read"]<<"Finished reading table ..."<<endl;
 }
 
 
@@ -292,7 +291,7 @@ void fastNLOCoeffAddBase::Write(ostream& table, int itabversion) {
    table << IPDFdef3 << sep;
 
    if(IPDFdef2==0){ // PDF linear combinations are stored herewith
-      cout<<"Writing PDF coefficients into table."<<endl;
+      info["Write"]<<"Writing PDF coefficients into table."<<endl;
       if ( IPDFdef3 != NSubproc ){
          error["Write"]<<"IPDFdef3 must be equal to NSubproc. (IPDFdef3="<<IPDFdef3<<", NSubproc="<<NSubproc<<"). Exiting."<<endl;
          exit(1);
@@ -788,44 +787,67 @@ void fastNLOCoeffAddBase::Print(int iprint) const {
 //________________________________________________________________________________________________________________ //
 
 // Erase observable bin
-void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx) {
-   debug["EraseBin"]<<"Erasing table entries in CoeffAddBase for bin index " << iObsIdx << endl;
+void fastNLOCoeffAddBase::EraseBin(unsigned int iObsIdx, int ITabVersionRead) {
+   debug["EraseBin"]<<"Erasing observable bin in CoeffAddBase with bin index " << iObsIdx << endl;
    if ( XNode1.size() == 0 ) {
       error["EraseBin"]<<"All additive contribution bins deleted already. Aborted!" << endl;
       exit(1);
    }
    if ( XNode1.size() != 0 ) XNode1.erase(XNode1.begin()+iObsIdx);
    if ( NPDFDim==2 && XNode2.size() != 0 ) XNode2.erase(XNode2.begin()+iObsIdx);
-   for ( unsigned int ip = 0 ; ip<fWgt.WgtObsSumW2.size() ; ip++ ) {
-      fWgt.WgtObsSumW2[ip].erase(fWgt.WgtObsSumW2[ip].begin()+iObsIdx);
-      fWgt.SigObsSumW2[ip].erase(fWgt.SigObsSumW2[ip].begin()+iObsIdx);
-      fWgt.SigObsSum[ip].  erase(fWgt.SigObsSum  [ip].begin()+iObsIdx);
-      fWgt.WgtObsNumEv[ip].erase(fWgt.WgtObsNumEv[ip].begin()+iObsIdx);
+   for ( unsigned int i = 0 ; i<fWgt.WgtObsSumW2.size() ; i++ ) {
+      fWgt.WgtObsSumW2[i].erase(fWgt.WgtObsSumW2[i].begin()+iObsIdx);
+      fWgt.SigObsSumW2[i].erase(fWgt.SigObsSumW2[i].begin()+iObsIdx);
+      fWgt.SigObsSum[i].  erase(fWgt.SigObsSum  [i].begin()+iObsIdx);
+      fWgt.WgtObsNumEv[i].erase(fWgt.WgtObsNumEv[i].begin()+iObsIdx);
+   }
+   if ( ! ( ITabVersionRead < 25000 ) ) {
+      if ( NCoeffInfoBlocks > 0 ) {
+         debug["EraseBin"]<<"Found " << NCoeffInfoBlocks << " InfoBlocks with bins to be erased, too." << endl;
+         for ( int i=0; i < NCoeffInfoBlocks; i++ ) {
+            if ( ICoeffInfoBlockFlag1[i] == 0 && ICoeffInfoBlockFlag2[i] == 0 ) {
+               CoeffInfoBlockContent[i].erase(CoeffInfoBlockContent[i].begin()+iObsIdx);
+               NCoeffInfoBlockCont[i] = NCoeffInfoBlockCont[i] - 1;
+            } else {
+               error["EraseBin"]<<"Erase bin not yet implemented for InfoBlocks other than with flags 1,2 = 0, 0:" <<
+                  ICoeffInfoBlockFlag1[i] << ", " << ICoeffInfoBlockFlag2[i] << ", aborted!" << endl;
+               exit(567);
+            }
+         }
+      }
    }
    fastNLOCoeffBase::EraseBin(iObsIdx);
 }
 
 // Catenate observable bin
-void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx) {
-   debug["CatBin"]<<"Catenating observable bin in CoeffAddBase corresponding to bin index " << iObsIdx << endl;
+void fastNLOCoeffAddBase::CatBin(const fastNLOCoeffAddBase& other, unsigned int iObsIdx, int ITabVersionRead) {
+   debug["CatBin"]<<"Catenating observable bin to CoeffAddBase with bin index " << iObsIdx << endl;
    if ( XNode1.size() == 0 ) {
       error["CatBin"]<<"Initial additive table is empty. Aborted!" << endl;
       exit(1);
    }
-   //unsigned int nold = XNode1.size();
-   if ( XNode1.size() != 0 ) {
-      XNode1.push_back(other.XNode1[iObsIdx]);
-      // XNode1.resize(nold+1);
-      // XNode1[nold] = other.XNode1[iObsIdx];
+   if ( XNode1.size() != 0 ) XNode1.push_back(other.XNode1[iObsIdx]);
+   if ( NPDFDim==2 &&  XNode2.size() != 0 ) XNode2.push_back(other.XNode2[iObsIdx]);
+   for ( unsigned int i = 0 ; i<fWgt.WgtObsSumW2.size() ; i++ ) {
+      fWgt.WgtObsSumW2[i].push_back(other.fWgt.WgtObsSumW2[i][iObsIdx]);
+      fWgt.SigObsSumW2[i].push_back(other.fWgt.SigObsSumW2[i][iObsIdx]);
+      fWgt.SigObsSum[i].  push_back(other.fWgt.SigObsSum  [i][iObsIdx]);
+      fWgt.WgtObsNumEv[i].push_back(other.fWgt.WgtObsNumEv[i][iObsIdx]);
    }
-   if ( NPDFDim==2 &&  XNode2.size() != 0 ) {
-      XNode2.push_back(other.XNode2[iObsIdx]);
-   }
-   for ( unsigned int ip = 0 ; ip<fWgt.WgtObsSumW2.size() ; ip++ ) {
-      fWgt.WgtObsSumW2[ip].push_back(other.fWgt.WgtObsSumW2[ip][iObsIdx]);
-      fWgt.SigObsSumW2[ip].push_back(other.fWgt.SigObsSumW2[ip][iObsIdx]);
-      fWgt.SigObsSum[ip].  push_back(other.fWgt.SigObsSum  [ip][iObsIdx]);
-      fWgt.WgtObsNumEv[ip].push_back(other.fWgt.WgtObsNumEv[ip][iObsIdx]);
+   if ( ! ( ITabVersionRead < 25000 ) ) {
+      if ( NCoeffInfoBlocks > 0 ) {
+         debug["CatBin"]<<"Found " << NCoeffInfoBlocks << " InfoBlocks with bins to be catenated, too." << endl;
+         for ( int i=0; i < NCoeffInfoBlocks; i++ ) {
+            if ( ICoeffInfoBlockFlag1[i] == 0 && ICoeffInfoBlockFlag2[i] == 0 ) {
+               CoeffInfoBlockContent[i].push_back(other.CoeffInfoBlockContent[i][iObsIdx]);
+               NCoeffInfoBlockCont[i] = NCoeffInfoBlockCont[i] + 1;
+            } else {
+               error["CatBin"]<<"Catenate bins not yet implemented for InfoBlocks other than with flags 1,2 = 0, 0:" <<
+                  ICoeffInfoBlockFlag1[i] << ", " << ICoeffInfoBlockFlag2[i] << ", aborted!" << endl;
+               exit(678);
+            }
+         }
+      }
    }
    fastNLOCoeffBase::CatBin(other, iObsIdx);
 }

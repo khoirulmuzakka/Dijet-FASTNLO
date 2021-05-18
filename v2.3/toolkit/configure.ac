@@ -10,7 +10,7 @@
 # Require minimal autoconf version, 2.69 is from 2012
 AC_PREREQ([2.69])
 # Define subproject fastNLO_toolkit
-AC_INIT([fastNLO_toolkit], [2.3.1], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,g.sieber@cern.ch,stober@cern.ch,wobisch@fnal.gov])
+AC_INIT([fastNLO_toolkit], [2.5.0], [daniel.britzger@desy.de,klaus.rabbertz@cern.ch,wobisch@latech.edu])
 #Suppress verbose output when compiling (use make V=99 for verbose output)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 # Properly include subprojects
@@ -733,9 +733,9 @@ AM_CONDITIONAL(DX_COND_pdf,   [test "x$DOXYGEN" != "x"])
 # Define project substitution variables (to be replaced e.g. in config files below)
 AC_SUBST([AUTHORS],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, G. Sieber, M. Wobisch"])
 AC_SUBST([AUTHORSv14],["T. Kluge, K. Rabbertz, M. Wobisch"])
-AC_SUBST([AUTHORSv2],["D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch"])
-AC_SUBST([QUOTEv14],["hep-ph/0609285"])
-AC_SUBST([QUOTEv2],["arXiv:1109.1310"])
+AC_SUBST([AUTHORSv2],["D. Britzger, K. Rabbertz, F. Stober, M. Wobisch"])
+AC_SUBST([QUOTEv14],["Proc. DIS 2006, 483 (2006), hep-ph/0609285."])
+AC_SUBST([QUOTEv2],["Proc. DIS 2012, 217 (2012), arXiv:1208.3641."])
 AC_SUBST([SUBPROJECT],["toolkit"])
 AC_SUBST([WEBPAGE],["http://projects.hepforge.org/fastnlo"])
 AC_SUBST([YEARS],["2005-`date +%Y`"])

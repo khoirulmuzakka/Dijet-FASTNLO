@@ -428,7 +428,7 @@ void fastNLOCoeffAddFix::Print(int iprint) const {
 
 
 //________________________________________________________________________________________________________________ //
-void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
+void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx, int ITabVersionRead) {
    //! Erase observable bin
    debug["fastNLOCoeffAddFix::EraseBin"]<<"Erasing table entries in CoeffAddFix for bin index " << iObsIdx << endl;
    if ( ScaleNode.size() == 0 ) {
@@ -437,11 +437,11 @@ void fastNLOCoeffAddFix::EraseBin(unsigned int iObsIdx) {
    }
    if ( ScaleNode.size() != 0 ) ScaleNode.erase(ScaleNode.begin()+iObsIdx);
    if ( SigmaTilde.size() != 0 ) SigmaTilde.erase(SigmaTilde.begin()+iObsIdx);
-   fastNLOCoeffAddBase::EraseBin(iObsIdx);
+   fastNLOCoeffAddBase::EraseBin(iObsIdx,ITabVersionRead);
 }
 
 // Catenate observable bin
-void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx) {
+void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx, int ITabVersionRead) {
    debug["fastNLOCoeffAddFix::CatBin"]<<"Catenating observable bin in CoeffAddFix corresponding to bin index " << iObsIdx << endl;
    if ( ScaleNode.size() == 0 ) {
       say::error["CatBin"]<<"Initial fix-scale table is empty. Aborted!" << endl;
@@ -456,5 +456,5 @@ void fastNLOCoeffAddFix::CatBin(const fastNLOCoeffAddFix& other, unsigned int iO
       SigmaTilde.resize(nold+1);
       SigmaTilde[nold] = other.SigmaTilde[iObsIdx];
    }
-   fastNLOCoeffAddBase::CatBin(other, iObsIdx);
+   fastNLOCoeffAddBase::CatBin(other, iObsIdx, ITabVersionRead);
 }

@@ -55,10 +55,10 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! ---  Parse command line
+   //! --- Parse command line
    char buffer[1024]; // TODO: Use PATH_MAX instead?
    string tablename;
    if (argc <= 1) {
@@ -228,8 +228,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 4 || AsEvolCode == "_") {
       AsEvolCode = "GRV";
-      shout["fnlo-tk-cppread"] << "No request given for alpha_s evolution code," << endl;
-      shout << "            using GRV default." << endl;
+      shout["fnlo-tk-cppread"] << "No request given for alpha_s evolution code, using GRV default." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
    }
@@ -251,7 +250,7 @@ int main(int argc, char** argv) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
-      chflex = "scale1";
+      chflex = "kScale1";
       shout["fnlo-tk-cppread"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
@@ -264,7 +263,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 7 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for no. of flavours," << endl;
-      shout << "            using default value for LHAPDF or Nf = " << Nf << "." << endl;
+      shout << "                  using default value for LHAPDF or Nf = " << Nf << "." << endl;
    } else {
       Nf = atoi(argv[7]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -287,7 +286,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 8 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for no. of loops," << endl;
-      shout << "            using default value for LHAPDF or NLoop = " << NLoop << "." << endl;
+      shout << "                  using default value for LHAPDF or NLoop = " << NLoop << "." << endl;
    } else {
       NLoop = atoi(argv[8]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -310,7 +309,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 9 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for value of alpha_s(M_Z)," << endl;
-      shout << "            using default value for LHAPDF or asMz = " << asMz << "." << endl;
+      shout << "                  using default value for LHAPDF or asMz = " << asMz << "." << endl;
    } else {
       asMz = atof(argv[9]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -333,7 +332,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 10 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for value of M_Z," << endl;
-      shout << "            using default value for LHAPDF or Mz = " << Mz << "." << endl;
+      shout << "                  using default value for LHAPDF or Mz = " << Mz << "." << endl;
    } else {
       Mz = atof(argv[10]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -356,8 +355,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 11 || VerbosityLevel == "_") {
       VerbosityLevel = "WARNING";
-      shout["fnlo-tk-cppread"] << "No request given for verbosity level," << endl;
-      shout << "            using WARNING default." << endl;
+      shout["fnlo-tk-cppread"] << "No request given for verbosity level, using WARNING default." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using verbosity level: " << VerbosityLevel << endl;
    }
@@ -370,17 +368,8 @@ int main(int argc, char** argv) {
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
-   //! --- Reset verbosity level to warning only from here on
-   // TODO: KR: A string to enum map or similar could come in handy here
-   if ( VerbosityLevel == "DEBUG" ) {
-      SetGlobalVerbosity(DEBUG);
-   } else if ( VerbosityLevel == "INFO" ) {
-      SetGlobalVerbosity(INFO);
-   } else if ( VerbosityLevel == "ERROR" ) {
-      SetGlobalVerbosity(ERROR);
-   } else {
-      SetGlobalVerbosity(WARNING);
-   }
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!

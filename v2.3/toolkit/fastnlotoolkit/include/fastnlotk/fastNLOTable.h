@@ -158,7 +158,7 @@ class fastNLOTable {
    /// ___________________________________________________________________________________________________
 
    /// get/set scenario description
-   std::vector <std::string> GetScDescr() const;
+   std::vector <std::string> GetScDescr() const { return ScDescript; }
    void SetScDescr(std::vector <std::string> ScDescr);
 
    /// get/set cross section units of published results (pb = 12, fb = 15, ...)

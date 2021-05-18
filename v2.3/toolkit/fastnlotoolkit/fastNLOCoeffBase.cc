@@ -26,17 +26,17 @@ fastNLOCoeffBase* fastNLOCoeffBase::Clone() const {
 void fastNLOCoeffBase::Read(istream& table, int ITabVersionRead){
    // basic read function.
    // reads in only 'base'-variables.
-   debug["ReadCoeffBase::Read"]<<"Start reading table ..."<<endl;
+   debug["Read"]<<"Start reading table ..."<<endl;
    ReadBase(table, ITabVersionRead);
    ReadCoeffInfoBlocks(table, ITabVersionRead);
    EndReadCoeff(table, ITabVersionRead);
-   debug["ReadCoeffBase::Read"]<<"Finished reading table."<<endl;
+   debug["Read"]<<"Finished reading table."<<endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::ReadBase(istream& table, int ITabVersionRead){
-   debug["ReadCoeffBase::ReadBase"]<<"Start reading base coefficient table ..."<<endl;
+   debug["ReadBase"]<<"Start reading base coefficient table ..."<<endl;
    fastNLOTools::ReadMagicNo(table);
    table >> IXsectUnits;
    table >> IDataFlag;
@@ -46,16 +46,16 @@ void fastNLOCoeffBase::ReadBase(istream& table, int ITabVersionRead){
    table >> NScaleDep;
    fastNLOTools::ReadFlexibleVector(CtrbDescript,table);
    fastNLOTools::ReadFlexibleVector(CodeDescript,table);
-   debug["ReadCoeffBase::ReadBase"]<<"Finished reading base coefficient table."<<endl;
+   debug["ReadBase"]<<"Finished reading base coefficient table."<<endl;
 }
 
 
 //________________________________________________________________________________________________________________ //
 void fastNLOCoeffBase::EndReadCoeff(istream& table, int ITabVersionRead){
-   debug["fastNLOCoeffBase::EndReadCoeff"]<<"Should have reached end of coefficient table for table version "<<ITabVersionRead<<endl;
+   debug["EndReadCoeff"]<<"Should have reached end of coefficient table for table version "<<ITabVersionRead<<endl;
    fastNLOTools::ReadMagicNo(table);
    fastNLOTools::PutBackMagicNo(table);
-   debug["fastNLOCoeffBase::EndReadCoeff"]<<"Finished reading coefficient table for table version "<<ITabVersionRead<<endl;
+   debug["EndReadCoeff"]<<"Finished reading coefficient table for table version "<<ITabVersionRead<<endl;
 }
 
 
@@ -126,29 +126,35 @@ bool fastNLOCoeffBase::IsCompatible(const fastNLOCoeffBase& other) const {
 
 //________________________________________________________________________________________________________________ //
 bool fastNLOCoeffBase::IsCatenable(const fastNLOCoeffBase& other) const {
-   if( IXsectUnits != other.GetIXsectUnits() ){
+   if ( IXsectUnits != other.GetIXsectUnits() ){
       debug["IsCatenable"]<<"IXsectUnits != other.GetIXsectUnits(). Skipped."<<endl;
       return false;
    }
-   if( IDataFlag != other.GetIDataFlag() ){
+   if ( IDataFlag != other.GetIDataFlag() ){
       debug["IsCatenable"]<<"IDataFlag != other.GetIDataFlag(). Skipped."<<endl;
       return false;
    }
-   if( IAddMultFlag != other.GetIAddMultFlag() ){
+   if ( IAddMultFlag != other.GetIAddMultFlag() ){
       debug["IsCatenable"]<<"IAddMultFlag != other.GetIAddMultFlag(). Skipped."<<endl;
       return false;
    }
-   if( IContrFlag1 != other.GetIContrFlag1() ){
+   if ( IContrFlag1 != other.GetIContrFlag1() ){
       debug["IsCatenable"]<<"IContrFlag1 != other.GetIContrFlag1(). Skipped."<<endl;
       return false;
    }
-   if( IContrFlag2 != other.GetIContrFlag2() ){
+   if ( IContrFlag2 != other.GetIContrFlag2() ){
       debug["IsCatenable"]<<"IContrFlag2 != other.GetIContrFlag2(). Skipped."<<endl;
       return false;
    }
-   if( NScaleDep != other.GetNScaleDep() ){
-      debug["IsCatenable"]<<"NScaleDep != other.GetNScaleDep(). Skipped."<<endl;
+   if ( NScaleDep != other.GetNScaleDep() ){
       return false;
+   }
+   if ( ! (fVersionRead < 25000) ) {
+      if ( (HasCoeffInfoBlock(0,0) && ! other.HasCoeffInfoBlock(0,0)) ||
+           (! HasCoeffInfoBlock(0,0) && other.HasCoeffInfoBlock(0,0)) ) {
+         debug["IsCatenable"]<<"Missing InfoBlock in either of the two tables. Skipped."<<endl;
+         return false;
+      }
    }
    info["IsCatenable"]<<"Base parameters of contribution allow catenation"<<endl;
    // check descripts here ?!
@@ -200,25 +206,25 @@ void fastNLOCoeffBase::Print(int iprint) const {
 
 // Erase observable bin
 void fastNLOCoeffBase::EraseBin(unsigned int iObsIdx) {
-   debug["fastNLOCoeffBase::EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
+   debug["EraseBin"]<<"Erasing table entries in CoeffBase for bin index " << iObsIdx << endl;
    SetNObsBin(GetNObsBin()-1);
 }
 
 // Catenate observable bin
 void fastNLOCoeffBase::CatBin(const fastNLOCoeffBase& other, unsigned int iObsIdx) {
-   debug["fastNLOCoeffBase::CatBin"]<<"Catenating observable bin in CoeffBase corresponding to bin index " << iObsIdx << endl;
+   debug["CatBin"]<<"Catenating observable bin in CoeffBase corresponding to bin index " << iObsIdx << endl;
    SetNObsBin(GetNObsBin()+1);
 }
 
 // Multiply observable bin
 void fastNLOCoeffBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
-   debug["fastNLOCoeffBase::MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffBase." << endl;
+   debug["MultiplyBin"]<<"Multiplying table entries. Nothing to be done in CoeffBase." << endl;
 }
 
 //
 //________________________________________________________________________________________________________________
 // Added to include CoeffInfoBlocks
-bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1) {
+bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1) const {
    bool result = false;
    for (int i=0; i<NCoeffInfoBlocks; i++) {
       if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 ) result = true;
@@ -226,7 +232,7 @@ bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1) {
    return result;
 }
 
-bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2) {
+bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2) const {
    bool result = false;
    for (int i=0; i<NCoeffInfoBlocks; i++) {
       if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 && ICoeffInfoBlockFlag2[i] == fICoeffInfoBlockFlag2 ) result = true;
@@ -248,41 +254,56 @@ int fastNLOCoeffBase::GetCoeffInfoBlockIndex(int fICoeffInfoBlockFlag1, int fICo
    return -1;
 }
 
+void fastNLOCoeffBase::AddCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2,
+                                         std::vector<std::string> Description, std::string datfile) {
+   info["AddCoeffInfoBlocks"]<<"Adding additional InfoBlock with flags "<<fICoeffInfoBlockFlag1<<" and "<<fICoeffInfoBlockFlag2<<" to table contribution."<<endl;
+   NCoeffInfoBlocks += 1;
+   ICoeffInfoBlockFlag1.push_back(fICoeffInfoBlockFlag1);
+   ICoeffInfoBlockFlag2.push_back(fICoeffInfoBlockFlag2);
+   NCoeffInfoBlockDescr.push_back(Description.size());
+   CoeffInfoBlockDescript.push_back(Description);
+   std::vector<double> Uncertainty = fastNLOTools::ReadInfoBlockContent(datfile);
+   CoeffInfoBlockContent.push_back(Uncertainty);
+}
+
 void fastNLOCoeffBase::ReadCoeffInfoBlocks(istream& table, int ITabVersionRead) {
    if (ITabVersionRead < 25000) {
-      debug["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"No additional info blocks allowed for table versions < 25000"<<endl;
+      debug["ReadCoeffInfoBlocks"]<<"No additional info blocks allowed for table versions < 25000"<<endl;
    } else {
       table >> NCoeffInfoBlocks;
-      debug["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found "<<NCoeffInfoBlocks<<" additional info blocks for coefficient table."<<endl;
+      debug["ReadCoeffInfoBlocks"]<<"Found "<<NCoeffInfoBlocks<<" additional info blocks for coefficient table."<<endl;
       for (int i=0; i<NCoeffInfoBlocks; i++) {
          int iflag;
          table >> iflag;
          ICoeffInfoBlockFlag1.push_back(iflag);
          if (ICoeffInfoBlockFlag1[i] == 0) {
-            debug["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
+            debug["ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
          } else {
-            error["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found info block of unknown type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
+            error["ReadCoeffInfoBlocks"]<<"Found info block of unknown type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
             exit(111);
          }
          table >> iflag;
          ICoeffInfoBlockFlag2.push_back(iflag);
          if (ICoeffInfoBlockFlag2[i] == 0) {
-            debug["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;
+            debug["ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;
          } else {
-            error["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found info block of unknown type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;
+            error["ReadCoeffInfoBlocks"]<<"Found info block of unknown type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;
             exit(222);
          }
          std::vector < std::string > Description;
-         fastNLOTools::ReadFlexibleVector(Description,table);
+         NCoeffInfoBlockDescr.push_back(fastNLOTools::ReadFlexibleVector(Description,table)-1);
          CoeffInfoBlockDescript.push_back(Description);
+         for (unsigned int j=0; j<Description.size(); j++) {
+            debug["ReadCoeffInfoBlocks"]<<"Read info block description line "<<j<<" : "<< Description[j] <<endl;
+         }
          if ( ICoeffInfoBlockFlag1[i] == 0 ) { // Entry per ObsBin
             std::vector < double > Content;
-            int nlines = fastNLOTools::ReadFlexibleVector(Content,table);
-            if ( nlines-1 != fNObsBins ) {
-               error["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<" , but # of content lines = "<<nlines-1<<" differs from fNObsBins = "<<fNObsBins<<"! Aborted."<<endl;
+            NCoeffInfoBlockCont.push_back(fastNLOTools::ReadFlexibleVector(Content,table));
+            if ( NCoeffInfoBlockCont[i]-1 != fNObsBins ) {
+               error["ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<" , but # of content lines = "<<NCoeffInfoBlockCont[i]-1<<" differs from fNObsBins = "<<fNObsBins<<"! Aborted."<<endl;
                exit(223);
             } else {
-               debug["fastNLOCoeffBase::ReadCoeffInfoBlocks"]<<"Read "<<nlines-1<<" lines into InfoBlock content vector."<<endl;
+               debug["ReadCoeffInfoBlocks"]<<"Read "<<NCoeffInfoBlockCont[i]-1<<" lines into InfoBlock content vector."<<endl;
             }
             CoeffInfoBlockContent.push_back(Content);
          }
@@ -292,19 +313,39 @@ void fastNLOCoeffBase::ReadCoeffInfoBlocks(istream& table, int ITabVersionRead) 
 
 void fastNLOCoeffBase::WriteCoeffInfoBlocks(ostream& table, int ITabVersionWrite) {
    if (ITabVersionWrite < 25000) {
-      debug["fastNLOCoeffBase::WriteCoeffInfoBlocks"]<<"No additional info blocks allowed for table versions < 25000"<<endl;
+      debug["WriteCoeffInfoBlocks"]<<"No additional InfoBlocks allowed for table versions < 25000"<<endl;
    } else {
-      // Test with zero InfoBlocks
-      debug["fastNLOCoeffBase::WriteCoeffInfoBlocks"]<<"Writing additional line "<<NCoeffInfoBlocks<<endl;
+      debug["WriteCoeffInfoBlocks"]<<"Writing additional InfoBlocks; NCoeffInfoBlocks = "<<NCoeffInfoBlocks<<endl;
       table << NCoeffInfoBlocks << sep;
       for (int i=0; i<NCoeffInfoBlocks; i++) {
-         table << ICoeffInfoBlockFlag1[i];
-         table << ICoeffInfoBlockFlag2[i];
-         table << NCoeffInfoBlockDescr[i];
-         for (int j=0; j<NCoeffInfoBlockDescr[i];j++) {
-            table << CoeffInfoBlockDescript[i][j];
+         debug["WriteCoeffInfoBlocks"]<<"ICoeffInfoBlockFlags1,2 = "<<ICoeffInfoBlockFlag1[i]<<", "<<ICoeffInfoBlockFlag1[i]<<endl;
+         table << ICoeffInfoBlockFlag1[i] << sep;
+         table << ICoeffInfoBlockFlag2[i] << sep;
+         table << NCoeffInfoBlockDescr[i] << sep;
+         for (int j=0; j<NCoeffInfoBlockDescr[i]; j++) {
+            debug["WriteCoeffInfoBlocks"]<<"CoeffInfoBlockDecsript[.][.] = "<<CoeffInfoBlockDescript[i][j]<<endl;
+            table << CoeffInfoBlockDescript[i][j] << sep;
          }
          int nlines = fastNLOTools::WriteFlexibleVector(CoeffInfoBlockContent[i],table);
+         debug["WriteCoeffInfoBlocks"]<<"Wrote "<<nlines-1<<" content lines to additional InfoBlock no. "<<i<<endl;
       }
+   }
+}
+
+void fastNLOCoeffBase::SetContributionDescription(std::vector <std::string> CtrbDescr) {
+   debug["SetContributionDescription"]<<"Setting contribution description."<<endl;
+   size_t NCtrbDescript = CtrbDescr.size();
+   fastNLOCoeffBase::CtrbDescript.resize(NCtrbDescript);
+   for (size_t i=0; i < NCtrbDescript; ++i) {
+      fastNLOCoeffBase::CtrbDescript[i] = CtrbDescr[i];
+   }
+}
+
+void fastNLOCoeffBase::SetCodeDescription(std::vector <std::string> CodeDescr) {
+   debug["SetCodeDescription"]<<"Setting code description."<<endl;
+   size_t NCodeDescript = CodeDescr.size();
+   fastNLOCoeffBase::CodeDescript.resize(NCodeDescript);
+   for (size_t i=0; i < NCodeDescript; ++i) {
+      fastNLOCoeffBase::CodeDescript[i] = CodeDescr[i];
    }
 }

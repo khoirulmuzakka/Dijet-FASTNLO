@@ -32,9 +32,9 @@ public:
    virtual void MultiplyBin(unsigned int iObsIdx, double fact); //!< Multiply coefficients of one bin a factor
    virtual void MultiplyBinProc(unsigned int iObsIdx, unsigned int iProc, double fact); //!< Multiply coefficients of one bin and subprocess by a factor
    // Erase observable bin from table
-   virtual void EraseBin(unsigned int iObsIdx);
+   virtual void EraseBin(unsigned int iObsIdx, int ITabVersionRead);
    // Catenate observable to table
-   virtual void CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx);
+   virtual void CatBin(const fastNLOCoeffAddFix& other, unsigned int iObsIdx, int ITabVersionRead);
 
    int GetTotalScalevars() const ;
    int GetTotalScalenodes() const ;

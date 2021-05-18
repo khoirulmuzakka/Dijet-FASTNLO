@@ -1758,10 +1758,6 @@ string fastNLOTable::GetXSDescr() const {
    return "Undefined";
 }
 
-vector <string> fastNLOTable::GetScDescr() const {
-   return ScDescript;
-}
-
 void fastNLOTable::SetScDescr(std::vector <std::string> ScDescr) {
    size_t NScDescript = ScDescr.size();
    fastNLOTable::ScDescript.resize(NScDescript);
@@ -2210,11 +2206,11 @@ void fastNLOTable::EraseBinFromTable(unsigned int iObsIdx) {
       } else if ( fastNLOCoeffAddFix::CheckCoeffConstants(ctmp,quiet) ) {
          logger.info["EraseBinFromTable"]<<"Found additive fix-table contribution. Now erasing index no. " << iObsIdx << endl;
          fastNLOCoeffAddFix* cfix = (fastNLOCoeffAddFix*)fCoeff[ic];
-         cfix->EraseBin(iObsIdx);
+         cfix->EraseBin(iObsIdx,ITabVersionRead);
       } else if ( fastNLOCoeffAddFlex::CheckCoeffConstants(ctmp,quiet) ) {
          logger.info["EraseBinFromTable"]<<"Found additive flex-table contribution. Now erasing index no. " << iObsIdx << endl;
          fastNLOCoeffAddFlex* cflex = (fastNLOCoeffAddFlex*)fCoeff[ic];
-         cflex->EraseBin(iObsIdx);
+         cflex->EraseBin(iObsIdx,ITabVersionRead);
       } else {
          logger.error["EraseBinFromTable"]<<"Could not identify contribution. Print and abort!" << endl;
          ctmp->Print(-1);
@@ -2301,7 +2297,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
                fastNLOCoeffAddFix* crhs = (fastNLOCoeffAddFix*)other.GetCoeffTable(ic);
                if ( clhs->IsCatenable(*crhs) ) {
                   logger.info["CatBinToTable"]<<"Found fix-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
-                  clhs->CatBin(*crhs,iObsIdx);
+                  clhs->CatBin(*crhs,iObsIdx,ITabVersionRead);
                   continue;
                }
             }
@@ -2310,7 +2306,7 @@ void fastNLOTable::CatBinToTable(const fastNLOTable& other, unsigned int iObsIdx
                fastNLOCoeffAddFlex* crhs = (fastNLOCoeffAddFlex*)other.GetCoeffTable(ic);
                if ( clhs->IsCatenable(*crhs) ) {
                   logger.info["CatBinToTable"]<<"Found flex-scale additive contribution. Now catenating index no. " << iObsIdx << endl;
-                  clhs->CatBin(*crhs,iObsIdx);
+                  clhs->CatBin(*crhs,iObsIdx,ITabVersionRead);
                   continue;
                }
             }

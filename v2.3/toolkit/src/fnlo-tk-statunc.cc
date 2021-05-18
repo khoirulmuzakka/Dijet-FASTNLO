@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Parse command line
@@ -212,8 +212,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 6 || VerbosityLevel == "_") {
       VerbosityLevel = "WARNING";
-      shout["fnlo-tk-statunc"] << "No request given for verbosity level," << endl;
-      shout << "            using WARNING default." << endl;
+      shout["fnlo-tk-statunc"] << "No request given for verbosity level, using WARNING default." << endl;
    } else {
       shout["fnlo-tk-statunc"] << "Using verbosity level: " << VerbosityLevel << endl;
    }
@@ -226,17 +225,8 @@ int main(int argc, char** argv) {
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
-   //! --- Reset verbosity level to warning only from here on
-   // TODO: KR: A string to enum map or similar could come in handy here
-   if ( VerbosityLevel == "DEBUG" ) {
-      SetGlobalVerbosity(DEBUG);
-   } else if ( VerbosityLevel == "INFO" ) {
-      SetGlobalVerbosity(INFO);
-   } else if ( VerbosityLevel == "ERROR" ) {
-      SetGlobalVerbosity(ERROR);
-   } else {
-      SetGlobalVerbosity(WARNING);
-   }
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    //! --- Loop over selected table sample
    //! Initialise fastNLO instances with interface to LHAPDF

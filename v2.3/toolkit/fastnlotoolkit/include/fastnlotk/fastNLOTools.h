@@ -80,6 +80,8 @@ namespace fastNLOTools {
    bool ReadMagicNo(std::istream& table);                                       //!< Read and check magic number from table.
    void PutBackMagicNo(std::istream& table);                                    //!< Reset magic number, such that it can be recognized by other reading routines
 
+   std::vector <double> ReadInfoBlockContent(std::string filename);
+
 };
 
 

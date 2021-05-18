@@ -1399,6 +1399,13 @@ void fastNLOReader::CalcCrossSection() {
    for (unsigned int i=0; i<NObsBin; i++) {
       QScale[i] = QScale[i]/XSection[i];
    }
+
+   // ---- Square root for statistical uncertainty combinaton ---- //
+   logger.debug["CalcCrossSection"]<<"Calculate stat. uncertainty from quadratic addition: sqrt(dXS)"<<endl;
+   for (unsigned int i=0; i<NObsBin; i++) {
+      dXSection[i] = sqrt(dXSection[i]);
+   }
+
    logger.debug["CalcCrossSection"]<<"... leaving CalcCrossSection."<<endl;
 }
 
@@ -1506,13 +1513,15 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
    int xUnits = c->GetIXsectUnits();
    logger.debug["CalcCrossSectionv21"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
-   // Check whether CoeffInfoBlock for relative stat. uncertainties (0,0) exists
-   logger.debug["CalcCrossSectionv21"]<<"Checking on presence of statistical uncertainties  ..."<<endl;
+   // Check whether CoeffInfoBlock for relative statistical/numerical uncertainties (0,0) exists
+   logger.debug["CalcCrossSectionv21"]<<"Checking on presence of statistical/numerical uncertainties  ..."<<endl;
    int iCIBIndex = c->GetCoeffInfoBlockIndex(0,0);
    std::vector < double > dCIBCont;
    if ( iCIBIndex > -1 ) {
-      logger.debug["CalcCrossSectionv21"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical uncertainties."<<endl;
+      logger.debug["CalcCrossSectionv21"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical/numerical uncertainties."<<endl;
       dCIBCont = c->GetCoeffInfoContent(iCIBIndex);
+   } else {
+      logger.info["CalcCrossSectionv21"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
    }
 
    for (unsigned int i=0; i<NObsBin; i++) {
@@ -1566,7 +1575,10 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
       if ( dCIBCont.empty() ) {
          dXS->at(i) += 0.;
       } else {
-         dXS->at(i) += fabs(XStmp)*dCIBCont[i]; // XStmp may be negative, but dCIBCont as statistical uncertainty should not!
+         // Quadratical addition of independent statistical uncertainties
+         dXS->at(i) += XStmp*XStmp*dCIBCont[i]*dCIBCont[i];
+         // Linear absolut addition of uncertainties (useful?)
+         //         dXS->at(i) += fabs(XStmp)*dCIBCont[i];
       }
    }
    logger.debug["CalcCrossSectionv21"]<<"... leaving CalcCrossSectionv21."<<endl;
@@ -1608,13 +1620,15 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
    int xUnits = c->GetIXsectUnits();
    logger.debug["CalcCrossSectionv20"]<<"Ipublunits = " << Ipublunits << ", xUnits = " << xUnits << endl;
 
-   // Check whether CoeffInfoBlock for relative stat. uncertainties (0,0) exists
-   logger.debug["CalcCrossSectionv20"]<<"Checking on presence of statistical uncertainties  ..."<<endl;
+   // Check whether CoeffInfoBlock for relative statistical/numerical uncertainties (0,0) exists
+   logger.debug["CalcCrossSectionv20"]<<"Checking on presence of statistical/numerical uncertainties  ..."<<endl;
    int iCIBIndex = c->GetCoeffInfoBlockIndex(0,0);
    std::vector < double > dCIBCont;
    if ( iCIBIndex > -1 ) {
-      logger.debug["CalcCrossSectionv20"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical uncertainties."<<endl;
+      logger.debug["CalcCrossSectionv20"]<<"Found CoeffInfoBlock "<<iCIBIndex<<" with statistical/numerical uncertainties."<<endl;
       dCIBCont = c->GetCoeffInfoContent(iCIBIndex);
+   } else {
+      logger.info["CalcCrossSectionv20"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
    }
 
    int scaleVar = c->GetNpow() == ILOord ? 0 : fScalevar;
@@ -1642,7 +1656,10 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
       if ( dCIBCont.empty() ) {
          dXS->at(i) += 0.;
       } else {
-         dXS->at(i) += fabs(XStmp)*dCIBCont[i]; // XStmp may be negative, but dCIBCont as statistical uncertainty should not!
+         // Quadratical addition of independent statistical uncertainties
+         dXS->at(i) += XStmp*XStmp*dCIBCont[i]*dCIBCont[i];
+         // Linear absolut addition of uncertainties (useful?)
+         //         dXS->at(i) += fabs(XStmp)*dCIBCont[i];
       }
    }
    logger.debug["CalcCrossSectionv20"]<<"... leaving CalcCrossSectionv20."<<endl;

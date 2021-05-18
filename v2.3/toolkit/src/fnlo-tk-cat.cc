@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose

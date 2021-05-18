@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Parse commmand line
@@ -256,7 +256,6 @@ int main(int argc, char** argv) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
-      chflex = "scale1";
       shout["fnlo-tk-yodaout"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Using scale definition "+chflex+"." << endl;
@@ -281,8 +280,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 8 || VerbosityLevel == "_") {
       VerbosityLevel = "WARNING";
-      shout["fnlo-tk-yodaout"] << "No request given for verbosity level," << endl;
-      shout << "            using WARNING default." << endl;
+      shout["fnlo-tk-yodaout"] << "No request given for verbosity level, using WARNING default." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Using verbosity level: " << VerbosityLevel << endl;
    }
@@ -295,22 +293,15 @@ int main(int argc, char** argv) {
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
-   //! --- Reset verbosity level to warning only from here on
-   // TODO: KR: A string to enum map or similar could come in handy here
-   if ( VerbosityLevel == "DEBUG" ) {
-      SetGlobalVerbosity(DEBUG);
-   } else if ( VerbosityLevel == "INFO" ) {
-      SetGlobalVerbosity(INFO);
-   } else if ( VerbosityLevel == "ERROR" ) {
-      SetGlobalVerbosity(ERROR);
-   } else {
-      SetGlobalVerbosity(WARNING);
-   }
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    //! --- fastNLO initialisation, attach table
    fastNLOTable table = fastNLOTable(tablename);
+
    //! Print essential table information
    table.PrintContributionSummary(0);
+   table.Print(0);
 
    //! Initialise a fastNLO reader instance
    //! Note: This also initializes the cross section to the LO/NLO one!

@@ -1,7 +1,10 @@
+#include <cfloat>
 #include <cstdlib>
-#include <string>
+#include <fstream>
 #include <iostream>
 #include <cmath>
+#include <sstream>
+#include <string>
 #include "fastnlotk/fastNLOTools.h"
 
 using namespace std;
@@ -388,5 +391,44 @@ namespace fastNLOTools {
       return true;
    }
 
+   //______________________________________________________________________________
+   std::vector <double> ReadInfoBlockContent(std::string filename) {
+      std::ifstream infile;
+      std::string line;
+      std::vector <double> Uncertainty;
+      info["ReadInfoBlockContent"]<<"Reading additional InfoBlock content from file: " << filename <<endl;
+      infile.open(filename);
+      if (infile.is_open()) {
+         int iline = 0;
+         // Read line-by-line
+         while(std::getline(infile, line)) {
+            // Put line into stringstream and read word-by-word
+            std::istringstream iss(line);
+            std::string word;
+            iss >> word;
+            // For now assume NNLOJET dat file format:
+            // - Skip all lines starting with comment symbol '#'
+            // - Read cross section and absolute statistical uncertainty from 4th and 5th columns
+            if ( word.at(0) != '#' ) {
+               // Skip first three words of each line
+               iss >> word;
+               iss >> word;
+               double xs, dxs;
+               iss >> xs;
+               iss >> dxs;
+               if ( fabs(xs) > DBL_MIN ) {
+                  Uncertainty.push_back(dxs/xs);
+               } else {
+                  Uncertainty.push_back(0.);
+               }
+               iline += 1;
+            }
+         }
+      } else {
+         error["ReadInfoBlockContent"]<<"Cannot read InfoBlock content, aborted! Filename is: " << filename <<endl;
+         exit(33);
+      }
+      return Uncertainty;
+   }
 
 } // end namespace fastNLO
