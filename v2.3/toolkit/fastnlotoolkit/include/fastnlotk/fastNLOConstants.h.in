@@ -167,27 +167,35 @@ namespace fastNLO {
    const std::string _CSEP20("####################");
    const std::string _DSEP20("====================");
    const std::string _SSEP20("--------------------");
+   const std::string _TSEP20(" - - - - - - - - - -");
    const std::string _CSEP20C(" ######################");
    const std::string _DSEP20C(" #=====================");
    const std::string _SSEP20C(" #---------------------");
+   const std::string _TSEP20C(" #- - - - - - - - - - -");
    const std::string _CSEP40  = _CSEP20  + _CSEP20;
    const std::string _DSEP40  = _DSEP20  + _DSEP20;
    const std::string _SSEP40  = _SSEP20  + _SSEP20;
+   const std::string _TSEP40  = _TSEP20  + _TSEP20;
    const std::string _CSEP40C = _CSEP20C + _CSEP20;
    const std::string _DSEP40C = _DSEP20C + _DSEP20;
    const std::string _SSEP40C = _SSEP20C + _SSEP20;
+   const std::string _TSEP40C = _TSEP20C + _TSEP20;
    const std::string _CSEPS  = _CSEP40  + _CSEP40;
    const std::string _DSEPS  = _DSEP40  + _DSEP40;
    const std::string _SSEPS  = _SSEP40  + _SSEP40;
+   const std::string _TSEPS  = _TSEP40  + _TSEP40;
    const std::string _CSEPSC = _CSEP40C + _CSEP40;
    const std::string _DSEPSC = _DSEP40C + _DSEP40;
    const std::string _SSEPSC = _SSEP40C + _SSEP40;
+   const std::string _TSEPSC = _TSEP40C + _TSEP40;
    const std::string _CSEPL  = _CSEPS  + _CSEPS ;
    const std::string _DSEPL  = _DSEPS  + _DSEPS ;
    const std::string _SSEPL  = _SSEPS  + _SSEPS ;
+   const std::string _TSEPL  = _TSEPS  + _TSEPS ;
    const std::string _CSEPLC = _CSEPSC + _CSEPS ;
    const std::string _DSEPLC = _DSEPSC + _DSEPS ;
    const std::string _SSEPLC = _SSEPSC + _SSEPS ;
+   const std::string _TSEPLC = _TSEPSC + _TSEPS ;
 #endif
 }
 

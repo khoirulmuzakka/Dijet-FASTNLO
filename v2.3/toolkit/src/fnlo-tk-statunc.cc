@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
          man << "   - Specify the PDF set including the absolute path." << endl;
          man << "   - Download the desired PDF set from the LHAPDF web site." << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
-         man << "   Alternatives: LO, NNLO, NLO-ONLY, NNLO-ONLY (if available)" << endl;
+         man << "   Alternatives: LO, NNLO, NLO_only, NNLO_only (if available)" << endl;
          man << "[nmin]: Smallest table number nnnn to start with, def. = 0000." << endl;
          man << "[nmax]: Largest  table number nnnn to end with, def. = 1000." << endl;
          man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
@@ -158,11 +158,11 @@ int main(int argc, char** argv) {
       } else if ( FixedOrderChoice == "NNLO" ) {
          eOrder = kNextToNextToLeading;
          shout["fnlo-tk-statunc"] << "Deriving NNLO cross sections for comparison." << endl;
-      } else if ( FixedOrderChoice == "NLO-ONLY" ) {
+      } else if ( FixedOrderChoice == "NLO_only" ) {
          eOrder = kNextToLeading;
          lexclusive = true;
          shout["fnlo-tk-statunc"] << "Deriving NLO contributions for comparison." << endl;
-      } else if ( FixedOrderChoice == "NNLO-ONLY" ) {
+      } else if ( FixedOrderChoice == "NNLO_only" ) {
          eOrder = kNextToNextToLeading;
          lexclusive = true;
          shout["fnlo-tk-statunc"] << "Deriving NNLO contributions for comparison." << endl;
@@ -365,35 +365,6 @@ int main(int argc, char** argv) {
       exit(1);
    }
 
-   // KR TEST MERGING
-
-   fastNLOTable* resultTable = NULL;
-   int nmerge = 0;
-   EMerge moption = kMerge;
-   for ( const string& path : alltables ) {
-      nmerge++;
-      if (nmerge == 1) {
-         resultTable = new fastNLOTable(path);
-      } else {
-         fastNLOTable tab(path);
-         resultTable->MergeTable(tab, moption); // merge
-      }
-   }
-   // --- Write result
-   resultTable->SetFilename("mergetest.tab.gz");
-   resultTable->SetITabVersionWrite(25000);
-   // Loop over contributions in table
-   for ( int ic=0; ic<resultTable->GetNcontrib()+resultTable->GetNdata(); ic++ ) {
-      fastNLOCoeffAddBase* coeff = (fastNLOCoeffAddBase*)resultTable->GetCoeffTable(ic);
-      int ib = coeff->GetNCoeffInfoBlocks();
-      cout<< "IIIIIIIII = " << ic << ", ib = " << ib <<endl;
-   }
-   //   AddCoeffInfoBlock
-   info["Blubber"]<<"Write merged results to file "<<resultTable->GetFilename()<<"."<<endl;
-   resultTable->WriteTable();
-
-   // KR TEST MERGING
-
    //! Write out statistical fluctuation info
    yell << _CSEPSC << endl;
    shout << "Special info on statistical fluctuations:" << endl;
@@ -475,7 +446,7 @@ int main(int argc, char** argv) {
    shout << "Relative Statistical Uncertainties" << endl;
    yell  << _SSEPSC << endl;
    shout << "bin      cross section           lower uncertainty       upper uncertainty" << endl;
-   yell  << _SSEPSC << endl;
+   yell  << _TSEPSC << endl;
 
    vector < double > dxsu;
    vector < double > dxsl;
@@ -484,7 +455,7 @@ int main(int argc, char** argv) {
       dxsu.push_back(dxs[iobs]);
       dxsl.push_back(dxs[iobs]);
    }
-   yell << _SSEPSC << endl;
+   yell << _TSEPSC << endl;
 
    //! Without YODA we can stop here
 #ifndef WITH_YODA

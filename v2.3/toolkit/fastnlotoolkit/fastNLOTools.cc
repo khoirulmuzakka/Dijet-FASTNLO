@@ -393,35 +393,70 @@ namespace fastNLOTools {
 
    //______________________________________________________________________________
    std::vector <double> ReadInfoBlockContent(std::string filename) {
+      std::string extension = "";
       std::ifstream infile;
       std::string line;
       std::vector <double> Uncertainty;
+
+      //! Determine extension to differentiate for parsing among
+      //  - NLOJet++ --> fnlo-tk-statunc .log files
+      //  - NNLOJET  --> .dat files
+      if ( filename.find_last_of(".") != std::string::npos ) {
+         extension = filename.substr(filename.find_last_of(".")+1);
+      }
       info["ReadInfoBlockContent"]<<"Reading additional InfoBlock content from file: " << filename <<endl;
       infile.open(filename);
       if (infile.is_open()) {
-         int iline = 0;
+         int  iline = 0;
+         bool lline = false;
          // Read line-by-line
          while(std::getline(infile, line)) {
+            cout << "line = " << line << endl;
             // Put line into stringstream and read word-by-word
             std::istringstream iss(line);
-            std::string word;
+            std::string word, word1, word2;
             iss >> word;
-            // For now assume NNLOJET dat file format:
+            // For 'dat' extension assume NNLOJET dat file format:
             // - Skip all lines starting with comment symbol '#'
             // - Read cross section and absolute statistical uncertainty from 4th and 5th columns
-            if ( word.at(0) != '#' ) {
-               // Skip first three words of each line
-               iss >> word;
-               iss >> word;
-               double xs, dxs;
-               iss >> xs;
-               iss >> dxs;
-               if ( fabs(xs) > DBL_MIN ) {
-                  Uncertainty.push_back(dxs/xs);
-               } else {
-                  Uncertainty.push_back(0.);
+            if ( extension == "dat" ) {
+               if ( word.at(0) != '#' ) {
+                  // Skip first three words of each line
+                  iss >> word;
+                  iss >> word;
+                  double xs, dxs;
+                  iss >> xs;
+                  iss >> dxs;
+                  if ( fabs(xs) > DBL_MIN ) {
+                     Uncertainty.push_back(dxs/xs);
+                  } else {
+                     Uncertainty.push_back(0.);
+                  }
+                  iline += 1;
                }
-               iline += 1;
+            }
+            // For 'log' extension assume fnlo-tk-stat v2.5 log file format:
+            // (New v2.5 separator lines starting with #- - - - - - -)
+            // - Start at first line with "#-" as 1st word and
+            // - stop again at next line starting with "#-" in 1st word
+            else if ( extension == "log" ) {
+               if ( word == "#-" ) {
+                  lline = ! lline;
+               } else if ( lline ) {
+                  cout << "AAAAA word = " << word << endl;
+                  // Skip second & third word of each uncertainty line (x section; lower uncertainty)
+                  iss >> word;
+                  iss >> word;
+                  double dxsrel;
+                  iss >> dxsrel;
+                  cout << "dxsrel = " << dxsrel << endl;
+                  Uncertainty.push_back(dxsrel);
+                  iline += 1;
+                  cout << "BBBBB iline = " << iline << endl;
+               }
+            } else {
+               error["ReadInfoBlockContent"]<<"Unkown file extension, aborted! Filename is: " << filename <<endl;
+               exit(32);
             }
          }
       } else {
