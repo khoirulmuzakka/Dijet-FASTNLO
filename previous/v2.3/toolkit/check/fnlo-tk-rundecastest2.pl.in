@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+#
+# Unit test to read a fastNLO table
+# Version:
+#
+# created by K. Rabbertz: 20.10.2016
+#
+#-----------------------------------------------------------------------
+#
+use Cwd;
+use English;
+use Getopt::Std;
+use strict;
+use warnings;
+
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
+# Remove potentially left-over temporary files
+my $tab   = "fnl1014_I902309_2-2";
+my $tabfl = ${tab}.".tab";
+my $tabgz = ${tabfl}.".gz";
+foreach my $file ( "rundecastest2.log", "rundecasdiff2.log", "${tabfl}", "${tabgz}" ) {
+    if ( -e $file ) {
+        system("rm -f $file");
+    }
+}
+
+# Prepare test setup
+# Copy gzipped default tables from data/check storage
+my $cmd = "cp -f ${src}/../data/check/${tabgz} .";
+print "Executing command: $cmd\n";
+my $ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-rundecastest2: Copying test table ${tabgz} failed: $ret, aborted!\n";}
+$cmd = "gunzip ${tabgz}";
+print "Executing command: $cmd\n";
+$ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-rundecastest2: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
+
+# Evaluate, keep only result lines
+$cmd = "../src/fnlo-tk-cppread ${tabfl} CT10nlo _ RUNDEC _ _ 5 2 0.1185 _ | tail -4 > rundecastest2.log";
+print "Executing command: $cmd\n";
+$ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-rundecastest2: Evaluating test table ${tabfl} failed: $ret, aborted!\n";}
+
+# Determine difference to default evaluation output
+$cmd = "diff ${src}/../data/check/${tab}_rundecastest2.log rundecastest2.log > rundecasdiff2.log";
+print "Executing command: $cmd\n";
+$ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-rundecastest2: Result comparison with 'diff' failed: $ret, aborted!\n";}
+
+# The diff.log must be empty
+if ( ! -z "rundecasdiff2.log" ) {
+    print "fnlo-tk-rundecastest2: Evaluation of test table differs from default:\n";
+    $cmd = "cat rundecasdiff2.log";
+    print "Executing command: $cmd\n";
+    $ret = system("$cmd");
+    print "fnlo-tk-rundecastest2: Do you use LHAPDF version 6?\n";
+    print "fnlo-tk-rundecastest2: Do you have the CT10nlo PDF set installed? Is it found?\n";
+    die "fnlo-tk-rundecastest2: Table evaluation unit test failed, please fix!\n";
+}
+
+print "fnlo-tk-rundecastest2: Table evaluation unit test passed.\n";
+
+exit 0;

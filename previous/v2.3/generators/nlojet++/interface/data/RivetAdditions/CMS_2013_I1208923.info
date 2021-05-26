@@ -1,0 +1,41 @@
+Name: CMS_2013_I1208923
+Year: 2013
+Summary: Measurements of differential jet cross sections in proton-proton collisions at √s=7 TeV with the CMS detector
+Experiment: CMS
+Collider:   LHC 7.0 TeV
+InspireID:  1208923
+Status:     UNVALIDATED
+Authors:
+ - Klaus Rabbertz <klaus.rabbertz@cern.ch>
+References:
+ - Phys. Rev. D 87 (2013) 112002.
+RunInfo:
+  pp QCD inclusive jet and dijet production with a minimum jet pT of 30 GeV at 7 TeV.
+NumEvents:  10000000
+Beams:    [p+, p+]
+Energies: [7000]
+PtCuts:   [30]
+Description:
+  'Measurements of the differential cross sections for inclusive jet and dijet production in proton-proton collisions
+  at a centre-of-mass energy of 7 TeV. Using a data sample of integrated luminosity of 5 fb-1, inclusive jet PT
+  cross sections up to a PT of 2 TeV in five intervals of |rapidity| from 0 to 2.5 are presented as well as
+  the invariant mass distributions of dijets up to a mass of 5 TeV in the 5 intervals of |rapidity|. Jets are
+  reconstructed using the anti-kt algorithm with distance parameter R=0.7. The cross sections are fully corrected
+  for detector effects.'
+NeedCrossSection: yes
+BibKey: Chatrchyan:2012bja
+BibTeX: '@ARTICLE{Chatrchyan:2012bja,
+  author = {Chatrchyan, Serguei and others},
+  title = {Measurements of differential jet cross sections in proton-proton collisions at $\sqrt{s}=7$ {TeV} with the {CMS} detector},
+  journal = {Phys. Rev. D},
+  year = {2013},
+  volume = {87},
+  pages = {112002},
+  archiveprefix = {arXiv},
+  collaboration = {CMS},
+  doi = {10.1103/PhysRevD.87.112002},
+  eprint = {1212.6660},
+  primaryclass = {hep-ex},
+  reportnumber = {CMS-QCD-11-004, CMS-PH-EP-2012-343},
+  slaccitation = {%%CITATION = ARXIV:1212.6660;%%}
+}'

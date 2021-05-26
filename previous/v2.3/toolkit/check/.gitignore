@@ -1,0 +1,6 @@
+# Ignore produced tests and test tables
+fnlo-tk-*.pl
+fnlo-tk-*.trs
+*.tab
+*.tab.gz
+*.yoda

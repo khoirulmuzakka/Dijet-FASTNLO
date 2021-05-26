@@ -1,0 +1,16 @@
+# ------------------------
+#   Input and output
+# ------------------------
+InTable    InclusiveNJetEvents_fnl5662i_v23_fix_2-2-2.tab
+OutTable   erasetest.tab
+
+# ------------------------------------
+#   Remove Bins
+#     Specify bin numbers to be removed
+#     within curly brackets.
+#     First bin is bin 1.
+#     Please use increasing bin numbering ##
+# ------------------------------------
+RemoveBins {   #  An increasing bin numbering must be used! ##
+   5   6
+}

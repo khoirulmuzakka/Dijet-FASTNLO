@@ -1,0 +1,26 @@
+Release Notes for fastnlo_interface_nlojet version 2.3.1pre revision 2067:
+==========================================================================
+Updated to work with new toolkit prerelease.
+Major simplification in NLOJet++ usage:
+- Typical jet analyses are categorized into two classes, InclusiveNJets and
+  InlusiveNJetsEvent, such that many variations can be made by only adapting
+  the provided example steering files. No code changes necessary.
+  InclusiveNJets makes one entry per jet of an event, while InlusiveNJetsEvent
+  makes only one entry per event.
+- Steering files to reproduce calculations for numerous published inclusive jet
+  or dijet mass cross sections are provided and labelled with a fastNLO indicator
+  plus the Inspire number of the corresponding publication.
+
+
+
+Release Notes for fastnlo_interface_nlojet version 2.3.1pre revision 1855:
+==========================================================================
+First public prerelease of the NLOJet++ interface to the fastNLO toolkit.
+This is a prerelease for testing and numerous things are still in progress.
+Proper documentation is missing.
+Don't hesitate to contact the authors for any questions or problems.
+
+Content:
+ - Library for running jet algorithms from within NLOJet++ libtool libraries
+   including interface to FastJet
+ - Example NLOJet++ libtool libraries for filling fastNLO v2 tables

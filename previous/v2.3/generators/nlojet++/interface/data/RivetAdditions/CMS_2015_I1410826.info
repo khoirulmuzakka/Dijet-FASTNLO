@@ -1,0 +1,45 @@
+Name: CMS_2015_I1410826
+Year: 2015
+Summary: <Insert short CMS_2015_I1410826 description>
+Experiment: CMS
+Collider: LHC
+InspireID: 1410826
+Status: UNVALIDATED
+Authors:
+ - Your Name <terence.libeiro@cern.ch>
+#References:
+# - <Example: Phys.Lett.B639:151-158,2006, Erratum-ibid.B658:285-289,2008>
+# - <Example: doi:10.1016/j.physletb.2006.04.048>
+# - <Example: arXiv:hep-ex/0511054 (plus erratum)>
+RunInfo:
+  <Insert event types (not gen-specific), energy, any kinematic
+  efficiency cut(s) that may be needed; essentially any details needed to set
+  up a generator to reproduce the data.>
+NumEvents: 1000000
+NeedCrossSection: no
+#Beams: <Insert beam pair(s), e.g. [p-, p+] or [[p-, e-], [p-, e+]]>
+#Energies: <Insert list of run energies or beam energy pairs in GeV,
+#           e.g. [1960] or [[8.0, 3.5]] or [630, 1800]. Order pairs to match "Beams">
+#PtCuts: <Insert list of kinematic pT cuts in GeV, e.g. [0, 20]>
+#NeedCrossSection: True
+Description:
+  '<Insert a fairly long description, including what is measured
+  and if possible what it is useful for in terms of MC validation
+  and tuning. Use LaTeX for maths like $\pT > 50\;\GeV$.
+  Use single quotes around the block if required (see http://www.yaml.org)>'
+BibKey: Khachatryan:2015luy
+BibTeX: '@article{Khachatryan:2015luy,
+      author         = "Khachatryan, Vardan and others",
+      title          = "{Measurement of the inclusive jet cross section in pp
+                        collisions at sqrt(s) = 2.76 TeV}",
+      collaboration  = "CMS",
+      year           = "2015",
+      eprint         = "1512.06212",
+      archivePrefix  = "arXiv",
+      primaryClass   = "hep-ex",
+      reportNumber   = "CMS-SMP-14-017, CERN-PH-EP-2015-299",
+      SLACcitation   = "%%CITATION = ARXIV:1512.06212;%%"
+}'
+ToDo:
+ - Implement the analysis, test it, remove this ToDo, and mark as VALIDATED :-)
+

@@ -1,0 +1,69 @@
+#!/usr/bin/env perl
+#
+# Unit test 2 to erase bins from a fastNLO table
+# Version:
+#
+# created by K. Rabbertz: 20.10.2016
+#
+#-----------------------------------------------------------------------
+#
+use Cwd;
+use English;
+use Getopt::Std;
+use strict;
+use warnings;
+
+# Define source dir as required for VPATH builds like in make distcheck
+my $src = "@srcdir@";
+
+# Remove potentially left-over temporary files
+my @tabs = ("fnl1014_I902309_2-2", "fnl1014_I902309_2");
+my @tabfls;
+my @tabgzs;
+foreach my $tab ( @tabs ) {
+    push @tabfls, ${tab}.".tab";
+    push @tabgzs, ${tab}.".tab".".gz";
+}
+foreach my $file ( "erasetest2.tab", "erasediff2.log", @tabfls, @tabgzs ) {
+    if ( -e $file ) {
+        system("rm -f $file");
+    }
+}
+
+# Prepare test setup
+# Copy gzipped default tables from data/check storage
+foreach my $tabgz ( @tabgzs ) {
+    my $cmd = "cp -f ${src}/../data/check/${tabgz} .";
+    print "Executing command: $cmd\n";
+    my $ret = system("$cmd");
+    if ( $ret ) {die "fnlo-tk-erasetest2: Copying test table ${tabgz} failed: $ret, aborted!\n";}
+    $cmd = "gunzip ${tabgz}";
+    print "Executing command: $cmd\n";
+    $ret = system("$cmd");
+    if ( $ret ) {die "fnlo-tk-erasetest2: Ungzipping test table ${tabgz} failed: $ret, aborted!\n";}
+}
+
+# Erase
+my $cmd = "../src/fnlo-tk-modify steerfile=${src}/../data/check/SteerModify_EraseBins2.str";
+print "Executing command: $cmd\n";
+my $ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-erasetest2: Erasing bins from test table $tabfls[0] failed: $ret, aborted!\n";}
+
+# Determine difference to default table with bins removed
+$cmd = "diff $tabfls[1] erasetest2.tab > erasediff2.log";
+print "Executing command: $cmd\n";
+$ret = system("$cmd");
+if ( $ret ) {die "fnlo-tk-erasetest2: Result comparison with 'diff' failed: $ret, aborted!\n";}
+
+# The diff.log must be empty
+if ( ! -z "erasediff2.log" ) {
+    print "fnlo-tk-erasetest2: Test table with bins erased differs from default:\n";
+    $cmd = "cat erasediff2.log";
+    print "Executing command: $cmd\n";
+    $ret = system("$cmd");
+    die "fnlo-tk-erasetest2: Modification unit test 2 failed, please fix!\n";
+}
+
+print "fnlo-tk-erasetest2: Modification unit test 2 passed.\n";
+
+exit 0;

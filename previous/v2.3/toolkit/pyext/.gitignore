@@ -1,0 +1,3 @@
+# Ignore produced temporary files
+fastnlo.py
+fastnlo_wrap.cc

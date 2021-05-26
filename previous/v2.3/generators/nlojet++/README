@@ -1,0 +1,134 @@
+# -*-sh-*-
+# fastnlo_interface_nlojet-2.3.1pre-1855:
+# =======================================
+# This is a prerelease for testing!
+# Please contact the authors for any questions, problems, or requests.
+
+
+# Content:
+# --------
+# - C++ library for running jet algorithms from within NLOJet++ libtool libraries including interface to FastJet
+# - Example NLOJet++ libtool libraries for filling fastNLO v2 tables
+
+
+# Requirements:
+# -------------
+# For installation of interface package: Patched version of NLOJet++-4.1.3:      nlojet++-4.1.3-patched.tar.gz
+#                                        FastJet-3.0.6 for the example scenario: fastjet-3.0.6.tar.gz
+#                                        The fastNLO Toolkit 2.3.0pre:           fastnlo_toolkit-2.3.1pre-1854.tar.gz
+# The fastNLO toolkit requires:          LHAPDF version 5 or 6, e.g.:            lhapdf-5.9.1.tar.gz
+#
+# All these packages are also downloadable from http://fastnlo.hepforge.org/code/v23/code-v23.html
+
+
+# Basic installation of one of these packages in six simple steps:
+# ----------------------------------------------------------------
+# 1. Unpack distribution tarball in directory of your choice:
+tar xzvf package-v.v.v.tar.gz
+#
+# 2. Descend into created subdirectory:
+cd package-v.v.v
+
+# 3. Configure the installation:
+#    (Prepared using the GNU autotools setup, which is NOT required for the installation itself.)
+./configure --prefix=/path/to/your/local/installation_directory
+
+#    If the same installation directory or other system-wide known installation directories
+#    contain already a version of other required packages, these will be found and used
+#    automatically.
+#    If not, please specify the path to where PACKAGE is installed, i.e. where
+#    'bin/package-executable' or 'lib/package-library can be found:
+./configure --prefix=/path/to/your/local/installation_directory --with-package=/path/to/your/package/installation
+
+#    To see all available configure options do:
+./configure --help
+
+# 4. Compile and link the project, use the '-j n' option to specify,
+#    how many cores, e.g. n=2, should be used in parallel in this step:
+make -j n
+
+# 5. If implemented, run functionality test suite:
+#make check
+
+# 6. Install the products into the configured target directory:
+make install
+
+
+# Special installation recommendations for some packages:
+# -------------------------------------------------------
+# FastJet: To use all available jet algorithms:
+./configure --prefix=/path/to/your/local/installation_directory --bindir=/path/to/your/local/installation_directory/bin
+            --enable-shared --enable-allplugins
+
+
+# Optional features:
+# ------------------
+# fastNLO Toolkit: See the Tooolkit README file!
+
+
+# Usage:
+# ------
+# The NLOJet++ interface comes with an example to do inclusive jet cross sections.
+#
+# The code resides in interface/hadron/InclusiveJets.cc of the distribution tar-ball and
+# can be copied and adapted to do other observables. The NLOjet++ libtool library gets installed into
+# /path/to/your/local/installation_directory/lib/fastnlo_interface_nlojet/libInclusiveJets.la
+#
+# For more flexibility in terms of event/jet selection and binning a steering file with name
+# InclusiveJets.str is required to be in the directory from where NLOJet++ is run.
+# Example steerings reproducing the 2010 CMS inclusive jet analysis like in fnl1014_I902309,
+# see http://fastnlo.hepforge.org/scenarios/tables-lhc.html, are installed into
+# /path/to/your/local/installation_directory/share/fastnlo_interface_nlojet
+# The two example steering files fnl2342b_v22_fix.str and fnl2342b_v22_flex.str both reproduce
+# the 2010 CMS inclusive jet analysis using either
+#
+# - the fastNLO fixed-scale table format that uses internally separate interpolation tables to store
+#   results for multiple factorization scale factors mu_f,
+#
+#   (This format usually produces smaller tables, but then whatever has been defined to be mu_f,
+#    e.g. mu_f = pT_jet, can only be varied among the chosen mu_f scale factors. The scale factor
+#    for the renormalization scale mu_r can be changed arbitrarily. Note: Work in progress allows us
+#    in the near future the use of the HOPPET package for arbitrary mu_f scale factors also here,
+#    but at the cost of higher computing times per table evaluation.)
+#
+# - the fastNLO flexible-scale table format that tabulates all logarithmic scale ratios to the
+#   renormalization and factorization scales for up to two scale choices, e.g. sqrt(Q^2) and pT_jet
+#   in deep-inelastic scattering.
+#   (This format results in larger tables but has the flexibility to select arbitrary scale factors
+#    for mu_r and mu_f AND to change the functional form of each scale choice! That is mu_r and mu_f
+#    can be set for example to mu_r = sqrt(Q^2 + pT^2) and mu_f = pT, if Q and pT were the two original
+#    scale choices.)
+#
+# See the description in the example steerings for more info on the various options.
+#
+# In order to run NLOJet++ (Please see also the NLOJet++ documentation!) you can do
+bin/nlojet++ --calculate -c[born|nlo] [--max-event=nnnnnnn] [-n taskname] [-s randomseed]
+             -u lib/fastnlo_interface_nlojet/libInclusiveJets.la
+#
+# If this is the first call and a sufficient number of events is requested than the scenario produces
+# a so-called warmup table, e.g. InclusiveJets_fnl2342b_v22_fix_warmup.txt
+# This warmup table is necessary for fastNLO to optimize the interpolation in scales mu_r, mu_f and
+# in the fractional parton momentum x, where PDFs are probed. This warmup table should be produced
+# in NLO mode (-cnlo) of NLOJet++ and with at least some tenths of millions of events. Mileage
+# might vary depending on your scenario.
+#
+# If a file with corresponding name (InclusiveJets_fnl2342b_v22_fix_warmup.txt) exists already,
+# it is used and a fastNLO table is produced. The table can be found in the subdirectory 'output'
+# where its name depends on the -n option given to NLOJet++.
+#
+# Since this is a VERY time consuming step, where some billions(!) of events should be produced for
+# statistically reliable results, fastNLO allows the user to produce many LO and NLO tables in parallel.
+# Take care to use different random number seeds for each job!
+# These tables can afterwards be merged into one using the fnlo-merge program of the toolkit.
+#
+# Please contact the authors for any questions, problems, or requests.
+
+
+# For developers only:
+# --------------------
+# If you have the GNU autotools installed, the project gets automatically reconfigured properly
+# if you e.g. add something new to a Makefile.am to be compiled or linked.
+#
+# The GNU autotools also support incremental installations. If you modify something in or add something
+# that requires recompilation or relinking, the install step can be restricted to only install updated files:
+make install "INSTALL=/path/to/install-sh -C"

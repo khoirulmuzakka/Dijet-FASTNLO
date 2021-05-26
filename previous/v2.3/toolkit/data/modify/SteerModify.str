@@ -1,0 +1,105 @@
+##################################################################################
+#  Steering example for program
+#     fnlo-tk-modify
+#
+#  Necessary parameters are "InTable" and "OutTable".
+#  If you do not want to modify a value, keep it empty.
+#
+#  Alternatively to this file, parameters can be passed to
+#  fnlo-tk-modify via the command line, e.g.:
+#     fnlo-tk-modify InTable=fnl4242.tab
+#  which will overwrite a potential "InTable" value in
+#  this steering file.
+#
+#  A different steering filename than "SteerModify.str"
+#  can be specified via the command line
+#     fnlo-tk-modify steerfile=AnotherSteerfile.str
+#
+#  You can also change all other values available for modification
+#  via the command line. For example, if you want to modify the table version:
+#     fnlo-tk-modify InTable=in.tab OutTable=out.tab Itabversion=30000
+#
+#  In order to change the Scenario Description
+#     AttachScDescription true # for adding to or false for replacing the description
+#     ScDescript {
+#       "First line to add"
+#       "Second line of add"
+#       "etc"
+#     }
+#
+##################################################################################
+
+#----------------------
+#   Input and output
+#----------------------
+InTable    TableToModify.tab
+OutTable   ModifiedTable.tab
+
+#--------------------
+#   Info print out
+#--------------------
+PrintSteeringCard   true   # Print steering provided on command line or within this file
+PrintInputA1        true   # Print table header of input table
+PrintInputA2        true   # Print table scenario of input table
+PrintOutputA1       true   # Print table header of output table
+PrintOutputA2       true   # Print table scenario of output table
+
+#-------------------------------------------
+#   Modify parameters of the table header
+#   Leave value empty for no modification
+#-------------------------------------------
+#Itabversion                # Change table version (Expert option!)
+#ScenName                   # Change scenario name
+
+# --------------------------------------------
+#   Modify parameters of the table scenario
+#   Leave value empty for no modification
+# --------------------------------------------
+#Ipublunits                 # Adapt units to the ones published in HepData
+#ILOord                     # Correct power in alpha_s of LO (Expert option! Must be consistent with original calculation!)
+#Ecms                       # Correct centre-of-mass energy (Expert option! Must be consistent with original calculation!)
+AttachScDescription false  # Append to (true) or replace (false) existing scenario description
+ScDescript {               # Example of final scenario description for CMS inclusive jets
+  "d2sigma-jet_dpTdy_[pb_GeV]"
+  "CMS_Collaboration"
+  "Inclusive_Jet_pT"
+  "anti-kT_R=0.5"
+  "CMS-PAPER-QCD-10-011, arXiv:1106.0208, Phys. Rev. Lett. 107, 132001 (2011)."
+  "RIVET_ID=CMS_2011_S9086218/D01-x01-y01,SPIRES_ID=9086218,INSPIRE_RECORD=902309"
+  "THEORY_LABEL=NLOJet++"
+  "provided by:"
+  "fastNLO_2.1.0"
+  "If you use this table, please cite:"
+  "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
+}
+
+#------------------------------------------------------
+#   Modify bin sizes
+#   (Does not change differential cross sections,
+#    which are stored already in differential form!)
+#------------------------------------------------------
+BinSizeFactor   1.         # Overall factor for bin sizes
+#BinSize {                  # Individual bin size factors for each observable bin; one no. per bin!
+#
+#}
+
+#--------------------------------------------------------------------
+#   Modify tabulated coefficients
+#   (Changes the differential cross sections, which can be adapted
+#    such way to updated bin widths or normalisations!)
+#--------------------------------------------------------------------
+#MultCoeff {                # Individual factors to scale stored coefficients for each observable bin; one no. per bin!
+#
+#}
+
+#-------------------------------------------------------------------------
+#   Cut out unused observable bins or split table into multiples pieces
+#     Specify bin numbers to be removed within curly brackets.
+#     First bin is bin 1, last bin is NObsBin.
+#     An ordered numbering with INCREASING bin numbers must be used!
+#--------------------------------------------------------------------------
+#RemoveBins {               #  Gaps are fine, BUT an increasing bin numbering must be used!
+#   1   2   3
+#  10  13
+# 111
+#}
