@@ -1,0 +1,1 @@
+./configure --prefix=$HOME/local --enable-fortranext --enable-pyext --with-hoppet --with-qcdnum --with-root --with-yoda

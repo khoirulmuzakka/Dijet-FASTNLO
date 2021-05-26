@@ -1,0 +1,129 @@
+# -*-sh-*-
+# fastNLO_toolkit version 2.3.1:
+# ==============================
+# Please contact the authors for any questions or problems.
+
+
+# Content:
+# --------
+# Generic C++ linkable library and code to create, fill, read, and evaluate fastNLO v2 tables
+
+
+# Requirements:
+# -------------
+# For installation of toolkit package: LHAPDF version 6, see also http://lhapdf.hepforge.org
+# For running executable: fastNLO table, PDF set from LHAPDF, see also http://fastnlo.hepforge.org
+
+
+# Basic installation of distribution package fastnlo_toolkit-v.v.v-nnnn.tar.gz in six simple steps:
+# -------------------------------------------------------------------------------------------------
+# 1. Unpack distribution tarball in directory of your choice:
+tar xzvf fastnlo_toolkit-v.v.v-nnnn.tar.gz
+#
+# 2. Descend into created subdirectory:
+cd fastnlo_toolkit-v.v.v-nnnn
+
+# 3. Configure the installation:
+#    (Prepared using the GNU autotools setup, which is NOT required for the installation itself.)
+./configure --prefix=/path/to/your/local/installation_directory
+
+#    If the same installation directory or other system-wide known installation directories
+#    contain already a version of LHAPDF version 5 or 6, LHAPDF will be found and used
+#    automatically.
+#    If not, please specify the path to where LHAPDF is installed, i.e. where
+#    'bin/lhapdf-config' can be found:
+./configure --prefix=/path/to/your/local/installation_directory --with-lhapdf=/path/to/your/lhapdf/installation
+
+#    To see all available configure options do:
+./configure --help
+
+# 4. Compile and link the project, use the '-j n' option to specify,
+#    how many cores, e.g. n=2, should be used in parallel in this step:
+make -j n
+
+# 5. Run functionality test suite:
+make check
+
+# 6. Install the products into the configured target directory:
+make install
+
+
+# Optional features:
+# ------------------
+# 1. The fastNLO_toolkit supports multiple alternatives for the evolution of the strong coupling.
+#    Some of them require additional external software: HOPPET and QCDNUM, see also
+#    http://hoppet.hepforge.org and http://qcdnum.hepforge.org
+#
+#    Note: On x86_64 systems the QCDNUM libraries must be compiled with the -fPIC option.
+#          Since this has to be adapted manually for each "makelibs" script in the original
+#          release qcdnum-17.00.06.tar.gz, we provide an already patched version from our
+#          web site: qcdnum-17.00.06-patched.tar.gz
+#
+#    If these packages are found in the same installation directory or
+#    other system-wide known installation directories, the options
+--with-hoppet
+#    or
+--with-qcdnum
+#    can be used to support their alpha_s evolutions.
+#    Otherwise their installation paths have to be specified explicitly like
+--with-hoppet=/path/to/your/hoppet/installation
+#    or
+--with-qcdnum=/path/to/your/qcdnum/installation
+#    The libraries are then expected to be in /path/to/your/installation/lib and
+#    include files in /path/to/your/installation/include
+
+# 2. Output can be provided in YODA format for comparisons to data using
+#    Rivet analyses and rivet-mkhtml
+--with-yoda
+
+# 3. Output can also be filled into ROOT histograms. A commented out example for this is
+#    provided in the fnlo-tk-example executable. For correct compile and link options
+#    the fastNLO_toolkit has to be configured with ROOT support like
+--with-root
+#    or
+--with-root=/path/to/your/root/installation
+
+# 4. The fastNLO_toolkit optionally allows access to its libraries via the PYTHON scripting language.
+#    If you have PYTHON and SWIG installed, the PYTHON extension can be enabled via
+--enable-pyext
+
+
+# Usage:
+# ------
+# Please see the executables in the folder 'src' and run e.g.
+fnlo-tk-example -h
+# or
+fnlo-tk-cppread -h
+# for some usage explanations.
+# In case of LHAPDF6, the PDF sets have to be specified without extension.
+
+
+# For developers ONLY:
+# --------------------
+# Instead of a distribution tarball experienced developers can also
+# check out the latest fastNLO software directly using git:
+git clone https://gitlab.ekp.kit.edu/qcd-public/fastNLO.git
+# The fastNLO toolkit resides in the subdirectory v2.0/toolkit.
+# To prepare this directory for installation the following command is needed:
+autoreconf -i
+# For this to work it is mandatory to have recent enough GNU autotools installed, i.e.
+# autoconf for auto-conf, auto-header, auto-scan;
+# automake for automake, aclocal;
+# libtool  for libtoolize
+#
+# If files related to these tools are not found in the usual system places as
+# in the case of LCG environment setups, it might be necessary to set proper
+# paths where these files can be found now, e.g.
+csh: setenv ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
+sh:  export ACLOCAL_PATH=/cvmfs/sft.cern.ch/lcg/releases/libtool/2.4.2-9ad34/x86_64-slc6-gcc62-opt/share/aclocal
+#
+# If macros still are not found like AX_CXX_COMPILE_STDCXX11, it might help to install
+# the package autoconf-archive.
+#
+# After a successful reconfigure the configuration, make, and install steps should proceed
+# as before.
+#
+# The GNU autotools also support incremental installations. If you modify something in or add something
+# to the fastNLO_toolkit that requires recompilation or relinking, the install step can be restricted
+# to only install updated files:
+make install "INSTALL=/path/to/install-sh -C"

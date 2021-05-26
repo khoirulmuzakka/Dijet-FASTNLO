@@ -1,0 +1,61 @@
+-----------------------------------------------------------------------
+TODO list for fastNLO_toolkit (ordered by priority)
+-----------------------------------------------------------------------
+
+- Add checks for HOPPET, CRunDec, QCDNUM
+- Change everything to use LHAPDF6 features instead of deprecated LHAGLUE;
+  partially done in HOPPET interface
+- Drop LHAPDF5 support
+- Use binary read/write table to save storage space and read in times (Mark's suggestion)
+- Provide features to allow -> APPLgrid conversion and the inverse -> fastNLO
+- Test installation with lgcenv environment
+   - Problem with zlib?
+   - Problem with HOPPET?
+ - Include stat. uncertainties into table
+ - Creator for Referenztabellen
+ - Streamline usage of logger.messagelevel, shout|cout, error|warn|silent etc. in speaker
+
+ - KR: Check, which points are actually done ...
+ - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
+ - Write documentation (e.g. twiki)
+ - converter aktualisieren ??
+ - Benutzbarkeit gewaehrleisten, wenn binning- und bin-suche im generator gemacht werden (ist teils implementiert bspw 'fnloEvent::_iOB')
+ - fastNLOCreate fuer mehrere Tabellen - also (bspw.) mehrere fastNLOCreate instanzen (dazu muessen alle 'read-steer'-statements geaendert werden)
+   oder mehrere Coeffizienten Tabellen
+ - 'automatisches' Erkennen von PDF-LiCos beim warm-up run
+ - implement DIS fixed-scale (desired?)
+ - 'Generator-stamps': konsistente beschreibung und zitate fuer CodeDescr[]. Bspw: fastNLO::CodeDescr::NLOJET_hhc(vector<string>& contrdescr)
+ - fnloEvent: implementiere 'operator+' und/oder eine 'add-funktion' (ordentliche Klassendefinitionen??)
+ - Change int functions() to void functions of read and write routines
+ - punktweise-differentielle gemischt mit bin-integrierten doppelt-differentiellen tabllen
+
+
+
+=======================================================================
+DONE
+=======================================================================
+ - Modifier & Concatenator for tables/bins
+ - fast Warmup-run (just some events and then 'guess' PS boundaries)
+ - 11x11 = 121 PDF-LiCos
+ - 13x13 PDF-LiCos
+ - Codieren der LiCo's in Tabelle (und lesen im reader)
+ - reader testen fuer NNLO
+ - Ensure NNLO compatibility of reader
+ - fastNLOConstants.h in fastNLOConstants.h.in with svn-variables
+ - implement DIS flexible-scale
+ - Write out constants of warmup-run into warmup-file
+ - implement fixed-scale hhc for nlojet
+ - Use 'const reference' or pointers as return values of interpolation grids
+ - Use 'const reference' for 'FillContribution' functions
+ - Division by binsize for coefficients
+ - Aergerniss mit BinBreite und IDiffBin==0 (in read- and write-routinen klaeren)
+ - merger aktualisieren
+ - fix labels in header of warmup-table bin-grid (dim1 <-> dim2)
+ - fnloEvent, fnloScenario: are now classes (stumps) instead of structs
+ - Steering file optionally without generator/interface specific quantitites
+ - fastNLOCreate::GetSteerParameter(string ... , double&);
+ - full-matrix schreibweise
+ - modifier aktualisieren
+ - bi-cubic interpolation
+ - 'one-point' interpolation (very useful)
+ - Linear interpolation

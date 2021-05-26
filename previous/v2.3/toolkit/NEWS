@@ -1,0 +1,127 @@
+IMPORTANT:
+==========
+To compare the actual fnlo-tk-cppread output with older revisions 2585 and earlier,
+asmz for use with GRV evolution (default) must be set explicitly to the previous
+PDG value of 0.1185. The actual one of PDG 2017, 0.1181, is the new default.
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2402:
+=================================================================================================
+Some major new developments are included in this release:
+(Attention: compiler with C++11 support is mandatory!)
+- In preparation of grid productions for NNLO calculations, many new features have been
+  implemented with respect to fastNLO table mass production and their statistical combination.
+  In particular, these are
+  - usage of the nnlo-bridge package (to be released) for filling fastNLO or APPLgrid
+    interpolation grids from NNLOJET
+  - extension of the fastNLO table format (2.36.00, backwards compatible) to store
+    statistical weight information for many new merging options addressing
+    statistical fluctuations in NNLO grid productions
+  - steering-less initialisation possible in addition to steering files
+  - improved warmup file generation and check
+  - more options for distribution of x nodes
+- Support of transparent writing/reading of gzipped tables tab.gz to reduce significantly
+  the necessary disk space when storing large numbers of tables;
+  requires the zlib compression library to be present;
+- Includes new test suite to check installation --> 'make check'
+- Includes basic example for a bi-directional interface between
+  the C++ fastNLO toolkit and Fortran analysis / PDF fitting code (fortranext)
+- The fastNLO table evaluation part is mostly unchanged, but has been
+  complemented with more tools to manipulate tables like
+  - cutting out unused bins or multiplying bins by a set of factors (fnlo-tk-modify)
+  - concatenating separately calculated phase-space bins into one common table (fnlo-tk-cat)
+  - printing out normalised cross sections directly for tables set up with normalisation flag
+    (fnlo-tk-cppread, fnlo-tk-yodaout)
+  - printing out partial cross sections for crosschecks, e.g. NLO contribution alone,
+    or of cross section for all members of a PDF set (fnlo-tk-cppread)
+  - new merger with many new options for table combination (fnlo-tk-merge2)
+- Issue reported by D. Maitre fixed
+- Some issues in Python wrapper fixed
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2212:
+=================================================================================================
+Some little issues fixed and:
+- Add producer for ROOT files with xsections & uncertainties.
+- Added executable fnlo-tk-statunc to derive statistical uncertainty from
+  sample of calculations with equal weight.
+- Installation adapted to new autotools-enabled QCDNUM versions.
+  Old-style QCDNUM versions not supported anymore.
+- Some adaptations for use in newer xFitter version.
+- Some adaptations for use with mcgrid 2.0.
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2163:
+=================================================================================================
+Some little issues fixed and:
+- PDF uncertainties calculable via fastNLO code or via LHAPDF6 (both not for HERAPDF).
+  A struct with 3 vectors is returned giving x section and rel. lower and upper uncertainty.
+- fnlo-tk-yodaout acquired an additional option for the fixed-order to be used, def. is NLO.
+- Standard table info printout now also prints no. of x nodes.
+- Improvements in table checking when merging/appending.
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2143:
+=================================================================================================
+Only some little issues have been fixed and improvements incorporated into this prerelease:
+- Interface part to MCgrid v2.0 finalized.
+- Option "IgnoreWarmupBinningCheck" added, avoids warmup binning check if set to true
+  (useful for bin borders in pi etc.).
+- An example to fill ROOT histograms from within fastNLO is provided (with input from Giannis Flouris)
+- Rebuild problem in Doxygen documentation is fixed.
+- Improved problem catch for ill-formatted tables.
+- Added some more safety measures with respect to inf or nan entries.
+- Improved logging handling.
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2087:
+=================================================================================================
+Major work went into this prelease:
+- This prerelease is meant to work with the next release of MCgrid (> v1.2) and Sherpa
+  to include all NLO processes available via this chain.
+- A new executable fnlo-tk-yodaout has been conceived (including work by Stefanos Tyros)
+  that provides YODA-formatted output for inclusion of fixed-oder table evaluations
+  in Data/MC comparisons via Rivet. Foreseen to be used in MCplots.
+- Up to triple differential observable binnings are supported, numerous
+  Getter functions are provided.
+- Functionality to derive scale and PDF uncertainties has been added and is used
+  in fnlo-tk-yodaout
+- fnlo-tk-config executable is provided for easier compiling/linking.
+- A first version of Doxygen documentation is included.
+- Method added to derive scale uncertainties.
+- Numerous little issues fixed
+
+
+
+Notes for public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1870:
+=================================================================================================
+Only small changes to eliminate some installation hiccups for the optional parts and
+to remove some additional warnings found by the clang and icc compilers.
+Don't hesitate to contact the authors for any questions or problems.
+
+
+
+Notes for first public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 1854:
+=================================================================================================
+This is a prerelease for testing and numerous things are still in progress.
+Proper documentation is missing.
+Don't hesitate to contact the authors for any questions or problems.
+
+
+
+Notes for very first autotools version of fastNLO_toolkit version 2.1.0, revision 1494:
+=======================================================================================
+
+- Restructured like fastNLO_reader C++ part
+- src contains code for one excutable to be made
+- fastnlotoolkit contains code for linkable library libfastnlotoolkit to be compiled and linked
+- subdir include/fastnlotk contains header files
+==> All include statements in code had to be complemented with "fastnlotk/"
+==> Change in library name and fastnlotk include directory allows simultaneous
+    installation and use of reader library AND toolkit library without problems
+    caused by identically named header files

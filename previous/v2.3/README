@@ -1,0 +1,12 @@
+# fastNLO:
+# ========
+# This directory contains two kinds of projects:
+#
+# 1. The fastNLO toolkit to create and evaluate fastNLO interpolation grids: toolkit
+# 2. Interfaces of particular pQCD programs to fill fastNLO interpolations grids:
+#    a) difftop (Not yet started)
+#    b) NLOJet++ (Releases available)
+#    c) Sherpa (In development)
+#
+# Please read the respective README files for more details.
+#
