@@ -47,7 +47,7 @@ namespace std {
 %}
 %include "../fastnlotoolkit/include/fastnlotk/speaker.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOPDFLinearCombinations.h"
-%include "../fastnlotoolkit/include/fastnlotk/fastNLOConstants.h"
+//%include "../fastnlotoolkit/include/fastnlotk/fastNLOConstants.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOTable.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h"
