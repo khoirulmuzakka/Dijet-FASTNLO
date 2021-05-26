@@ -180,7 +180,7 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
    // do the xpom integration
    logger.info["GetDiffCrossSection"]<<"Integrating xpom in "<<fxPoms.size()<<" slices. [";
    fflush(stdout);
-   
+
    fXSection_vs_xIPzIP.clear();
    fXSection_vs_xIPzIP.resize(NObsBin);
    if ( fPrintxIPzIP ) {
@@ -196,26 +196,26 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
          if (i==0) logger.debug["GetDiffCrossSection"]<<"i="<<i<<"\tixp="<<ixp<<"\tfxpom="<<fxpom<<"\tXSection[i]="<<XSection[i]<<"\tfdxPoms[ixp]="<<fdxPoms[ixp]<<endl;
          xs[i] += XSection[i] * fdxPoms[ixp] ;
          xsLO[i] += XSection_LO[i] * fdxPoms[ixp] ;
-	 
-	 //vector<map<double,double> > fXSection_vsX1;
-	 //std::vector < std::map< std::pair<double, double>, double > > fXSection_vs_xIPzIP;
-	 if ( fPrintxIPzIP ) {
-	    for ( auto xc : fXSection_vsX1[i] ) {
-	       printf("%8d%14.6f%14.6f%14.6f\n",i,fxpom,xc.first,xc.second*fdxPoms[ixp]);
-	       fXSection_vs_xIPzIP[i][make_pair(fxpom,xc.first)] = xc.second*fdxPoms[ixp];
-	       //cout<<i<<"\t"<<fxpom<<"\t"<<xc.first<<"\t"<<xc.second*fdxPoms[ixp]<<endl;;
-	    }
-	 }
-	 // for ( auto xc : fXSection_vsX1[i] ) {
-	 //    fXSection_vs_xIPzIP[i][make_pair(xc.first,fxpom)] = xc.second*fdxPoms[ixp];
-	 // }
-	 // for ( auto d : fXSection_vsX1[0] ) cout<<" | "<<d.first<<", "<<d.second;
-	 // cout<<endl;
+
+         //vector<map<double,double> > fXSection_vsX1;
+         //std::vector < std::map< std::pair<double, double>, double > > fXSection_vs_xIPzIP;
+         if ( fPrintxIPzIP ) {
+            for ( auto xc : fXSection_vsX1[i] ) {
+               printf("%8d%14.6f%14.6f%14.6f\n",i,fxpom,xc.first,xc.second*fdxPoms[ixp]);
+               fXSection_vs_xIPzIP[i][make_pair(fxpom,xc.first)] = xc.second*fdxPoms[ixp];
+               //cout<<i<<"\t"<<fxpom<<"\t"<<xc.first<<"\t"<<xc.second*fdxPoms[ixp]<<endl;;
+            }
+         }
+         // for ( auto xc : fXSection_vsX1[i] ) {
+         //    fXSection_vs_xIPzIP[i][make_pair(xc.first,fxpom)] = xc.second*fdxPoms[ixp];
+         // }
+         // for ( auto d : fXSection_vsX1[0] ) cout<<" | "<<d.first<<", "<<d.second;
+         // cout<<endl;
       }
 
       // radek
       for(unsigned i = 0; i < NObsBin; ++i) {
-         //cout << "The basic cross section in bin "<<i <<" : " << XSection[i] << endl;                                                                                            
+         //cout << "The basic cross section in bin "<<i <<" : " << XSection[i] << endl;
          double sumMy=0;
          for(auto &x :  fXSection_vsQ2[i]) {
             sumMy += x.second;
@@ -230,16 +230,17 @@ vector < double > fastNLODiffReader::GetDiffCrossSection() {
    }
    logger.info>>"]"<<endl;
    logger.info["GetDiffCrossSection"]<< "Integrated interval in xpom: " << interv << endl;
-   
+
    // set this cross section also to FastNLO mother class
    XSection = xs;
    XSection_LO = xsLO;
 
-   // k-factors
-   fastNLOReader::kFactor.resize(NObsBin);
-   for (unsigned int i = 0 ; i<NObsBin ; i++) {
-      fastNLOReader::kFactor[i] = fastNLOReader::XSection[i] / fastNLOReader::XSection_LO[i];
-   }
+   // DEPRECATED
+   // // k-factors
+   // fastNLOReader::kFactor.resize(NObsBin);
+   // for (unsigned int i = 0 ; i<NObsBin ; i++) {
+   //    fastNLOReader::kFactor[i] = fastNLOReader::XSection[i] / fastNLOReader::XSection_LO[i];
+   // }
 
    return xs;
 }
@@ -264,7 +265,7 @@ vector<double> fastNLODiffReader::GetXFX(double xp, double muf) const {
       int nx = -1;
       int nb = -1;
       for (int ib = 0 ; nb == -1 && ib<B_LO()->GetNObsBin() ; ib++) {
-	 if (B_NLO() && (B_LO()->GetNxmax(ib) != B_NLO()->GetNxmax(ib)))
+         if (B_NLO() && (B_LO()->GetNxmax(ib) != B_NLO()->GetNxmax(ib)))
              logger.error["fastNLODiffReader::GetXFX"]<<"LO and NLO tables must have same number of x-bins."<<endl;
           for (int ix = 0 ; nx == -1 && ix<B_LO()->GetNxtot1(ib); ix++) {
              if (B_NLO() && (B_LO()->GetXNode1(ib,ix) != B_NLO()->GetXNode1(ib,ix)))

@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Parse commmand line
@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
          yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-yodaout"] << "This program evaluates a fastNLO table and" << endl;
-         info["fnlo-tk-yodaout"] << "prints out cross sections with either scale or" << endl;
-         info["fnlo-tk-yodaout"] << "PDF uncertainties in YODA format for use with Rivet." << endl;
+         info["fnlo-tk-yodaout"] << "prints out cross sections with statistical (if available), " << endl;
+         info["fnlo-tk-yodaout"] << "scale, or PDF uncertainties in YODA format for use with Rivet." << endl;
          info["fnlo-tk-yodaout"] << "For this to work, the scenario description must contain" << endl;
          info["fnlo-tk-yodaout"] << "the Rivet ID in the form 'RIVET_ID=EXP_YYYY_INSPIREID/Dii-xjj-ykk'," << endl;
          info["fnlo-tk-yodaout"] << "where 'ii', 'jj', and 'kk' indicate the first histogram covered by" << endl;
@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
          man << "                 L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)" << endl;
 #endif
          man << "                 AS (a_s(M_Z) variation uncertainty with GRV evolution)" << endl;
+         man << "                 ST (statistical uncertainty of x section calculation, if available)" << endl;
          man << "[order]: Fixed-order precision to use, def. = NLO" << endl;
          man << "   Alternatives: LO, NLO_only, NNLO, NNLO_only (if available)" << endl;
          man << "[norm]: Normalize if applicable, def. = no." << endl;
@@ -124,6 +125,7 @@ int main(int argc, char** argv) {
          man << "                 \"kQuadraticSum\", i.e. mur=muf=sqrt(scale1^2+scale2^2)." << endl;
          man << "[np]: Apply nonperturbative corrections if available, def. = no." << endl;
          man << "   Alternatives: \"yes\" or \"np\"" << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -154,6 +156,7 @@ int main(int argc, char** argv) {
    EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
    EAsUncertaintyStyle    eAsUnc    = kAsNone;
+   EAddUncertaintyStyle   eAddUnc   = kAddNone;
    string chunc = "none";
    if (argc > 3) {
       chunc = (const char*) argv[3];
@@ -193,6 +196,9 @@ int main(int argc, char** argv) {
       } else if ( chunc == "AS" ) {
          eAsUnc = kAsGRV;
          shout["fnlo-tk-yodaout"] << "Showing a_s(M_Z) uncertainty with GRV evolution." << endl;
+      } else if ( chunc == "ST" ) {
+         eAddUnc = kAddStat;
+         shout["fnlo-tk-yodaout"] << "Showing statistical uncertainty of x section calculation." << endl;
       } else {
          error["fnlo-tk-yodaout"] << "Illegal choice of uncertainty, " << chunc << ", aborted!" << endl;
          exit(1);
@@ -261,22 +267,41 @@ int main(int argc, char** argv) {
       chnp = (const char*) argv[7];
    }
    if (argc <= 7 || chnp == "_") {
+      chnp = "no";
       shout["fnlo-tk-yodaout"] << "Do not apply nonperturbative corrections." << endl;
    } else {
       shout["fnlo-tk-yodaout"] << "Apply nonperturbative corrections if available." << endl;
    }
 
-   //! ---  Too many arguments
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
    if (argc > 8) {
+      VerbosityLevel  = (const char*) argv[8];
+   }
+   if (argc <= 8 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-yodaout"] << "No request given for verbosity level, using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-yodaout"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //! ---  Too many arguments
+   if (argc > 9) {
       error["fnlo-tk-yodaout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
    yell << _CSEPSC << endl;
+   //---  End of parsing arguments
+
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    //! --- fastNLO initialisation, attach table
    fastNLOTable table = fastNLOTable(tablename);
+
    //! Print essential table information
    table.PrintContributionSummary(0);
+   table.Print(0);
 
    //! Initialise a fastNLO reader instance
    //! Note: This also initializes the cross section to the LO/NLO one!
@@ -417,16 +442,24 @@ int main(int argc, char** argv) {
    string LineName;
    if ( chunc == "2P" || chunc == "6P" ) {
       XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative Scale Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative scale uncertainties (%s)",chunc.c_str());
       LineName += "_dxscl";
    } else if ( chunc == "AS" ) {
       XsUnc = fnlo->GetAsUncertainty(eAsUnc, lNorm);
-      snprintf(buffer, sizeof(buffer), " # Relative a_s(M_Z) Uncertainties (%s)",chunc.c_str());
+      snprintf(buffer, sizeof(buffer), " # Relative a_s(M_Z) uncertainties (%s)",chunc.c_str());
       LineName += "_dxa_s";
+   } else if ( chunc == "ST" ) {
+      XsUnc = fnlo->GetAddUncertainty(eAddUnc, lNorm);
+      snprintf(buffer, sizeof(buffer), " # Relative statistical uncertainties (%s)",chunc.c_str());
+      LineName += "_dxst";
    } else if ( chunc != "none" ) {
       XsUnc = fnlo->GetPDFUncertainty(ePDFUnc, lNorm);
       snprintf(buffer, sizeof(buffer), " # Relative PDF Uncertainties (%s %s %s)",chord.c_str(),PDFFile.c_str(),chunc.c_str());
       LineName += "_dxpdf";
+   } else {
+      XsUnc = fnlo->GetScaleUncertainty(kScaleNone, lNorm);
+      snprintf(buffer, sizeof(buffer), " # Without uncertainties");
+      LineName += "_dxnone";
    }
 
    if ( XsUnc.xs.size() ) {

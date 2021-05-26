@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
@@ -112,7 +112,6 @@ int main(int argc, char** argv) {
          info["fnlo-tk-cat"]<<"Reading table '" << path << "'" << endl;
          yell << _CSEPSC << endl;
          fastNLOTable tab(path);
-
          //! --- Initialising result with first read table
          //! --- If necessary, normalisation is done later on
          if ( !resultTable ) {

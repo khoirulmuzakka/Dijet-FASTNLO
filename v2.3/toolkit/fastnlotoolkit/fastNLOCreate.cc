@@ -996,7 +996,7 @@ void fastNLOCreate::Instantiate() {
    // -------------------------
    // header
    SetScenName(fScenConsts.ScenarioName);
-   SetItabversion(fastNLO::tabversion);
+   SetITabVersionWrite(fastNLO::tabversion);
 
    // ---- scenario specific flags
    Ipublunits   = fScenConsts.PublicationUnits;

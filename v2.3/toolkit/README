@@ -1,12 +1,12 @@
 # -*-sh-*-
-# fastNLO_toolkit version 2.3.1:
+# fastNLO_toolkit version 2.5.0:
 # ==============================
 # Please contact the authors for any questions or problems.
 
 
 # Content:
 # --------
-# Generic C++ linkable library and code to create, fill, read, and evaluate fastNLO v2 tables
+# Generic C++ linkable library and code to create, fill, modify, read, and evaluate fastNLO v2 tables
 
 
 # Requirements:

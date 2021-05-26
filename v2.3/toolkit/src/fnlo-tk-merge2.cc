@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Print program purpose
@@ -138,46 +138,46 @@ int main(int argc, char** argv) {
    for (int iarg=1; iarg<narg; iarg++) {
       string sarg = argv[iarg];
       if ( sarg.find(".tab") != string::npos ) {
-	 if (access(sarg.c_str(), R_OK) != 0) //! --- File there?
-	    warn[_progname]<<"Unable to access file '" << sarg << "', skipped!" << endl;
-	 else { // keep it
-	    if ( setfiles.count(sarg) ) {
-	       warn[_progname]<<"File '"<<sarg<<"' already added once (but duplication is allowed)."<<endl;
-	    }
-	    files.push_back(sarg);
-	    setfiles.insert(sarg);
-	 }
+         if (access(sarg.c_str(), R_OK) != 0) //! --- File there?
+            warn[_progname]<<"Unable to access file '" << sarg << "', skipped!" << endl;
+         else { // keep it
+            if ( setfiles.count(sarg) ) {
+               warn[_progname]<<"File '"<<sarg<<"' already added once (but duplication is allowed)."<<endl;
+            }
+            files.push_back(sarg);
+            setfiles.insert(sarg);
+         }
       }
       else if ( sarg.find("-") == 0 ) {
-	 if ( options.count(sarg) ) {error[_progname]<<"Duplicate option "<<sarg<<" recognized. Exiting."<<endl;exit(1); }
-	 options.insert(sarg);
-	 if ( sarg == "-p" ) plotfile=argv[++iarg];
-	 if ( sarg == "-w" ) { 
-	    wgtoption=argv[++iarg];
-	    if ( wgtoption == "NNLOJET" ) {	       
-	       wgtFile=argv[++iarg];
-	       info[_progname]<<"NNLOJET specified weights are read from file: "<<wgtFile<<endl;
-	    }
-	 }
-	 if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
-	 if ( sarg == "-cutRMS" ) cutRMS=atof(argv[++iarg]); 
-	 if ( sarg == "-add" ) { wgtoption = "add"; }
-	 if ( sarg == "-attach" ) { wgtoption = "attach"; }
-	 if ( sarg == "-append" ) { wgtoption = "add"; }
-	 if ( sarg == "-pre" ) { 
-	    pre=atoi(argv[++iarg]); 
-	    if ( _wgtoptions.count(argv[iarg+1]) ) preoptin=argv[++iarg]; 
-	    else info[_progname]<<"Using pre-average weighting default: "<<preoptin<<endl;
-	 }
-	 if ( _validoptions.count(sarg) == 0 ) { 
-	    error[_progname]<<"Invalid option '"<<sarg<<"'."<<endl<<endl;;
-	    PrintHelpMessage();
-	    exit(1);
-	 }
+         if ( options.count(sarg) ) {error[_progname]<<"Duplicate option "<<sarg<<" recognized. Exiting."<<endl;exit(1); }
+         options.insert(sarg);
+         if ( sarg == "-p" ) plotfile=argv[++iarg];
+         if ( sarg == "-w" ) {
+            wgtoption=argv[++iarg];
+            if ( wgtoption == "NNLOJET" ) {
+               wgtFile=argv[++iarg];
+               info[_progname]<<"NNLOJET specified weights are read from file: "<<wgtFile<<endl;
+            }
+         }
+         if ( sarg == "-o" ) { outfile=argv[++iarg]; narg++; }
+         if ( sarg == "-cutRMS" ) cutRMS=atof(argv[++iarg]);
+         if ( sarg == "-add" ) { wgtoption = "add"; }
+         if ( sarg == "-attach" ) { wgtoption = "attach"; }
+         if ( sarg == "-append" ) { wgtoption = "add"; }
+         if ( sarg == "-pre" ) {
+            pre=atoi(argv[++iarg]);
+            if ( _wgtoptions.count(argv[iarg+1]) ) preoptin=argv[++iarg];
+            else info[_progname]<<"Using pre-average weighting default: "<<preoptin<<endl;
+         }
+         if ( _validoptions.count(sarg) == 0 ) {
+            error[_progname]<<"Invalid option '"<<sarg<<"'."<<endl<<endl;;
+            PrintHelpMessage();
+            exit(1);
+         }
       }
       else { //error
-	 error[_progname]<<"Input argument not valid: '"<<sarg<<"'. Only in-/out-filenames or options (-XYZ) allowed."<<endl;
-	 exit(1);
+         error[_progname]<<"Input argument not valid: '"<<sarg<<"'. Only in-/out-filenames or options (-XYZ) allowed."<<endl;
+         exit(1);
       }
    }
    // --- help message
@@ -189,12 +189,12 @@ int main(int argc, char** argv) {
    }
    if (access(outfile.c_str(), R_OK) == 0) {
       if ( options.count("-f") ) {
-	 warn[_progname]<<"Output file " << outfile << " exists already. Overwriting it."<<endl;
+         warn[_progname]<<"Output file " << outfile << " exists already. Overwriting it."<<endl;
       }
       else {
-	 error[_progname]<<"Output file " << outfile << " exists already!" << endl;
-	 shout[_progname]<<"Please remove it first." << endl;
-	 exit(1);
+         error[_progname]<<"Output file " << outfile << " exists already!" << endl;
+         shout[_progname]<<"Please remove it first." << endl;
+         exit(1);
       }
    }
    //! --- Check no. of file names
@@ -204,7 +204,7 @@ int main(int argc, char** argv) {
    }
    // i/o done
    // --------------------------------------------------------------------------------------- //
-   
+
    info[_progname]<<"Using weighting option: "<<wgtoption<<"."<<endl;
 
    if ( _wgtoptions.count(wgtoption)==0 ) {
@@ -218,8 +218,8 @@ int main(int argc, char** argv) {
    map<string,vector<double> > mUserWgts; // [filename] [weight-per-obsbin]
    if ( moption==fastNLO::kSumUserBinProc ) {
       if ( pre > 0 ) {
-	 error[_progname]<<"User specified weights cannot be combined with option -pre."<<endl;
-	 exit(1);
+         error[_progname]<<"User specified weights cannot be combined with option -pre."<<endl;
+         exit(1);
       }
       // read file
       mUserWgts = ReadNnlojetWgtFile(wgtFile,files);
@@ -239,52 +239,52 @@ int main(int argc, char** argv) {
    /*
    if ( options.count("-1") == 0 ) { // read in all files now!
       for ( auto path : files ) {
-	 info[_progname]<<"Reading table '" << path << "'" << endl;
-	 fastNLOTable* tab = new fastNLOTable(path);
+         info[_progname]<<"Reading table '" << path << "'" << endl;
+         fastNLOTable* tab = new fastNLOTable(path);
 
-	 if ( tab->GetItabversion() < 23000 ) {
-	    warn[_progname]<<"This program is maybe only compatible with fastNLO table versions > v2.3,000."<<endl;
-	    warn[_progname]<<"Consider to use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
-	    //exit(2);
-	 }
+         if ( tab->GetItabversion() < 23000 ) {
+            warn[_progname]<<"This program is maybe only compatible with fastNLO table versions > v2.3,000."<<endl;
+            warn[_progname]<<"Consider to use program fnlo-tk-merge and/or fnlo-tk-append instead."<<endl;
+            //exit(2);
+         }
 
-	 //alltables[path] = tab;
-	 alltables.push_back(tab);
-	 //allpaths[tab] = path;
-	 // int tabid = alltables.size()-1;
-	 // lookup[path] = tabid;
-      
-	 //! --- Check statistical information of additive contributions
-	 if ( options.count("-p") ) {
-	    int nc = tab->GetNcontrib() + tab->GetNdata();
-	    if ( nc != 1 ) {
-	       warn[_progname]<<"Program fnlo-tk-merge2 currently can only handle fastNLO tables with exactly one contributions. Please use program fnlo-tk-merge fnlo-tk-append."<<endl;
-	       //exit(2);
-	    }
-	    for ( int ic=0 ; ic<nc; ic++ ) {
-	       bool quiet = true;
-	       fastNLOCoeffBase* cnew = (fastNLOCoeffBase*)tab->GetCoeffTable(ic);
-	       // Identify type of new coeff table, only additive ones have event numbers
-	       if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) { // additive?
-		  fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)cnew;
-		  if ( cadd->GetNevt() == 1 ) {
-		     warn[_progname]<<"Contribution #" << ic << " in table " << path << " has event number '1', which is usually invalid."<<endl;
-		     // error[_progname]<<"Contribution #" << ic << " in table " << path << endl;
-		     // error[_progname]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
-		     // error[_progname]<<"Nevt = " << cadd->GetNevt() << endl;
-		     //exit(1);
-		  }
-		  //
-		  //allWgtStat[tabid] = cadd->GetWgtStat();
-	       }
-	       else {
-		  error[_progname]<<"Program fnlo-tk-merge2 can only deal with additive contributions. Exiting"<<endl;
-		  exit(2);
-	       }
-	    }
-	 }
+         //alltables[path] = tab;
+         alltables.push_back(tab);
+         //allpaths[tab] = path;
+         // int tabid = alltables.size()-1;
+         // lookup[path] = tabid;
+
+         //! --- Check statistical information of additive contributions
+         if ( options.count("-p") ) {
+            int nc = tab->GetNcontrib() + tab->GetNdata();
+            if ( nc != 1 ) {
+               warn[_progname]<<"Program fnlo-tk-merge2 currently can only handle fastNLO tables with exactly one contributions. Please use program fnlo-tk-merge fnlo-tk-append."<<endl;
+               //exit(2);
+            }
+            for ( int ic=0 ; ic<nc; ic++ ) {
+               bool quiet = true;
+               fastNLOCoeffBase* cnew = (fastNLOCoeffBase*)tab->GetCoeffTable(ic);
+               // Identify type of new coeff table, only additive ones have event numbers
+               if ( fastNLOCoeffAddBase::CheckCoeffConstants(cnew,quiet) ) { // additive?
+                  fastNLOCoeffAddBase* cadd = (fastNLOCoeffAddBase*)cnew;
+                  if ( cadd->GetNevt() == 1 ) {
+                     warn[_progname]<<"Contribution #" << ic << " in table " << path << " has event number '1', which is usually invalid."<<endl;
+                     // error[_progname]<<"Contribution #" << ic << " in table " << path << endl;
+                     // error[_progname]<<"has no valid number-of-events information and cannot be merged. Aborted!" << endl;
+                     // error[_progname]<<"Nevt = " << cadd->GetNevt() << endl;
+                     //exit(1);
+                  }
+                  //
+                  //allWgtStat[tabid] = cadd->GetWgtStat();
+               }
+               else {
+                  error[_progname]<<"Program fnlo-tk-merge2 can only deal with additive contributions. Exiting"<<endl;
+                  exit(2);
+               }
+            }
+         }
       }
-   }   
+   }
    */
 
    // --------------------------------------------------------------------------------------- //
@@ -293,7 +293,7 @@ int main(int argc, char** argv) {
    //    vector<vector<vector<double> > > ProcBinWgt = CalculateWeight(allWgtStat,wgtoption);
    // }
 
-   
+
    // --------------------------------------------------------------------------------------- //
    // --- calculating pre-averages if requested.
    vector<fastNLOTable*> alltables;
@@ -302,26 +302,26 @@ int main(int argc, char** argv) {
       vector<fastNLOTable*> addtab;
       //for ( auto tab : alltables ) {
       for ( const string& path : files ) {
-	 //fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
-	 fastNLOTable* tab = new fastNLOTable(path);
-	 if ( keeptab == NULL ) {
-	    alltables.push_back(tab);
-	    keeptab = tab;
-	    continue;
-	 }
-	 else {
-	    addtab.push_back(tab);
-	 }
-	 if ( int(addtab.size()) == pre-1 /*|| files.back() == path*/ ) { // merge
-	    keeptab->MergeTables(addtab,prewgt);
-	    for ( fastNLOTable* t : addtab ) delete t;
-	    addtab.clear();
-	    keeptab = NULL;
-	 }
+         //fastNLOTable* tab = alltables[path]; // fastNLOTable tab(path);
+         fastNLOTable* tab = new fastNLOTable(path);
+         if ( keeptab == NULL ) {
+            alltables.push_back(tab);
+            keeptab = tab;
+            continue;
+         }
+         else {
+            addtab.push_back(tab);
+         }
+         if ( int(addtab.size()) == pre-1 /*|| files.back() == path*/ ) { // merge
+            keeptab->MergeTables(addtab,prewgt);
+            for ( fastNLOTable* t : addtab ) delete t;
+            addtab.clear();
+            keeptab = NULL;
+         }
       }
       if ( addtab.size() ) {
-	 keeptab->MergeTables(addtab,prewgt);
-	 for ( fastNLOTable* t : addtab ) delete t;
+         keeptab->MergeTables(addtab,prewgt);
+         for ( fastNLOTable* t : addtab ) delete t;
       }
    }
 
@@ -332,22 +332,22 @@ int main(int argc, char** argv) {
    int nValidTables = 1;
    if ( alltables.empty() ) {
       for ( const string& path : files ) {
-	 if ( resultTable==NULL ) {
-	    resultTable = new fastNLOTable(path);
-	    if ( moption==fastNLO::kSumUserBinProc ) 
-	       resultTable->SetUserWeights(mUserWgts[path]);
-	 }
-	 else {
-	    if ( moption == fastNLO::kMedian || moption == fastNLO::kMean || cutRMS!=0 ) 
-	       alltables.push_back(new fastNLOTable(path));
-	    else {
-	       //resultTable->MergeTable(fastNLOTable(path), moption); // merge
-	       fastNLOTable tab(path);
-	       if ( moption==fastNLO::kSumUserBinProc ) tab.SetUserWeights(mUserWgts[path]);
-	       resultTable->MergeTable(tab, moption); // merge
-	    }
-	    nValidTables++;
-	 }
+         if ( resultTable==NULL ) {
+            resultTable = new fastNLOTable(path);
+            if ( moption==fastNLO::kSumUserBinProc )
+               resultTable->SetUserWeights(mUserWgts[path]);
+         }
+         else {
+            if ( moption == fastNLO::kMedian || moption == fastNLO::kMean || cutRMS!=0 )
+               alltables.push_back(new fastNLOTable(path));
+            else {
+               //resultTable->MergeTable(fastNLOTable(path), moption); // merge
+               fastNLOTable tab(path);
+               if ( moption==fastNLO::kSumUserBinProc ) tab.SetUserWeights(mUserWgts[path]);
+               resultTable->MergeTable(tab, moption); // merge
+            }
+            nValidTables++;
+         }
       }
    }
    else {
@@ -401,8 +401,8 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
       std::stringstream ss(line);
       content.push_back(vector<string>());
       while (std::getline(ss, item, ' ')) {
-	 //cout<<item<<endl;
-	 content.back().push_back(item);
+         //cout<<item<<endl;
+         content.back().push_back(item);
       }
       //for ( auto pp : tokens ) cout<<pp<<endl;
    }
@@ -413,8 +413,8 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
    set<string> uniquefiles;
    for ( auto ff : files ) {
       if ( uniquefiles.count(ff) ) {
-	 cout<<"Info. Duplicate input file detected."<<endl;
-	 continue;
+         cout<<"Info. Duplicate input file detected."<<endl;
+         continue;
       }
       uniquefiles.insert(ff);
       std::string ftag = ff;
@@ -424,36 +424,36 @@ std::map<std::string,std::vector<double> > ReadNnlojetWgtFile( std::string wgtFi
       ftag += ".";
       //cout<<"ftag="<<ftag<<endl;
       for ( vector<string>& lit : content ) {
-	 string nnfile = lit[0];
-	 if ( nnfile.find(ftag) != string::npos ){
-	    // found wgts for input table ff
-	    if ( wgts.count(ff) ) {
-	       cout<<"Warning. Weights already found for input table"
-		   <<ff<<" (was searching for '"<<ftag<<"'). Maybe duplicates for input?"<<endl; 
-	       exit(4);
-	    };
-	    for ( string cc : lit ) {
-	       if ( wgts.count(ff) == 0 ) wgts[ff]; // first entry is the filename, instantiate new vector
-	       else {
-		  double dval = strtod(cc.c_str(),NULL);
-		  if (dval==0 ) {
-		     cout<<"Warning. Weight is zero, using tiny number instead. (input: "
-			 <<cc<<") file: "<<ff<<endl;
-		     dval=1.e-20;
-		  }
-		  wgts[ff].push_back(dval);
-	       }
-	    }
-	    std::cout<<"Found "<<wgts[ff].size()<<" weights for input file: "<<ff<<std::endl;
-	    if ( wgts[ff].size() != content[0].size()-1 ) {
-	       std::cout<<"ERROR. Too little weights for file "<<ff<<endl;
-	       exit(3);
-	    }
-	 }
+         string nnfile = lit[0];
+         if ( nnfile.find(ftag) != string::npos ){
+            // found wgts for input table ff
+            if ( wgts.count(ff) ) {
+               cout<<"Warning. Weights already found for input table"
+                   <<ff<<" (was searching for '"<<ftag<<"'). Maybe duplicates for input?"<<endl;
+               exit(4);
+            };
+            for ( string cc : lit ) {
+               if ( wgts.count(ff) == 0 ) wgts[ff]; // first entry is the filename, instantiate new vector
+               else {
+                  double dval = strtod(cc.c_str(),NULL);
+                  if (dval==0 ) {
+                     cout<<"Warning. Weight is zero, using tiny number instead. (input: "
+                         <<cc<<") file: "<<ff<<endl;
+                     dval=1.e-20;
+                  }
+                  wgts[ff].push_back(dval);
+               }
+            }
+            std::cout<<"Found "<<wgts[ff].size()<<" weights for input file: "<<ff<<std::endl;
+            if ( wgts[ff].size() != content[0].size()-1 ) {
+               std::cout<<"ERROR. Too little weights for file "<<ff<<endl;
+               exit(3);
+            }
+         }
       }
       if ( wgts.count(ff) == 0) {
-	 std::cout<<"Error. No weights for table "<<ff<<" found in wight-file "<<wgtFile<<endl;
-	 exit(3);
+         std::cout<<"Error. No weights for table "<<ff<<" found in wight-file "<<wgtFile<<endl;
+         exit(3);
       }
    }
    // --- weights for all input fastNLO files found?

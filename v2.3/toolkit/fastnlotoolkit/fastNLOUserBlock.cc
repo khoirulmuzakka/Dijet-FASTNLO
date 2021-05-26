@@ -28,11 +28,11 @@ void fastNLOUserBlock::Read(istream *table){
    int nLinesDescr;
    *table >> nLinesDescr;
    fDescr.resize(nLinesDescr);
-   for ( int i = 0 ; i<nLinesDescr ; i++ ) 
+   for ( int i = 0 ; i<nLinesDescr ; i++ )
       *table >> fDescr[i];
    *table >> fNLines;
    fContent.resize(fNLines);
-   for ( int i = 0 ; i<fNLines ; i++ ) 
+   for ( int i = 0 ; i<fNLines ; i++ )
       *table >> fContent[i];
 }
 
@@ -48,11 +48,11 @@ void fastNLOUserBlock::Write (ostream *table){
    }
    *table << fUserFlag << endl;
    *table << fDescr.size() <<endl;
-   for ( unsigned int i = 0 ; i < fDescr.size() ; i++ ) 
+   for ( unsigned int i = 0 ; i < fDescr.size() ; i++ )
       *table << fDescr[i] << endl;
    *table << fNLines << endl;
    *table << fContent.size() << endl;
-   for ( unsigned int i = 0 ; i< fContent.size(); i++ ) 
+   for ( unsigned int i = 0 ; i< fContent.size(); i++ )
       *table << fContent[i] << endl;
 }
 

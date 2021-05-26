@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
    using namespace say;       //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;   //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
    //! --- Parse commmand line
@@ -83,8 +83,8 @@ int main(int argc, char** argv) {
          yell << _SSEPSC << endl;
          yell << " #" << endl;
          info["fnlo-tk-rootout"] << "This program evaluates a fastNLO table and" << endl;
-         info["fnlo-tk-rootout"] << "writes histograms with cross sections and scale or" << endl;
-         info["fnlo-tk-rootout"] << "PDF uncertainties into ROOT." << endl;
+         info["fnlo-tk-rootout"] << "writes histograms with cross sections and PDF, statistical or" << endl;
+         info["fnlo-tk-rootout"] << "scale uncertainties into ROOT." << endl;
          info["fnlo-tk-rootout"] << "" << endl;
          info["fnlo-tk-rootout"] << "TODO: Provide more info on histogram numbering/labelling ..." << endl;
          man << "" << endl;
@@ -119,6 +119,7 @@ int main(int argc, char** argv) {
          man << "                 \"scale21\", i.e. mur=scale2, muf=scale1," << endl;
          man << "                 \"kProd\", i.e. mur=muf=scale1*scale2," << endl;
          man << "                 \"kQuadraticSum\", i.e. mur=muf=sqrt(scale1^2+scale2^2)." << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -142,8 +143,9 @@ int main(int argc, char** argv) {
    }
 
    //! --- Uncertainty choice
-   EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    EPDFUncertaintyStyle   ePDFUnc   = kPDFNone;
+   EAddUncertaintyStyle   eAddUnc   = kAddNone;
+   EScaleUncertaintyStyle eScaleUnc = kScaleNone;
    string chunc = "none";
    if (argc > 3) {
       chunc = (const char*) argv[3];
@@ -228,12 +230,28 @@ int main(int argc, char** argv) {
       shout["fnlo-tk-rootout"] << "Using scale definition "+chflex+"." << endl;
    }
 
-   //! ---  Too many arguments
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
    if (argc > 7) {
+      VerbosityLevel  = (const char*) argv[7];
+   }
+   if (argc <= 7 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-rootout"] << "No request given for verbosity level, using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-rootout"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //! ---  Too many arguments
+   if (argc > 8) {
       error["fnlo-tk-rootout"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
    yell << _CSEPSC << endl;
+   //---  End of parsing arguments
+
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    //! --- Prepare loop over PDF sets
    const int nsets = 4;
@@ -258,13 +276,17 @@ int main(int argc, char** argv) {
 
    //! --- fastNLO initialisation, attach table
    fastNLOTable table = fastNLOTable(tablename);
+
    //! Print essential table information
    table.PrintContributionSummary(0);
+   table.Print(0);
 
    //! Initialise a fastNLO reader instance with interface to LHAPDF
    //! Note: This also initializes the cross section to the LO/NLO one!
    fastNLOLHAPDF* fnlo = NULL;
    fnlo = new fastNLOLHAPDF(table,PDFFiles[0],0);
+   //! Store table version number
+   int ITabVersion = fnlo->GetITabVersionRead();
 
    //! Check on existence of LO (Id = -1 if not existing)
    int ilo   = fnlo->ContrId(kFixedOrder, kLeading);
@@ -441,9 +463,9 @@ int main(int argc, char** argv) {
          //! Re-calculate cross sections for new settings
          fnlo->CalcCrossSection();
 
-         //! Do PDF and scale uncertainties
-         unsigned int iOffs[3] = {1,6,8};
-         for (unsigned int iUnc = 0; iUnc<3; iUnc++) {
+         //! Do PDF, statistical/numerical, and scale uncertainties
+         unsigned int iOffs[4] = {1,3,6,8};
+         for (unsigned int iUnc = 0; iUnc<4; iUnc++) {
 
             //! Get cross section & uncertainties (only for additive perturbative contributions)
             XsUncertainty XsUnc;
@@ -458,8 +480,19 @@ int main(int argc, char** argv) {
                snprintf(titlel, sizeof(titlel), "-dsigma_%s/sigma",PDFFiles[iPDF].c_str());
                snprintf(titleu, sizeof(titleu), "+dsigma_%s/sigma",PDFFiles[iPDF].c_str());
             }
-            //! 2P scale uncertainties
+            //! Statistical/numerical uncertainties
             else if ( iUnc==1 ) {
+               if (ITabVersion < 25000) {
+                  info["fnlo-tk-rootout"] << "Table version " << ITabVersion << "too small; statistical uncertainties not available." << endl;
+               }
+               eAddUnc = kAddStat;
+               XsUnc = fnlo->GetAddUncertainty(eAddUnc, lNorm);
+               snprintf(buffer, sizeof(buffer), " # Relative Statistical Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
+               snprintf(titlel, sizeof(titlel), "-dsigma_stat/sigma");
+               snprintf(titleu, sizeof(titleu), "+dsigma_stat/sigma");
+            }
+            //! 2P scale uncertainties
+            else if ( iUnc==2 ) {
                eScaleUnc = kSymmetricTwoPoint;
                XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 2P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());
@@ -467,7 +500,7 @@ int main(int argc, char** argv) {
                snprintf(titleu, sizeof(titleu), "+dsigma_2P/sigma");
             }
             //! 6P scale uncertainties
-            else if ( iUnc==2 ) {
+            else if ( iUnc==3 ) {
                eScaleUnc = kAsymmetricSixPoint;
                XsUnc = fnlo->GetScaleUncertainty(eScaleUnc, lNorm);
                snprintf(buffer, sizeof(buffer), " # 6P Relative Scale Uncertainties (%s %s)",sOrder.c_str(),PDFFiles[iPDF].c_str());

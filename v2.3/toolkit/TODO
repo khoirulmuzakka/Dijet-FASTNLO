@@ -2,20 +2,18 @@
 TODO list for fastNLO_toolkit (ordered by priority)
 -----------------------------------------------------------------------
 
+- Creator for Referenztabellen
 - Add checks for HOPPET, CRunDec, QCDNUM
 - Change everything to use LHAPDF6 features instead of deprecated LHAGLUE;
   partially done in HOPPET interface
 - Drop LHAPDF5 support
 - Use binary read/write table to save storage space and read in times (Mark's suggestion)
+  (Not clear that binary storage actually saves anything ...! Test first.)
 - Provide features to allow -> APPLgrid conversion and the inverse -> fastNLO
 - Test installation with lgcenv environment
    - Problem with zlib?
    - Problem with HOPPET?
- - Include stat. uncertainties into table
- - Creator for Referenztabellen
  - Streamline usage of logger.messagelevel, shout|cout, error|warn|silent etc. in speaker
-
- - KR: Check, which points are actually done ...
  - Getter for PhaseSpace-check: a la: GetIsWithinPhaseSpace(double obs1, double obs2, etc.) (cache probably observables for later usage)
  - Write documentation (e.g. twiki)
  - converter aktualisieren ??
@@ -34,6 +32,7 @@ TODO list for fastNLO_toolkit (ordered by priority)
 =======================================================================
 DONE
 =======================================================================
+ - Include stat. uncertainties into table
  - Modifier & Concatenator for tables/bins
  - fast Warmup-run (just some events and then 'guess' PS boundaries)
  - 11x11 = 121 PDF-LiCos

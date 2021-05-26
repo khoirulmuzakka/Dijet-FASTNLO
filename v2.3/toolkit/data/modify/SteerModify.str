@@ -24,7 +24,7 @@
 #     ScDescript {
 #       "First line to add"
 #       "Second line of add"
-#       "etc"
+#       "etc."
 #     }
 #
 ##################################################################################
@@ -38,6 +38,7 @@ OutTable   ModifiedTable.tab
 #--------------------
 #   Info print out
 #--------------------
+Verbosity           INFO   # Set print out verbosity
 PrintSteeringCard   true   # Print steering provided on command line or within this file
 PrintInputA1        true   # Print table header of input table
 PrintInputA2        true   # Print table scenario of input table
@@ -48,8 +49,8 @@ PrintOutputA2       true   # Print table scenario of output table
 #   Modify parameters of the table header
 #   Leave value empty for no modification
 #-------------------------------------------
-#Itabversion                # Change table version (Expert option!)
-#ScenName                   # Change scenario name
+#Itabversion 25000          # Change table version (Expert option!)
+#ScenName fnlabcd           # Change scenario name
 
 # --------------------------------------------
 #   Modify parameters of the table scenario
@@ -68,20 +69,24 @@ ScDescript {               # Example of final scenario description for CMS inclu
   "RIVET_ID=CMS_2011_S9086218/D01-x01-y01,SPIRES_ID=9086218,INSPIRE_RECORD=902309"
   "THEORY_LABEL=NLOJet++"
   "provided by:"
-  "fastNLO_2.1.0"
+  "fastNLO_2.5.0"
   "If you use this table, please cite:"
-  "  D. Britzger, T. Kluge, K. Rabbertz, F. Stober, M. Wobisch, arXiv:1109.1310"
+  "  D. Britzger, K. Rabbertz, F. Stober, M. Wobisch, Proc. DIS 2012, 217 (2012), arXiv:1208.3641."
 }
 
 #------------------------------------------------------
-#   Modify bin sizes
+#   Modify bin sizes set in table scenario
 #   (Does not change differential cross sections,
 #    which are stored already in differential form!)
 #------------------------------------------------------
-BinSizeFactor   1.         # Overall factor for bin sizes
+#BinSizeFactor   1.         # Overall factor for bin sizes
 #BinSize {                  # Individual bin size factors for each observable bin; one no. per bin!
 #
 #}
+
+# --------------------------------------------
+#   Modify the table contributions
+# --------------------------------------------
 
 #--------------------------------------------------------------------
 #   Modify tabulated coefficients
@@ -92,11 +97,58 @@ BinSizeFactor   1.         # Overall factor for bin sizes
 #
 #}
 
+#--------------------------------------------------------------------
+#   Modify code description
+#   (Same description for all perturbative contributions!)
+#--------------------------------------------------------------------
+#CodeDescript {
+#  "NNLOJET_rev5918, please cite: T. Gehrmann et al., PoS RADCOR2017, 074 (2018), arXiv:1801.06415."
+#  "APPLfast interface, please cite: D. Britzger et al., Eur. Phys. J. C79, 845 (2019), arXiv:1906.05303."
+#}
+
+#--------------------------------------------------------------------
+#   Add InfoBlocks with statistical/numerical uncertainty
+#--------------------------------------------------------------------
+#InfoBlockFlag1   0         # Default: 0 Statistical/numerical uncertainty
+#InfoBlockFlag2   1         # Default: 1 = quadratic addition; else: 0 = linear addition
+
+# Either read uncertainty from files ...
+#InfoBlockFiles { # For each order separately: NNLOJET dat files, fastNLO statunc log files, txt files using 1 or 2 columns
+#  2jet.LO.fnl3832_yb0_ys0_ptavgj12.dat
+#  2jet.NLO_only.fnl3832_yb0_ys0_ptavgj12.dat
+#  2jet.NNLO_only.fnl3832_yb0_ys0_ptavgj12.dat
+#}
+
+#InfoBlockFileColumns { # Column(s) with rel. stat. uncertainty or with x section and abs. stat. uncertainty
+#  4
+#  4  5
+#}
+
+# ... or provide them directly as columns inside this file
+#InfoBlockStatUnc {{
+#  dstrel_LO   dstrel_NLO
+#    0.001       0.01
+#    0.001       0.01
+#    0.001       0.01
+#    0.001       0.01
+#}}
+
+#InfoBlockDescr { # Same description for each contribution
+#  "Default statistical uncertainties from NNLOJET."
+#}
+
+#InfoBlockOrders { # Attribution of dat files to respective orders
+#  "LO"
+#  "NLO"
+#  "NNLO"
+#}
+
 #-------------------------------------------------------------------------
 #   Cut out unused observable bins or split table into multiples pieces
 #     Specify bin numbers to be removed within curly brackets.
 #     First bin is bin 1, last bin is NObsBin.
 #     An ordered numbering with INCREASING bin numbers must be used!
+#   Do NOT erase bins while adding InfoBlocks or vice versa!
 #--------------------------------------------------------------------------
 #RemoveBins {               #  Gaps are fine, BUT an increasing bin numbering must be used!
 #   1   2   3

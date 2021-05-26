@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
    using namespace say;          //! namespace for 'speaker.h'-verbosity levels
    using namespace fastNLO;      //! namespace for fastNLO constants
 
-   //! --- Set verbosity level
+   //! --- Set initial verbosity level
    SetGlobalVerbosity(INFO);
 
-   //! ---  Parse commmand line
-   char buffer[1024];
+   //! --- Parse command line
+   char buffer[1024]; // TODO: Use PATH_MAX instead?
    string tablename;
    if (argc <= 1) {
       yell << "" << endl;
@@ -138,6 +138,7 @@ int main(int argc, char** argv) {
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
          man << "[Mz]: Set value of M_Z at which alpha_s(M_Z) is defined in alpha_s evolution, def. = 91.1876 (PDG)" << endl;
          man << "   Only possible for [ascode] other than LHAPDF!" << endl;
+         man << "[Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING" << endl;
          yell << " #" << endl;
          man << "Use \"_\" to skip changing a default argument." << endl;
          yell << " #" << endl;
@@ -150,6 +151,7 @@ int main(int argc, char** argv) {
          shout["fnlo-tk-cppread"] << "Evaluating table: " << tablename << endl;
       }
    }
+
    //--- PDF set
    string chtmp = "X";
    string PDFFile = "X";
@@ -166,8 +168,6 @@ int main(int argc, char** argv) {
    } else {
       shout["fnlo-tk-cppread"] << "Using PDF set   : " << PDFFile << endl;
    }
-
-
 
    //--- PDF or scale variations
    int nvars = 1;
@@ -228,8 +228,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 4 || AsEvolCode == "_") {
       AsEvolCode = "GRV";
-      shout["fnlo-tk-cppread"] << "No request given for alpha_s evolution code," << endl;
-      shout << "            using GRV default." << endl;
+      shout["fnlo-tk-cppread"] << "No request given for alpha_s evolution code, using GRV default." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using alpha_s evolution code: " << AsEvolCode << endl;
    }
@@ -251,6 +250,7 @@ int main(int argc, char** argv) {
       chflex = (const char*) argv[6];
    }
    if (argc <= 6 || chflex == "_") {
+      chflex = "kScale1";
       shout["fnlo-tk-cppread"] << "Using default mur=muf=scale 1." << endl;
    } else {
       shout["fnlo-tk-cppread"] << "Using scale definition "+chflex << endl;
@@ -263,7 +263,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 7 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for no. of flavours," << endl;
-      shout << "            using default value for LHAPDF or Nf = " << Nf << "." << endl;
+      shout << "                  using default value for LHAPDF or Nf = " << Nf << "." << endl;
    } else {
       Nf = atoi(argv[7]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 8 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for no. of loops," << endl;
-      shout << "            using default value for LHAPDF or NLoop = " << NLoop << "." << endl;
+      shout << "                  using default value for LHAPDF or NLoop = " << NLoop << "." << endl;
    } else {
       NLoop = atoi(argv[8]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 9 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for value of alpha_s(M_Z)," << endl;
-      shout << "            using default value for LHAPDF or asMz = " << asMz << "." << endl;
+      shout << "                  using default value for LHAPDF or asMz = " << asMz << "." << endl;
    } else {
       asMz = atof(argv[9]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -332,7 +332,7 @@ int main(int argc, char** argv) {
    }
    if (argc <= 10 || chtmp == "_") {
       shout["fnlo-tk-cppread"] << "No request given for value of M_Z," << endl;
-      shout << "            using default value for LHAPDF or Mz = " << Mz << "." << endl;
+      shout << "                  using default value for LHAPDF or Mz = " << Mz << "." << endl;
    } else {
       Mz = atof(argv[10]);
       if ( AsEvolCode == "LHAPDF" ) {
@@ -348,16 +348,28 @@ int main(int argc, char** argv) {
       }
    }
 
-   //---  Too many arguments
+   //--- Set verbosity level of table evaluation
+   string VerbosityLevel = "WARNING";
    if (argc > 11) {
+      VerbosityLevel  = (const char*) argv[11];
+   }
+   if (argc <= 11 || VerbosityLevel == "_") {
+      VerbosityLevel = "WARNING";
+      shout["fnlo-tk-cppread"] << "No request given for verbosity level, using WARNING default." << endl;
+   } else {
+      shout["fnlo-tk-cppread"] << "Using verbosity level: " << VerbosityLevel << endl;
+   }
+
+   //---  Too many arguments
+   if (argc > 12) {
       error["fnlo-tk-cppread"] << "Too many arguments, aborting!" << endl;
       exit(1);
    }
    yell << _CSEPSC << endl;
    //---  End of parsing arguments
 
-   //! --- Reset verbosity level to warning only from here on
-   SetGlobalVerbosity(WARNING);
+   //! --- Reset verbosity level from here on
+   SetGlobalVerbosity(toVerbosity()[VerbosityLevel]);
 
    // ************************** fastNLO and example documentation starts here ****************************
    // --- fastNLO user: Hello!
@@ -1135,14 +1147,14 @@ int main(int argc, char** argv) {
                fnlo->SetMuFFunctionalForm(kScale2);
                fnlo->SetMuRFunctionalForm(kScale2);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu2 is derived "
-                                       << "from only the second scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the second scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else if ( chflex == "scale12" ) {
                fnlo->SetMuFFunctionalForm(kScale2);
                fnlo->SetMuRFunctionalForm(kScale1);
                info["fnlo-tk-cppread"] << "The average scale reported in this example as mu1 is derived "
-                                       << "from only the first scale of this flexible-scale table." << endl
-                                       << "                        Please check how this table was filled!" << endl;
+                                       << "from only the first scale of this flexible-scale table. "
+                                       << "Please check how this table was filled!" << endl;
             } else if ( chflex == "scale21" ) {
                fnlo->SetMuFFunctionalForm(kScale1);
                fnlo->SetMuRFunctionalForm(kScale2);
