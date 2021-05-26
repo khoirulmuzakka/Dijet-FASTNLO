@@ -181,6 +181,7 @@ int main(int argc, char** argv) {
    //! --- Print input table information
    info["fnlo-tk-modify"] << "Trying to read input table " << STRING(InTable) << endl;
    fastNLOTable table(CHAR(InTable));
+   unsigned int nobs = table.GetNObsBin();
    if ( EXIST(PrintInputA1) ) {
       if ( BOOL(PrintInputA1) ) table.PrintHeader(1);
    }
@@ -244,7 +245,6 @@ int main(int argc, char** argv) {
    if ( EXIST(BinSizeFactor) ) {
       double fac = DOUBLE(BinSizeFactor);
       info["fnlo-tk-modify"]<<"Multiplying all bin sizes by factor " << fac << "!" << endl;
-      unsigned int nobs = table.GetNObsBin();
       for (unsigned int iObs=0; iObs<nobs; iObs++) {
          table.MultiplyBinSize(iObs,fac);
       }
@@ -253,7 +253,6 @@ int main(int argc, char** argv) {
    if ( !DOUBLE_ARR(BinSize).empty() ) {
       vector<double> fac = DOUBLE_ARR(BinSize);
       info["fnlo-tk-modify"]<<"Multiplying bin sizes by provided factors!"<<endl;
-      unsigned int nobs = table.GetNObsBin();
       if ( nobs != fac.size() ) {
          error["fnlo-tk-modify"]<<"You need the same number of multiplicative factors, nfact = " << fac.size() <<
             ", than bins in the table, nobsbin = " << nobs << ". Aborted!" << endl;
@@ -268,7 +267,6 @@ int main(int argc, char** argv) {
    if ( !DOUBLE_ARR(MultCoeff).empty() ) {
       vector<double> fac = DOUBLE_ARR(MultCoeff);
       info["fnlo-tk-modify"]<<"Multiplying by provided factors all coefficients of additive contributions to observable bins!"<<endl;
-      unsigned int nobs = table.GetNObsBin();
       if ( nobs != fac.size() ) {
          error["fnlo-tk-modify"]<<"You need the same number of multiplicative factors, nfact = " << fac.size() <<
             ", than bins in the table, nobsbin = " << nobs << ". Aborted!" << endl;
@@ -315,10 +313,102 @@ int main(int argc, char** argv) {
       }
    }
 
-   //! Add InfoBlocks with statistical uncertainty from NNLOJET
-   if ( !STRING_ARR(InfoBlockFiles).empty() &&
-        !STRING_ARR(InfoBlockDescr).empty() &&
-        !STRING_ARR(InfoBlockOrders).empty()) {
+   //! Add InfoBlocks with statistical uncertainty from steering file
+   //! Default flag1=0: Statistical/numerical uncertainty
+   int IBFlag1 = 0;
+   //! Default flag2=1: Quadratic addition, alternative: 0: linear addition
+   int IBFlag2 = 1;
+   //! Default description line
+   std::string Default = "Please provide description!";
+   if ( EXIST(InfoBlockStatUnc) ) {
+      if ( !INT_ARR(RemoveBins).empty() ) {
+         info["fnlo-tk-modify"]<<"Do NOT erase bins while adding InfoBlocks or vice versa! Aborted."<<endl;
+         exit(25);
+      } else {
+         info["fnlo-tk-modify"]<<"Adding InfoBlocks to contributions."<<endl;
+      }
+      static vector<double> dstrel_LO   = DOUBLE_COL(InfoBlockStatUnc,dstrel_LO);
+      static vector<double> dstrel_NLO  = DOUBLE_COL(InfoBlockStatUnc,dstrel_NLO);
+      static vector<double> dstrel_NNLO = DOUBLE_COL(InfoBlockStatUnc,dstrel_NNLO);
+      unsigned int NDescr  = STRING_ARR(InfoBlockDescr).size();
+      if ( NDescr > 1 ) {
+         error["fnlo-tk-modify"]<<"Only one description line allowed for all blocks, aborted! NDescr = " << NDescr << endl;
+         exit(39);
+      }
+      int Ncontrib = table.GetNcontrib();
+      int ic = 0;
+      for ( int i = 0; i < Ncontrib; i++ ) {
+         fastNLOCoeffBase* c = table.GetCoeffTable(i);
+         if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+            int iFlag1 = IBFlag1;
+            int iFlag2 = IBFlag2;
+            if ( EXIST(InfoBlockFlag1) ) { iFlag1 = INT(InfoBlockFlag1); }
+            if ( EXIST(InfoBlockFlag2) ) { iFlag2 = INT(InfoBlockFlag2); }
+            if ( c->IsLO() ) {
+               info["fnlo-tk-modify"]<<"Found LO contribution " << i << endl;
+               std::vector<std::string> Description;
+               if ( NDescr > 0 ) {
+                  Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
+               } else {
+                  Description.push_back(Default);
+               }
+               if ( dstrel_LO.size() == 0 ) {
+                  warn["fnlo-tk-modify"]<<"Found LO contribution, but no uncertainties! Nothing added." << endl;
+               } else if ( dstrel_LO.size() != nobs ) {
+                  error["fnlo-tk-modify"]<<"You need the same number of uncertainties, dstrel_LO = " << dstrel_LO.size() <<
+                     ", than bins in the table, nobsbin = " << nobs << ". Aborted!" << endl;
+                  exit(1);
+               } else {
+                  c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,dstrel_LO);
+               }
+               ic += 1;
+            } else if ( c->IsNLO() ) {
+               info["fnlo-tk-modify"]<<"Found NLO contribution " << i << endl;
+               std::vector <std:: string> Description;
+               if ( NDescr > 0 ) {
+                  Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
+               } else {
+                  Description.push_back(Default);
+               }
+               if ( dstrel_NLO.size() == 0 ) {
+                  warn["fnlo-tk-modify"]<<"Found NLO contribution, but no uncertainties! Nothing added." << endl;
+               } else if ( dstrel_NLO.size() != nobs ) {
+                  error["fnlo-tk-modify"]<<"You need the same number of uncertainties, dstrel_NLO = " << dstrel_NLO.size() <<
+                     ", than bins in the table, nobsbin = " << nobs << ". Aborted!" << endl;
+                  exit(1);
+               } else {
+                  c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,dstrel_NLO);
+               }
+               ic += 1;
+            } else if ( c->IsNNLO() ) {
+               info["fnlo-tk-modify"]<<"Found NNLO contribution " << i << endl;
+               std::vector <std:: string> Description;
+               if ( NDescr > 0 ) {
+                  Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
+               } else {
+                  Description.push_back(Default);
+               }
+               if ( dstrel_NNLO.size() == 0 ) {
+                  warn["fnlo-tk-modify"]<<"Found NNLO contribution, but no uncertainties! Nothing added." << endl;
+               } else if ( dstrel_NNLO.size() != nobs ) {
+                  error["fnlo-tk-modify"]<<"You need the same number of uncertainties, dstrel_NNLO = " << dstrel_NNLO.size() <<
+                     ", than bins in the table, nobsbin = " << nobs << ". Aborted!" << endl;
+                  exit(1);
+               } else {
+                  c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,dstrel_NNLO);
+               }
+               ic += 1;
+            } else {
+               info["fnlo-tk-modify"]<<"Unknown contribution " << i << endl;
+               info["fnlo-tk-modify"]<<"Nothing changed." << endl;
+            }
+         }
+      }
+   }
+
+   //! Add InfoBlocks with statistical uncertainty from file (NNLOJET .dat, fnlo-tk-statunc .log, or .txt)
+   else if ( !STRING_ARR(InfoBlockFiles).empty() &&
+             !STRING_ARR(InfoBlockOrders).empty() ) {
       if ( !INT_ARR(RemoveBins).empty() ) {
          info["fnlo-tk-modify"]<<"Do NOT erase bins while adding InfoBlocks or vice versa! Aborted."<<endl;
          exit(25);
@@ -326,13 +416,31 @@ int main(int argc, char** argv) {
          info["fnlo-tk-modify"]<<"Adding InfoBlocks to contributions."<<endl;
       }
       unsigned int NFiles  = STRING_ARR(InfoBlockFiles).size();
-      unsigned int NDescr  = STRING_ARR(InfoBlockDescr).size();
+      unsigned int NCols   = INT_ARR(InfoBlockFileColumns).size();
       unsigned int NOrders = STRING_ARR(InfoBlockOrders).size();
+      unsigned int NDescr  = STRING_ARR(InfoBlockDescr).size();
+      if ( NFiles != NOrders ) {
+         error["fnlo-tk-modify"]<<"Need one order specification per file, aborted! Found NFiles = " << NFiles << ", and NOrders = " << NOrders <<endl;
+         exit(37);
+      }
+      unsigned int icola = 0;
+      unsigned int icolb = 0;
+      if ( NCols == 0 ) {
+      } else if ( NCols == 1 ) {
+         icola = INT_ARR(InfoBlockFileColumns)[0];
+      } else if ( NCols == 2 ) {
+         icola = INT_ARR(InfoBlockFileColumns)[0];
+         icolb = INT_ARR(InfoBlockFileColumns)[1];
+      } else {
+         error["fnlo-tk-modify"]<<"Up to two column numbers allowed, but found more. Aborted! NCols = " << NCols <<endl;
+         exit(38);
+      }
+      if ( NDescr > 1 ) {
+         error["fnlo-tk-modify"]<<"Only one description line allowed for all blocks, aborted! NDescr = " << NDescr << endl;
+         exit(39);
+      }
       for ( unsigned int i = 0; i < NFiles; i++ ){
          info["fnlo-tk-modify"]<<"InfoBlock file no. " << i << " is: " << STRING_ARR(InfoBlockFiles)[i] << endl;
-      }
-      for ( unsigned int i = 0; i < NDescr; i++ ){
-         info["fnlo-tk-modify"]<<"InfoBlock description no. " << i << " is: " << STRING_ARR(InfoBlockDescr)[i] << endl;
       }
       for ( unsigned int i = 0; i < NOrders; i++ ){
          info["fnlo-tk-modify"]<<"InfoBlock order no. " << i << " is: " << STRING_ARR(InfoBlockOrders)[i] << endl;
@@ -343,6 +451,10 @@ int main(int argc, char** argv) {
       for ( int i = 0; i < Ncontrib; i++ ) {
          fastNLOCoeffBase* c = table.GetCoeffTable(i);
          if ( fastNLOCoeffAddBase::CheckCoeffConstants(c,true) ) {
+            int iFlag1 = IBFlag1;
+            int iFlag2 = IBFlag2;
+            if ( EXIST(InfoBlockFlag1) ) { iFlag1 = INT(InfoBlockFlag1); }
+            if ( EXIST(InfoBlockFlag2) ) { iFlag2 = INT(InfoBlockFlag2); }
             if ( c->IsLO() ) {
                info["fnlo-tk-modify"]<<"Found LO contribution " << i << endl;
                int ilo = 0;
@@ -354,14 +466,12 @@ int main(int argc, char** argv) {
                   }
                }
                std::vector<std::string> Description;
-               if ( NDescr > 1 ) {
-                  Description.push_back(STRING_ARR(InfoBlockDescr)[ilo]);
-               } else if ( NDescr > 0 ) {
+               if ( NDescr > 0 ) {
                   Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
                } else {
                   Description.push_back(Default);
                }
-               c->AddCoeffInfoBlock(0,0,Description,STRING_ARR(InfoBlockFiles)[ilo]);
+               c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,STRING_ARR(InfoBlockFiles)[ilo],icola,icolb);
                ic += 1;
             } else if ( c->IsNLO() ) {
                info["fnlo-tk-modify"]<<"Found NLO contribution " << i << endl;
@@ -374,14 +484,12 @@ int main(int argc, char** argv) {
                   }
                }
                std::vector <std:: string> Description;
-               if ( NDescr > 1 ) {
-                  Description.push_back(STRING_ARR(InfoBlockDescr)[inlo]);
-               } else if ( NDescr > 0 ) {
+               if ( NDescr > 0 ) {
                   Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
                } else {
                   Description.push_back(Default);
                }
-               c->AddCoeffInfoBlock(0,0,Description,STRING_ARR(InfoBlockFiles)[inlo]);
+               c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,STRING_ARR(InfoBlockFiles)[inlo],icola,icolb);
                ic += 1;
             } else if ( c->IsNNLO() ) {
                info["fnlo-tk-modify"]<<"Found NNLO contribution " << i << endl;
@@ -394,14 +502,12 @@ int main(int argc, char** argv) {
                   }
                }
                std::vector <std:: string> Description;
-               if ( NDescr > 1 ) {
-                  Description.push_back(STRING_ARR(InfoBlockDescr)[innlo]);
-               } else if ( NDescr > 0 ) {
+               if ( NDescr > 0 ) {
                   Description.push_back(STRING_ARR(InfoBlockDescr)[0]);
                } else {
                   Description.push_back(Default);
                }
-               c->AddCoeffInfoBlock(0,0,Description,STRING_ARR(InfoBlockFiles)[innlo]);
+               c->AddCoeffInfoBlock(iFlag1,iFlag2,Description,STRING_ARR(InfoBlockFiles)[innlo],icola,icolb);
                ic += 1;
             } else {
                info["fnlo-tk-modify"]<<"Unknown contribution " << i << endl;

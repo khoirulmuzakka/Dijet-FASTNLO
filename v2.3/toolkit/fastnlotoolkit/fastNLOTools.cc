@@ -392,26 +392,39 @@ namespace fastNLOTools {
    }
 
    //______________________________________________________________________________
-   std::vector <double> ReadInfoBlockContent(std::string filename) {
+   std::vector <double> ReadUncertaintyFromFile(std::string filename, unsigned int icola, unsigned int icolb) {
       std::string extension = "";
       std::ifstream infile;
       std::string line;
       std::vector <double> Uncertainty;
 
-      //! Determine extension to differentiate for parsing among
-      //  - NLOJet++ --> fnlo-tk-statunc .log files
-      //  - NNLOJET  --> .dat files
+      //! Determine extension to differentiate for parsing
+      //! - fnlo-tk-statunc:  'log' file extension; column numbers not needed, rel. stat. uncertainty = col #4
+      //! - NNLOJET dat file: 'dat' file extension; column numbers not needed, rel. stat. uncertainty = (col #5 / col #4)
+      //! - Generic txt file: 'txt' file extension; only icola --> rel. stat. uncertainty = col #icola
+      //! -                                         icol a & b --> rel. stat. uncertainty = col #icolb / #icola
       if ( filename.find_last_of(".") != std::string::npos ) {
          extension = filename.substr(filename.find_last_of(".")+1);
       }
-      info["ReadInfoBlockContent"]<<"Reading additional InfoBlock content from file: " << filename <<endl;
+      if ( extension != "dat" && extension != "log" && extension != "txt" ) {
+         error["ReadUncertaintyFromFile"]<<"Unknown filename extension, aborted! filename = " << filename <<endl;
+         exit(34);
+      } else if ( extension == "txt" && icola == 0) {
+         error["ReadUncertaintyFromFile"]<<"'txt' file found, but column specification is missing, aborted! icola " << icola <<endl;
+         exit(35);
+      } else if ( extension == "txt" && (icola > 10 || icolb > 10) ) {
+         error["ReadUncertaintyFromFile"]<<"'txt' file found, but column specification is too large, aborted! icola, icolb = " << icola << ", " << icolb <<endl;
+         exit(35);
+      } else {
+         info["ReadUncertaintyFromFile"]<<"Reading additional uncertainty content from file: " << filename <<endl;
+      }
+
       infile.open(filename);
       if (infile.is_open()) {
          int  iline = 0;
          bool lline = false;
          // Read line-by-line
          while(std::getline(infile, line)) {
-            cout << "line = " << line << endl;
             // Put line into stringstream and read word-by-word
             std::istringstream iss(line);
             std::string word, word1, word2;
@@ -443,24 +456,40 @@ namespace fastNLOTools {
                if ( word == "#-" ) {
                   lline = ! lline;
                } else if ( lline ) {
-                  cout << "AAAAA word = " << word << endl;
                   // Skip second & third word of each uncertainty line (x section; lower uncertainty)
                   iss >> word;
                   iss >> word;
                   double dxsrel;
                   iss >> dxsrel;
-                  cout << "dxsrel = " << dxsrel << endl;
                   Uncertainty.push_back(dxsrel);
                   iline += 1;
-                  cout << "BBBBB iline = " << iline << endl;
+               }
+            }
+            // For 'txt' extension either read column #icola or divide column #icolb / #icola; max col = 10
+            else if ( extension == "txt" ) {
+               double a = 0;
+               double b = 0;
+               for ( unsigned int ic = 1; ic<11; ic++ ) {
+                  if ( ic == icola ) a = std::stod(word);
+                  if ( ic == icolb ) b = std::stod(word);
+                  iss >> word;
+               }
+               if ( icolb == 0 ) {
+                  Uncertainty.push_back(a);
+               } else {
+                  if ( fabs(a) > DBL_MIN ) {
+                     Uncertainty.push_back(b/a);
+                  } else {
+                     Uncertainty.push_back(0);
+                  }
                }
             } else {
-               error["ReadInfoBlockContent"]<<"Unkown file extension, aborted! Filename is: " << filename <<endl;
-               exit(32);
+               error["ReadUncertaintyFromFile"]<<"Unknown filename extension, aborted! filename = " << filename <<endl;
+               exit(34);
             }
          }
       } else {
-         error["ReadInfoBlockContent"]<<"Cannot read InfoBlock content, aborted! Filename is: " << filename <<endl;
+         error["ReadUncertaintyFromFile"]<<"Cannot read from file, aborted! filename is: " << filename <<endl;
          exit(33);
       }
       return Uncertainty;

@@ -224,22 +224,39 @@ void fastNLOCoeffBase::MultiplyBin(unsigned int iObsIdx, double nfact) {
 //
 //________________________________________________________________________________________________________________
 // Added to include CoeffInfoBlocks
+// Check existence of InfoBlock of type, i.e. flags, (flag1,x); return error in case of multiple matches!
 bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1) const {
    bool result = false;
    for (int i=0; i<NCoeffInfoBlocks; i++) {
-      if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 ) result = true;
+      if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 ) {
+         if ( ! result ) {
+            result = true;
+         } else {
+            error["HasCoeffInfoBlocks"]<<"Aborted! Found multiple info blocks of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
+            exit(201);
+         }
+      }
    }
    return result;
 }
 
+// Check existence of InfoBlock of type, i.e. flags, (flag1,flag2); return error in case of multiple matches!
 bool fastNLOCoeffBase::HasCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2) const {
    bool result = false;
    for (int i=0; i<NCoeffInfoBlocks; i++) {
-      if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 && ICoeffInfoBlockFlag2[i] == fICoeffInfoBlockFlag2 ) result = true;
+      if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 && ICoeffInfoBlockFlag2[i] == fICoeffInfoBlockFlag2 ) {
+         if ( ! result ) {
+            result = true;
+         } else {
+            error["HasCoeffInfoBlocks"]<<"Aborted! Found multiple info blocks of type ICoeffInfoBlockFlag1 = "<<ICoeffInfoBlockFlag1[i]<<endl;
+            exit(202);
+         }
+      }
    }
    return result;
 }
 
+// Return first matching index; multiple blocks of same type, i.e. flags (flag1,x), are not allowed!
 int fastNLOCoeffBase::GetCoeffInfoBlockIndex(int fICoeffInfoBlockFlag1) {
    for (int i=0; i<NCoeffInfoBlocks; i++) {
       if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 ) return i;
@@ -247,6 +264,7 @@ int fastNLOCoeffBase::GetCoeffInfoBlockIndex(int fICoeffInfoBlockFlag1) {
    return -1;
 }
 
+// Return first matching index; multiple blocks of same type, i.e. flags (flag1,flag2), are not allowed!
 int fastNLOCoeffBase::GetCoeffInfoBlockIndex(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2) {
    for (int i=0; i<NCoeffInfoBlocks; i++) {
       if ( ICoeffInfoBlockFlag1[i] == fICoeffInfoBlockFlag1 && ICoeffInfoBlockFlag2[i] == fICoeffInfoBlockFlag2 ) return i;
@@ -254,16 +272,23 @@ int fastNLOCoeffBase::GetCoeffInfoBlockIndex(int fICoeffInfoBlockFlag1, int fICo
    return -1;
 }
 
-void fastNLOCoeffBase::AddCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2,
-                                         std::vector<std::string> Description, std::string datfile) {
+void fastNLOCoeffBase::AddCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2, std::vector<std::string> Description,
+                                         std::vector<double> Uncertainty) {
    info["AddCoeffInfoBlocks"]<<"Adding additional InfoBlock with flags "<<fICoeffInfoBlockFlag1<<" and "<<fICoeffInfoBlockFlag2<<" to table contribution."<<endl;
    NCoeffInfoBlocks += 1;
    ICoeffInfoBlockFlag1.push_back(fICoeffInfoBlockFlag1);
    ICoeffInfoBlockFlag2.push_back(fICoeffInfoBlockFlag2);
    NCoeffInfoBlockDescr.push_back(Description.size());
    CoeffInfoBlockDescript.push_back(Description);
-   std::vector<double> Uncertainty = fastNLOTools::ReadInfoBlockContent(datfile);
+   NCoeffInfoBlockCont.push_back(Uncertainty.size());
    CoeffInfoBlockContent.push_back(Uncertainty);
+}
+
+void fastNLOCoeffBase::AddCoeffInfoBlock(int fICoeffInfoBlockFlag1, int fICoeffInfoBlockFlag2, std::vector<std::string> Description,
+                                         std::string filename, unsigned int icola, unsigned int icolb) {
+   info["AddCoeffInfoBlocks"]<<"Adding additional InfoBlock reading data from file "<<filename<<endl;
+   std::vector<double> Uncertainty = fastNLOTools::ReadUncertaintyFromFile(filename, icola, icolb);
+   AddCoeffInfoBlock(fICoeffInfoBlockFlag1, fICoeffInfoBlockFlag2, Description, Uncertainty);
 }
 
 void fastNLOCoeffBase::ReadCoeffInfoBlocks(istream& table, int ITabVersionRead) {
@@ -284,7 +309,7 @@ void fastNLOCoeffBase::ReadCoeffInfoBlocks(istream& table, int ITabVersionRead) 
          }
          table >> iflag;
          ICoeffInfoBlockFlag2.push_back(iflag);
-         if (ICoeffInfoBlockFlag2[i] == 0) {
+         if (ICoeffInfoBlockFlag2[i] == 0 || ICoeffInfoBlockFlag2[i] == 1) {
             debug["ReadCoeffInfoBlocks"]<<"Found info block of type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;
          } else {
             error["ReadCoeffInfoBlocks"]<<"Found info block of unknown type ICoeffInfoBlockFlag2 = "<<ICoeffInfoBlockFlag2[i]<<endl;

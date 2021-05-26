@@ -414,16 +414,6 @@ int main(int argc, char** argv) {
       }
    }
 
-   // //! Write out cross sections with statistical uncertainty
-   // yell << " " << _DSEPS << endl;
-   // yell << " Statistical uncertainties of the " << FixedOrderChoice << " cross section for the primary scale choice.\n";
-   // yell << " " << _SSEPS << endl;
-   // yell << "  bin       cross section           rel. average error of the mean\n";
-   // yell << " " << _SSEPS << endl;
-   // for (unsigned int i=0; i<xs0.size(); i++) {
-   //    printf("%5i      %18.11e      %18.11e\n",i+1,xs[i],dxs[i]/xs[i]);
-   // }
-
    //! If YODA is linked, write out cross sections with statistical uncertainty in YODA format as well
    fastNLOLHAPDF fnlo(firsttable,PDFFile,0);
 
@@ -439,6 +429,7 @@ int main(int argc, char** argv) {
    //! Get binning
    vector < pair < double, double > > bins = fnlo.GetObsBinsBounds(NDim-1);
 
+   //! Write out cross sections with statistical uncertainty
    yell  << _CSEPSC << endl;
    shout << "fnlo-tk-statunc: Evaluating uncertainties" << endl;
    yell  << _CSEPSC << endl;

@@ -108,13 +108,30 @@ ScDescript {               # Example of final scenario description for CMS inclu
 
 #--------------------------------------------------------------------
 #   Add InfoBlocks with statistical/numerical uncertainty
-#   (For now only works with NNLOJET dat files!)
 #--------------------------------------------------------------------
-#InfoBlockFiles { # NNLOJET dat files for each order separately
+#InfoBlockFlag1   0         # Default: 0 Statistical/numerical uncertainty
+#InfoBlockFlag2   1         # Default: 1 = quadratic addition; else: 0 = linear addition
+
+# Either read uncertainty from files ...
+#InfoBlockFiles { # For each order separately: NNLOJET dat files, fastNLO statunc log files, txt files using 1 or 2 columns
 #  2jet.LO.fnl3832_yb0_ys0_ptavgj12.dat
 #  2jet.NLO_only.fnl3832_yb0_ys0_ptavgj12.dat
 #  2jet.NNLO_only.fnl3832_yb0_ys0_ptavgj12.dat
 #}
+
+#InfoBlockFileColumns { # Column(s) with rel. stat. uncertainty or with x section and abs. stat. uncertainty
+#  4
+#  4  5
+#}
+
+# ... or provide them directly as columns inside this file
+#InfoBlockStatUnc {{
+#  dstrel_LO   dstrel_NLO
+#    0.001       0.01
+#    0.001       0.01
+#    0.001       0.01
+#    0.001       0.01
+#}}
 
 #InfoBlockDescr { # Same description for each contribution
 #  "Default statistical uncertainties from NNLOJET."

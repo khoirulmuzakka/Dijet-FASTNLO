@@ -85,9 +85,18 @@ public:
    bool HasCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2) const;
    int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1);
    int GetCoeffInfoBlockIndex(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2);
+   int GetCoeffInfoBlockFlag1(int Index) const { return ICoeffInfoBlockFlag1[Index]; };
+   int GetCoeffInfoBlockFlag2(int Index) const { return ICoeffInfoBlockFlag2[Index]; };
+   void SetCoeffInfoBlockFlag1(int Index, int iFlag1) { ICoeffInfoBlockFlag1[Index] = iFlag1; };
+   void SetCoeffInfoBlockFlag2(int Index, int iFlag2) { ICoeffInfoBlockFlag2[Index] = iFlag2; };
    std::vector < double > GetCoeffInfoContent(int Index) const { return CoeffInfoBlockContent[Index]; };
    int GetNCoeffInfoBlocks() const {return NCoeffInfoBlocks;}
-   void AddCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2, std::vector<std::string> Description, std::string datfile);
+   // Provide uncertainty via input vector
+   void AddCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2, std::vector<std::string> Description,
+                          std::vector<double> uncertainty);
+   // Provide uncertainty reading from filename
+   void AddCoeffInfoBlock(int ICoeffInfoBlockFlag1, int ICoeffInfoBlockFlag2, std::vector<std::string> Description,
+                          std::string filename, unsigned int icola = 0, unsigned int icolb = 0);
 
 protected:
    void ReadBase(std::istream& table, int ITabVersionRead);

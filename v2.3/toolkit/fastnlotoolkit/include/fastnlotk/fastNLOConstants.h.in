@@ -112,7 +112,7 @@ namespace fastNLO {
 
    enum EAddUncertaintyStyle {
       kAddNone                  = 0,    // no additional uncertainty
-      kAddStat                  = 1     // statistical uncertainty ( i.e. uncorrelated and symmetric)
+      kAddStat                  = 1     // statistical/numerical uncertainty
    };
 
    enum EPDFUncertaintyStyle {
