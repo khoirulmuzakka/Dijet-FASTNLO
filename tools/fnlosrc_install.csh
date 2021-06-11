@@ -720,7 +720,7 @@ if ( $withoptional ) then
 # Python is enabled by default.
 #------------------------------------------------------------------------------
 #   set arc="Rivet-2.5.4"
-   set arc="Rivet-3.1.2" # Needs HepMC3 and fastjet contrib
+   set arc="Rivet-3.1.4" # Needs HepMC3 and fastjet contrib
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}.tar.gz
       cd ${arc}
@@ -788,7 +788,8 @@ if ( ! $mpnnlo ) then
 #   set arc="fastnlo_toolkit-2.3.1-2585"
 #   set arc="fastnlo_toolkit-2.3.1-2657"
 #   set arc="fastnlo_toolkit-2.3.1-2753"
-   set arc="fastnlo_toolkit-2.3.1-2771"
+#   set arc="fastnlo_toolkit-2.3.1-2771"
+   set arc="fastnlo_toolkit-2.5.0-2819"
    set rev=""
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}${rev}.tar.gz
@@ -828,7 +829,8 @@ if ( ! $mpnnlo ) then
 #------------------------------------------------------------------------------
 #      set arc="fastnlo_interface_nlojet-2.3.1pre-2424"
 #      set arc="fastnlo_interface_nlojet-2.3.1pre-2657"
-      set arc="fastnlo_interface_nlojet-2.3.1pre-2771"
+#      set arc="fastnlo_interface_nlojet-2.3.1pre-2771"
+      set arc="fastnlo_interface_nlojet-2.5.0-2819"
       if ( ! -e ${arc}_installed  ) then
          tar xzf ${arc}.tar.gz
          cd ${arc}

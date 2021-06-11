@@ -1,0 +1,234 @@
+###############################################################################
+# TABLE EVALUATION
+#
+# The fastNLO Toolkit comes with some executables, usually installed in ${prefix}/bin,
+# demonstrating the use of the interpolation tables. All executables are named
+# 'fnlo-tk-execname' with execname being either cppread (Cross-Section Calculator),
+# example (Example Evaluator), rootout (ROOT Writer), or yodaout (YODA Writer).
+# Typing the command with option -h gives some general information about its
+# purpose and explains the usage options as shown below.
+# Typing the command with option -v prints ot the version number.
+# The corresponding C++ code can be found in the appropriately named .cc files
+# in the 'src' directory of the tar file. All functionality of the Toolkit library
+# can also be accessed from python if configured with the --enable-python option.
+#
+# The printouts below corresponds to version fastNLO_toolkit Version 2.5.0_2819
+#==============================================================================
+
+
+> fnlo-tk-cppread -h
+ ##################################################################################
+ # INFO.    [fnlo-tk-cppread] Program to read fastNLO tables and derive
+ # INFO.    [fnlo-tk-cppread] QCD cross sections using PDFs e.g. from LHAPDF
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-cppread] For more explanations type:
+ # INFO.    [fnlo-tk-cppread] ./fnlo-tk-cppread -h
+ # INFO.    [fnlo-tk-cppread] For version number printout type:
+ # INFO.    [fnlo-tk-cppread] ./fnlo-tk-cppread -v
+ ##################################################################################
+
+ ##################################################################################
+ # INFO.    [fnlo-tk-cppread] fastNLO Cross-Section Calculator
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-cppread] This program evaluates a fastNLO table for a set of specified options and
+ # INFO.    [fnlo-tk-cppread] prints out a table with detailed binning and cross-section information
+ # INFO.    [fnlo-tk-cppread] for each observable bin.
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-cppread <fastNLOtable.tab> [PDF] [#scalecombs] [ascode] [norm] [flexscale]
+ # USAGE.          Specification: <> mandatory; [] optional.
+ # USAGE.   <fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab
+ # USAGE.   [PDF]: PDF set, def. = CT10nlo
+ # USAGE.      For LHAPDF5: Specify set names WITH filename extension, e.g. ".LHgrid".
+ # USAGE.      For LHAPDF6: Specify set names WITHOUT filename extension.
+ # USAGE.      If the PDF set still is not found, then:
+ # USAGE.      - Check, whether the LHAPDF environment variable is set correctly.
+ # USAGE.      - Specify the PDF set including the absolute path.
+ # USAGE.      - Download the desired PDF set from the LHAPDF web site.
+ # USAGE.   [#vars]: Number of mu_r, mu_f scale variations to investigate, if possible, def. = 1.
+ # USAGE.      If #vars == 1 then only the central scale with scale factors of (1,1) is investigated.
+ # USAGE.      If  1 < #vars < 8   then no. of additional mu_r, mu_f scale factor variations to investigate, if possible.
+ # USAGE.      If -7 < #vars < 0   then no. of additional mu_r, mu_f low fixed-scale variations to investigate, if possible.
+ # USAGE.      If -13 < #vars < -6 then no. of additional mu_r, mu_f high fixed-scale variations to investigate, if possible.
+ # USAGE.      If #vars == 0 then all PDF members are investigated for the default scale factors of (1,1).
+ # USAGE.   [ascode]: Name of desired alpha_s evolution code, def. = GRV.
+ # USAGE.      Alternatives are: LHAPDF, RUNDEC, and
+ # USAGE.                        QCDNUM, or HOPPET, IF compiled with these options!
+ # USAGE.   [norm]: Normalize if applicable, def. = no.
+ # USAGE.      Alternatives: "yes" or "norm"
+ # USAGE.   [flexscale]: Central scale choice for flex-scale tables.
+ # USAGE.      Default:      "kScale1",  i.e. mur=muf=scale1,
+ # USAGE.      Alternatives: "kScale2",  i.e. mur=muf=scale2,
+ # USAGE.                    "scale12", i.e. mur=scale1, muf=scale2,
+ # USAGE.                    "scale21", i.e. mur=scale2, muf=scale1,
+ # USAGE.                    "kProd", i.e. mur=muf=scale1*scale2,
+ # USAGE.                    "kQuadraticSum", i.e. mur=muf=sqrt(scale1^2+scale2^2).
+ # USAGE.   [Nf]: Set no. of flavours to use in alpha_s evolution, def. = 5
+ # USAGE.      Alternatives: 3,4,6, and 0 i.e. Nf matching at thresholds.
+ # USAGE.      Only possible for [ascode] other than LHAPDF!
+ # USAGE.   [NLoop]: Set no. of loops to use in alpha_s evolution, def. = 2 (NLO)
+ # USAGE.      Alternatives: 1,3,4.
+ # USAGE.      Only possible for [ascode] other than LHAPDF!
+ # USAGE.   [asMz]: Set value of alpha_s(M_Z) to use in alpha_s evolution, def. = 0.1181 (PDG 2017)
+ # USAGE.      Only possible for [ascode] other than LHAPDF!
+ # USAGE.   [Mz]: Set value of M_Z at which alpha_s(M_Z) is defined in alpha_s evolution, def. = 91.1876 (PDG)
+ # USAGE.      Only possible for [ascode] other than LHAPDF!
+ # USAGE.   [Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING
+ #
+ # USAGE.   Use "_" to skip changing a default argument.
+ #
+ ##################################################################################
+
+
+> fnlo-tk-example -h
+ ##################################################################################
+ # INFO.    [fnlo-tk-example] Example program for the user to test cross-section calculations
+ # INFO.    [fnlo-tk-example] with fastNLO
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-example] For more explanations type:
+ # INFO.    [fnlo-tk-example] ./fnlo-tk-example -h
+ # INFO.    [fnlo-tk-example] and consult the provided source code 'fnlo-tk-example.cc'.
+ ##################################################################################
+
+ ##################################################################################
+ # [fnlo-tk-example] fastNLO Example Evaluator
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-example] This is an example program to evaluate a fastNLO table
+ # INFO.    [fnlo-tk-example] that a user can check and adapt to his liking
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-example <fastNLOtable.tab> [PDF]
+ # USAGE.          Arguments: <> mandatory; [] optional.
+ # USAGE.   <fastNLOtable.tab>: Table input file fnl2342b.tab
+ # USAGE.   [PDF]: PDF set, def. = CT10nlo
+ # USAGE.      For LHAPDF5: Specify set names WITH filename extension, e.g. ".LHgrid".
+ # USAGE.      For LHAPDF6: Specify set names WITHOUT filename extension.
+ # USAGE.      If the PDF set still is not found, then:
+ # USAGE.      - Check, whether the LHAPDF environment variable is set correctly.
+ # USAGE.      - Specify the PDF set including the absolute path.
+ # USAGE.      - Download the desired PDF set from the LHAPDF web site.
+ #
+ ##################################################################################
+
+
+r{t/fastNLO/tools> fnlo-tk-yodaout -h
+ ##################################################################################
+ # INFO.    [fnlo-tk-yodaout] Program to read fastNLO tables and write out
+ # INFO.    [fnlo-tk-yodaout] QCD cross sections in YODA format for use with Rivet
+ # INFO.    [fnlo-tk-yodaout] (If compiled without YODA support only text printout is given)
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-yodaout] For more explanations type:
+ # INFO.    [fnlo-tk-yodaout] ./fnlo-tk-yodaout -h
+ # INFO.    [fnlo-tk-yodaout] For version number printout type:
+ # INFO.    [fnlo-tk-yodaout] ./fnlo-tk-yodaout -v
+ ##################################################################################
+
+ ##################################################################################
+ # INFO.    [fnlo-tk-yodaout] fastNLO YODA Writer
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-yodaout] This program evaluates a fastNLO table and
+ # INFO.    [fnlo-tk-yodaout] prints out cross sections with statistical (if available),
+ # INFO.    [fnlo-tk-yodaout] scale, or PDF uncertainties in YODA format for use with Rivet.
+ # INFO.    [fnlo-tk-yodaout] For this to work, the scenario description must contain
+ # INFO.    [fnlo-tk-yodaout] the Rivet ID in the form 'RIVET_ID=EXP_YYYY_INSPIREID/Dii-xjj-ykk',
+ # INFO.    [fnlo-tk-yodaout] where 'ii', 'jj', and 'kk' indicate the first histogram covered by
+ # INFO.    [fnlo-tk-yodaout] this table and the capital letter indicates the plot counter to increase.
+ # INFO.    [fnlo-tk-yodaout] In case the Rivet ID is missing, it can be added e.g. by using 'fnlo-tk-modify'.
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-yodaout <fastNLOtable.tab> [PDF] [uncertainty]
+ # USAGE.          Arguments: <> mandatory; [] optional.
+ # USAGE.   <fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab
+ # USAGE.   [PDF]: PDF set, def. = CT10nlo
+ # USAGE.      For LHAPDF5: Specify set names WITH filename extension, e.g. ".LHgrid".
+ # USAGE.      For LHAPDF6: Specify set names WITHOUT filename extension.
+ # USAGE.      If the PDF set still is not found, then:
+ # USAGE.      - Check, whether the LHAPDF environment variable is set correctly.
+ # USAGE.      - Specify the PDF set including the absolute path.
+ # USAGE.      - Download the desired PDF set from the LHAPDF web site.
+ # USAGE.   [uncertainty]: Uncertainty to show, def. = none
+ # USAGE.      Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)
+ # USAGE.                    2P (symmetric 2-point scale factor variation)
+ # USAGE.                    6P (asymmetric 6-point scale factor variation)
+ # USAGE.                    HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)
+ # USAGE.                    HA (asymmetric Hessian PDF uncertainty)
+ # USAGE.                    HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)
+ # USAGE.                    HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)
+ # USAGE.                    MC (MC sampling PDF uncertainty --> NNPDF PDFs)
+ # USAGE.                    L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)
+ # USAGE.                    AS (a_s(M_Z) variation uncertainty with GRV evolution)
+ # USAGE.                    ST (statistical uncertainty of x section calculation, if available)
+ # USAGE.   [order]: Fixed-order precision to use, def. = NLO
+ # USAGE.      Alternatives: LO, NLO_only, NNLO, NNLO_only (if available)
+ # USAGE.   [norm]: Normalize if applicable, def. = no.
+ # USAGE.      Alternatives: "yes" or "norm"
+ # USAGE.   [flexscale]: Central scale choice for flex-scale tables.
+ # USAGE.      Default:      "kScale1",  i.e. mur=muf=scale1,
+ # USAGE.      Alternatives: "kScale2",  i.e. mur=muf=scale2,
+ # USAGE.                    "scale12", i.e. mur=scale1, muf=scale2,
+ # USAGE.                    "scale21", i.e. mur=scale2, muf=scale1,
+ # USAGE.                    "kProd", i.e. mur=muf=scale1*scale2,
+ # USAGE.                    "kQuadraticSum", i.e. mur=muf=sqrt(scale1^2+scale2^2).
+ # USAGE.   [np]: Apply nonperturbative corrections if available, def. = no.
+ # USAGE.      Alternatives: "yes" or "np"
+ # USAGE.   [Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING
+ #
+ # USAGE.   Use "_" to skip changing a default argument.
+ #
+ ##################################################################################
+
+
+r{t/fastNLO/tools> fnlo-tk-rootout -h
+ ##################################################################################
+ # INFO.    [fnlo-tk-rootout] Program to read fastNLO tables and write out
+ # INFO.    [fnlo-tk-rootout] QCD cross sections into ROOT histograms
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-rootout] For more explanations type:
+ # INFO.    [fnlo-tk-rootout] ./fnlo-tk-rootout -h
+ # INFO.    [fnlo-tk-rootout] For version number printout type:
+ # INFO.    [fnlo-tk-rootout] ./fnlo-tk-rootout -v
+ ##################################################################################
+ ##################################################################################
+ # INFO.    [fnlo-tk-rootout] fastNLO ROOT Writer
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-rootout] This program evaluates a fastNLO table and
+ # INFO.    [fnlo-tk-rootout] writes histograms with cross sections and PDF, statistical or
+ # INFO.    [fnlo-tk-rootout] scale uncertainties into ROOT.
+ # INFO.    [fnlo-tk-rootout]
+ # INFO.    [fnlo-tk-rootout] TODO: Provide more info on histogram numbering/labelling ...
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-rootout <fastNLOtable.tab> [PDF] [uncertainty]
+ # USAGE.          Arguments: <> mandatory; [] optional.
+ # USAGE.   <fastNLOtable.tab>: Table input file, e.g. fnl2342b.tab
+ # USAGE.   [PDF]: PDF set, def. = series of CT14nlo, MMHT2014nlo68cl, NNPDF30_nlo_as_0118, PDF4LHC15_nlo_mc
+ # USAGE.      For LHAPDF5: Specify set names WITH filename extension, e.g. ".LHgrid".
+ # USAGE.      For LHAPDF6: Specify set names WITHOUT filename extension.
+ # USAGE.      If the PDF set still is not found, then:
+ # USAGE.      - Check, whether the LHAPDF environment variable is set correctly.
+ # USAGE.      - Specify the PDF set including the absolute path.
+ # USAGE.      - Download the desired PDF set from the LHAPDF web site.
+ # USAGE.   [PDF uncertainty]: Uncertainty to show, def. = none
+ # USAGE.      Alternatives: NN (none, but correct MC sampling average value --> NNPDF PDFs)
+ # USAGE.                    HS (symmetric Hessian PDF uncertainty --> ABM, (G)JR PDFs)
+ # USAGE.                    HA (asymmetric Hessian PDF uncertainty)
+ # USAGE.                    HP (pairwise asymmetric Hessian PDF uncertainty --> CTEQ|MSTW PDFs)
+ # USAGE.                    HC (pairwise asymmetric Hessian PDF uncertainty rescaled to CL68 --> CTEQ PDFs)
+ # USAGE.                    MC (MC sampling PDF uncertainty --> NNPDF PDFs)
+ # USAGE.                    L6 (LHAPDF6 PDF uncertainty --> LHAPDF6 PDFs)
+ # USAGE.   [order]: Fixed-order precision to use, def. = series up to highest fixed-order available
+ # USAGE.      Alternatives: LO, NLO, NNLO (if available)
+ # USAGE.   [norm]: Normalize if applicable, def. = no.
+ # USAGE.      Alternatives: "yes" or "norm"
+ # USAGE.   [flexscale]: Central scale choice for flex-scale tables.
+ # USAGE.      Default:      "kScale1",  i.e. mur=muf=scale1,
+ # USAGE.      Alternatives: "kScale2",  i.e. mur=muf=scale2,
+ # USAGE.                    "scale12", i.e. mur=scale1, muf=scale2,
+ # USAGE.                    "scale21", i.e. mur=scale2, muf=scale1,
+ # USAGE.                    "kProd", i.e. mur=muf=scale1*scale2,
+ # USAGE.                    "kQuadraticSum", i.e. mur=muf=sqrt(scale1^2+scale2^2).
+ # USAGE.   [Verbosity]: Set verbosity level of table evaluation [DEBUG,INFO,WARNING,ERROR], def. = WARNING
+ #
+ # USAGE.   Use "_" to skip changing a default argument.
+ #
+ ##################################################################################

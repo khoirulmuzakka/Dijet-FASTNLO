@@ -1,0 +1,363 @@
+#
+# TODO: This text needs some update for v2.5
+#
+###############################################################################
+#
+# The production of new tables with fastNLO proceeds in two steps:
+#
+# 1. Warmup run
+#    The accessible phase space in parton fractional momenta x and
+#    momentum scales Q has to be optimized. This is performed in
+#    a pre- or warm-up run and writes out a .txt file containing
+#    the determined limits (plus the observable binning used).
+#    Kinematically or otherwise inaccessible i.e. totally empty
+#    phase space bins must be removed from the steering and
+#    from the warmup file before running production jobs.
+#
+# 2. Production run
+#    The x,Q binning is read from the warm-up file.
+#    ALL calculations for one scenario respectively observable
+#    MUST use the SAME warmup file in order to be combined (merged)
+#    statistically to the full LO & NLO (& NNLO) table.
+#
+###############################################################################
+#
+# Specialising to the NLOJet++ interface, there are two steerable generic scenarios,
+# (1) InclusiveNJets and (2) InclusiveNJetEvents.
+#
+# (1) The 1st one is for inclusive jet cross sections and makes one entry
+#     for each selected jet, e.g. the jet pT, of each selected jet.
+#     The implemented jet observables are: |y|, |eta|, pT_[GeV], and phi
+#     The implemented QCD scales are:      pT_max_[GeV] and pT_jet_[GeV]
+#
+# (2) The 2nd one is for jet event cross sections and makes one entry,
+#     e.g. a dijet mass, per selected event.
+#     The implemented event observables are: |y_max|, y_star, |y_1|, y_2s,
+#                                            Mjj_[GeV], Mjj_[TeV], <pT_1,2>_[GeV],
+#                                            Chi, HT/2_[GeV], pT_max_[GeV], and DeltaPhi_1,2
+#     The implemented QCD scales are:        <pT_1,2>_[GeV], <pT_1,2,3>_[GeV], Mjj/2_[GeV],
+#                                            pT_max*exp(0.3*y_star)_[GeV] (s. ATLAS),
+#                                            exp(0.3*y_star), and HT/2_[GeV]
+#
+# Numerous example steering files for various scenarios are available in
+# $prefixdir/share/fastnlo_interface_nlojet
+#
+# As long as only selection cuts, binnings, and settings need to be adjusted
+# in these steering files, new scenario code does not need to be developed.
+# NLOjet++ can be run out-of-the-box with one of the two generic scenarios and
+# the corresponding steering file with adjusted settings. A new compilation
+# or linking is not required. In the following, it is assumed that such a
+# scenario should be evaluated.
+#
+# If a new observable must be implemented, the best way is to copy the closest
+# generic scenario for either jet or event cross sections, InclusiveNJets.cc or
+# InclusiveNJetEvents.cc, modify the documented code according to the user's
+# needs, and add the new .cc file to the Makefile.am of the interface/hadron
+# directory. Subsequently, the autotools development tools must be used to
+# recreate an installable code package by running
+#    autoreconf -i
+# before re-configuring and installing everything as before from the tar.gz
+# distribution package.
+#
+###############################################################################
+#
+# Warmup run with NLOJet++ and the fastnlo_interface_nlojet
+#
+# From the directory where the executable shoud be run, create a symbolic link
+# named either 'InclusiveNJets.str' or 'InclusiveNJetEvents.str' to the desired
+# steering file for your production. As an example, let's take the scenario
+# 'fnl2342b_I902309_v23_fix.str' from the share/fastnlo_interface_nlojet/InclusiveJets
+# directory. This scenario corresponds to the CMS inclusive jet measurement at 7 TeV
+# from 2010. The 'I902309' number in the filename is the Inspire record no. of the
+# corresponding publication. More details can be found inside the file under
+# 'ScenarioDescription'.
+# So here one has to execute
+#    cd ${prefix}; rm -f InclusiveNJets.str; ln -s share/fastnlo_interface_nlojet/InclusiveJets/fnl2342b_I902309_v23_fix.str InclusiveNJets.str
+#
+# Then remove any leftover, potentially "low statistics" warmup file from previous test runs
+#    rm -f InclusiveNJets_fnl2342b_I902309_v23_fix_warmup.txt
+#
+# Run NLOJet++ in the mode with largest possible phase space, here NLO:
+#    nlojet++ --calculate --save-after=100000 --max-event=1000000 -cnlo -n fnl2342b_I902309_v23_fix -u lib/fastnlo_interface_nlojet/libInclusiveNJets.la >! fnl2342b_I902309_v23_fix_wrm.log
+#
+# Remarks on the NLOjet++ commands (cf. also the original code and publications):
+#   '--save-after=nnnnn' instructs NLOJet++ to (over-)write accumulated results after each nnnnn events
+#   '--max-event=nnnnn'  instructs NLOJet++ to stop after nnnnn events
+#   -cnlo runs NLOJet++ in NLO mode. The alternative, LO, is performed with -cborn
+#   -n fnl2342b_I902309_v23_fix is passed from NLOJet++ to the interface code and determines i.a.
+#   the result filenames
+#   The '-u lib/fastnlo_interface_nlojet/libInclusiveNJets.la' tells NLOJet++ which plugin code to run
+#
+#   Important:
+#   - If the program finds a warmup file, it automatically switches to do a production run.
+#   - This is only a low statistics example. For final results O(10M-1G) events should be used. Multiple jobs can be merged.
+#   - The undocumented option '-s randomseed' is recommended to be used for production,
+#     particularly so, if many jobs start potentially at the same time. The standard seed generation
+#     from NLOJet++ is not very elaborate and can lead to identical result tables!
+#
+# After harvesting all warmup files, usually named 'InclusiveNJets_fnl2352b_I1325553_v23_fix_warmup_nnnn.txt'
+# with a 4-digit individual job number, the min/max limits of all files must be extracted and written to
+# a new warmup file. For simplicity it is assumed that a directory structure similar to this one
+# is used:
+#
+#   Create a directory structure for table storage a la fastNLO
+#
+#     mkdir -p ${somepath}/fastNLO_tables_v2.3/'Scenario_Name'
+#   Goto storage directory and create subdirs
+#     cd ~/fastNLO_tables_v2.3/'Scenario_Name'
+#     mkdir 'Scenario_Name'
+#     mkdir 'Scenario_Name'_ref
+#     mkdir 'Scenario_Name'_wrm
+#
+# Then store the harvested warmup files in 'Scenario_Name'_wrm and run from
+# the parent directory:
+#
+#   fnlo-add-tables.pl 'Scenario_Name'
+#
+# This produces the overall limits of all warmup files and writes them into
+# 'Scenario_Name_warmup.txt'
+#
+###############################################################################
+#
+# Production runs with NLOJet++ and the fastnlo_interface_nlojet
+#
+# From the same directory as the warmup run, the production jobs can be run,
+# either at LO or at NLO. The summary warmup file created above must be present in
+# this directory. Then it should be found automatically and production mode
+# is entered. If it is not found, another warmup run is initiated ...
+# In that case stop and check why it was not found.
+#
+# The commands to use are
+#
+#   nlojet++ --calculate --save-after=100000 --max-event=1000000 -s 12345 -cborn -n fnl2342b_I902309_v23_fix -u lib/fastnlo_interface_nlojet/libInclusiveNJets.la >! fnl2342b_I902309_v23_fix_lo.log
+# or
+#   nlojet++ --calculate --save-after=100000 --max-event=1000000 -s 67890 -cnlo -n fnl2342b_I902309_v23_fix -u lib/fastnlo_interface_nlojet/libInclusiveNJets.la >! fnl2342b_I902309_v23_fix_nlo.log
+#
+# Again, for real production jobs the no. of events should be much higher.
+# Even more important, explicitly use here the NLOJet++ option -s to set
+# different random number seeds for each job.
+# To test for any problems in the sample of tables assumed to be stored in
+# the subdirectory 'Scenario_Name', the script fnlo-clean-tables.pl can be run
+# from the parent directory as
+#
+#   fnlo-clean-tables.pl -in 'Scenario_Name'
+#
+# As a result, all tables containing +inf, -inf, or NaN entries are moved to
+# the subsubdir called 'Problems'. All duplicate tables are moved to
+# the subsubdir named 'Duplicates'. This script makes use of two additional
+# perl scripts, fnlo-check-infnan.pl and fnlo-check-duplicates.pl, which can also
+# be executed separately.
+#
+# Finally, the remaining tables need to be tested for statistical fluctuations
+# before being merged into one precision table. For that purpose, the
+# script fnlo-add-tables.pl is useful. First, when called like
+#
+#   fnlo-add-tables.pl 'Scenario_Name'
+#
+# it produces a summary table out of all tables, LO or NLO, available in subdir
+# 'Scenario_Name'. Secondly, when called with the -s option, i.e.
+#
+#   fnlo-add-tables.pl -s 'Scenario_Name'
+#
+# table combinations for a statistical evaluation are produced. For these,
+# each LO table is merged with 1 NLO table (--> LO statistical evaluation)
+# and all LO tables are merged with each NLO table (--> NLO stat. evaluation).
+# The actual merging of tables is performed by the toolkit program fnlo-tk-merge.
+# A second toolkit program, fnlo-tk-statunc, can then be used to derive
+# statistical uncertainties for the LO and NLO table sample produced in the
+# previous step. If this is done from a parallel directory
+#
+#     cd ~/fastNLO_tables_v2.3/'Scenario_Name'
+#     mkdir stat
+#
+# where the LO and NLO sample are stored in subdir stat, then
+#
+# fnlo-tk-statunc  "fastNLOsample"
+#
+# with "fastNLOsample" being the basename of table input files, e.g.
+# fnl2452_I1082936_v23_flex-hhc-born-2jet, for the LO case, will
+# evaluate the statistical uncertainty from the sample of available
+# LO or NLO tables and at the same time produce a 'kill-file' with
+# table filenames exhibiting a + or - 10 sigma deviation from a mean
+# in any observable bin. The script fnlo-move-fluctuations.pl deletes
+# the respective test tables from the sample dir 'stat' and moves the
+# original tables in ~/fastNLO_tables_v2.3/'Scenario_Name'/'Scenario_Name'
+# into a subsubdir named 'Fluctuations'.
+# This procedure should be repeated until there is no more 'kill-file'
+# produced. As a last step, the sum of all accepted tables should
+# be reproduced via
+#
+#   fnlo-add-tables.pl 'Scenario_Name'
+#
+###############################################################################
+#
+# Some fastNLO Toolkit functionalities and related helper scripts
+#
+# The output of
+#
+# 'toolname' -h
+#
+# is shown below.
+#
+#==============================================================================
+#
+# Toolkit programs
+#
+#==============================================================================
+ ##################################################################################
+ # INFO.    [fnlo-tk-merge] Tool to merge fastNLO tables with different contributions or
+ # INFO.    [fnlo-tk-merge] to combine identical statistically independent contributions
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-merge] For more explanations type:
+ # INFO.    [fnlo-tk-merge] ./fnlo-tk-merge -h
+ ##################################################################################
+
+ ##################################################################################
+ # [fnlo-tk-merge] fastNLO Table Merger
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-merge] The purpose of this tool is to merge fastNLO tables with different contributions or
+ # INFO.    [fnlo-tk-merge] to combine identical statistically independent additive contributions to improve
+ # INFO.    [fnlo-tk-merge] the statistical precision.
+ # INFO.    [fnlo-tk-merge] The statistical information of each additive contribution is checked.
+ # INFO.    [fnlo-tk-merge] An event number of unity indicates that this contribution
+ # INFO.    [fnlo-tk-merge] has been combined from multiple contributions losing the
+ # INFO.    [fnlo-tk-merge] the event normalisation information that is stored contribution-
+ # INFO.    [fnlo-tk-merge] and not bin-wise. Further merging of such tables is not possible.
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-merge <InTable_1.tab> <InTable_2.tab> [InTable_n.tab] <OutTable.tab>
+ # USAGE.          Specification: <> mandatory; [] optional.
+ # USAGE.          List of blank-separated table files, at least three!
+ # USAGE.          Mandatory are:
+ # USAGE.   <InTable_1.tab>:   First table input file to be merged
+ # USAGE.   <InTable_2.tab>:   Second table input file to be merged
+ # USAGE.   <OutTable.tab>:    Output filename, to which the merged table is written
+ #
+ ##################################################################################
+
+
+ ##################################################################################
+ # INFO.    [fnlo-tk-statunc] Program to read a sample of fastNLO tables and write out
+ # INFO.    [fnlo-tk-statunc] averaged QCD cross sections with statistical uncertainties
+ #---------------------------------------------------------------------------------
+ # INFO.    [fnlo-tk-statunc] For more explanations type:
+ # INFO.    [fnlo-tk-statunc] ./fnlo-tk-statunc -h
+ ##################################################################################
+
+ ##################################################################################
+ # [fnlo-tk-statunc] fastNLO Statistical Table Sample Evaluator
+ #---------------------------------------------------------------------------------
+ #
+ # INFO.    [fnlo-tk-statunc] This program evaluates a sample of equivalent, but
+ # INFO.    [fnlo-tk-statunc] statistically independent fastNLO tables and
+ # INFO.    [fnlo-tk-statunc] provides their averaged cross sections together with
+ # INFO.    [fnlo-tk-statunc] statistical uncertainties.
+ # INFO.    [fnlo-tk-statunc] In addition, some statistical sample characteristics are
+ # INFO.    [fnlo-tk-statunc] printed for each observable bin. The tables files with the
+ # INFO.    [fnlo-tk-statunc] largest downwards and upwards fluctuations from the average are indicated.
+ # INFO.    [fnlo-tk-statunc] All files with any deviation larger than 10 sigma are listed
+ # INFO.    [fnlo-tk-statunc] in an extra kill file for removal by the user.
+ # INFO.    [fnlo-tk-statunc] If optional YODA support is configured and proper RIVET_ID's are
+ # INFO.    [fnlo-tk-statunc] available in the fastNLO tables, the result is additionally provided
+ # INFO.    [fnlo-tk-statunc] in YODA format.
+ # USAGE.
+ # USAGE.   Usage: ./fnlo-tk-statunc <fastNLOsample> [PDF] [order] [nmin] [nmax]
+ # USAGE.          Arguments: <> mandatory; [] optional.
+ # USAGE.   <fastNLOsample>: Basename of table input files, e.g. fnl2452_I1082936_v23_flex-hhc-born-2jet,
+ # USAGE.                    that will be complemented by '_nnnn.tab'
+ # USAGE.   [PDF]: PDF set, def. = CT10nlo
+ # USAGE.      For LHAPDF5: Specify set names WITH filename extension, e.g. ".LHgrid".
+ # USAGE.      For LHAPDF6: Specify set names WITHOUT filename extension.
+ # USAGE.      If the PDF set still is not found, then:
+ # USAGE.      - Check, whether the LHAPDF environment variable is set correctly.
+ # USAGE.      - Specify the PDF set including the absolute path.
+ # USAGE.      - Download the desired PDF set from the LHAPDF web site.
+ # USAGE.   [order]: Fixed-order precision to use, def. = NLO
+ # USAGE.      Alternatives: LO, NNLO (if available)
+ # USAGE.   [nmin]: Smallest table number nnnn to start with, def. = 0000.
+ # USAGE.   [nmax]: Largest  table number nnnn to end with, def. = 1000.
+ #
+ # USAGE.   Use "_" to skip changing a default argument.
+ #
+ ##################################################################################
+#==============================================================================
+#
+# fastNLO helper scripts
+#
+#==============================================================================
+##################################################
+# fnlo-add-warmup.pl: Starting warmup table addition for fastNLO: WARMADD_14102016_064223
+##################################################
+#
+#fnlo-add-warmup.pl
+#Usage: fnlo-add-warmup.pl [switches/options] scenario
+#  -d              Verbose output
+#  -h              Print this text
+#  -v #            Choose between fastNLO version 2.3 or ? (def.=2.3)
+#  -w dir          Directory for warmup tables, (def.=scenario)
+#
+#
+######################################################
+# fnlo-clean-tables.pl: Starting table clean-up for fastNLO: FASTIDCLEAN_14102016_064303
+######################################################
+#
+#
+#fnlo-clean-tables.pl
+#Usage: fnlo-clean-tables.pl scenario
+#  -d dir          Directory for scenario and scenarioref subdirs, (def.=.)
+#  -h              Print this text
+#  -i              Run check on duplicates (id) (def.=no)
+#  -n              Run check on inf or NaN content (def.=no)
+#  -v #            Choose between fastNLO versions 2.3 and ? (def.=2.3)
+#
+#
+######################################################
+# fnlo-check-duplicates.pl: Starting table id check for fastNLO: FASTIDCHECK_14102016_064237
+######################################################
+#
+#
+#fnlo-check-duplicates.pl
+#Usage: fnlo-check-duplicates.pl glob (selects all files matching glob)
+#  -h              Print this text
+#  -v #            Choose between fastNLO versions 2.3 and ? (def.=2.3)
+#
+#
+######################################################
+# fnlo-check-infnan.pl: Starting table contamination check for fastNLO: FASTINFNANCHECK_14102016_064249
+######################################################
+#
+#
+#fnlo-check-infnan.pl
+#Usage: fnlo-check-infnan.pl glob (selects all files matching glob)
+#  -h              Print this text
+#  -v #            Choose between fastNLO versions 2.3 and ? (def.=2.3)
+#
+#
+##################################################
+# fnlo-add-tables.pl: Starting table addition for fastNLO: TABADD_14102016_064215
+##################################################
+#
+#fnlo-add-tables.pl
+#Usage: fnlo-add-tables.pl [switches/options] scenario
+#  -d              Verbose output
+#  -h              Print this text
+#  -l dir          Directory for LO tables, (def.=scenario)
+#  -n dir          Directory for NLO/NNLO or combined tables, (def.=scenario)
+#  -s              Produce tables for statistical evaluation,
+#                  i.e. combinations of each LO with 1 NLO table and
+#                  all LO with each NLO table
+#                  Do not use with combined tables.
+#  -v #            Choose between fastNLO version 2.3 or ? (def.=2.3)
+#
+#
+##################################################
+# fnlo-move-fluctuations.pl: Starting table removal: TABDEL_14102016_064311
+##################################################
+#
+#
+#fnlo-move-fluctuations.pl: Re-/Move fluctuating fastNLO tables
+#Usage: fnlo-move-fluctuations.pl killfilename
+#  -h              Print this text
+#
+#Absolutely check the kill file first for the table locations and
+#compatibility with your directory setup!
