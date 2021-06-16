@@ -246,10 +246,6 @@ class fastNLOTable {
    /// Returns pointer to reference table if available, else returns NULL pointer
    fastNLOCoeffAddBase* GetReferenceTable(fastNLO::ESMOrder eOrder) const;
 
-   /// Handle InfoBlocks
-   int CreateInfoBlock(int no, fastNLOCoeffBase *newinfoblock);
-
-
 private:
    bool cmp(const double x1, const double x2) const;
    bool cmp(const std::vector<double>& x1, const std::vector<double >& x2) const;
