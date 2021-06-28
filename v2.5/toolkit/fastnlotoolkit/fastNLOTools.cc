@@ -441,7 +441,10 @@ namespace fastNLOTools {
                   iss >> xs;
                   iss >> dxs;
                   if ( fabs(xs) > DBL_MIN ) {
+                     // Is negative, if NLO_only or NNLO_only x section at production was < 0; keep this as additional information.
                      Uncertainty.push_back(dxs/xs);
+                     // Only allow positive numbers with maximum value of 1, i.e. = 100% uncertainty maximum
+                     //                     Uncertainty.push_back(std::min(fabs(dxs/xs),1.0));
                   } else {
                      Uncertainty.push_back(0.);
                   }
