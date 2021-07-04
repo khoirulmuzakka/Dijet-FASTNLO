@@ -1502,7 +1502,7 @@ void fastNLOReader::CalcCrossSectionv21(fastNLOCoeffAddFlex* c) {
       iCIBFlag2 = c->GetCoeffInfoBlockFlag2(iCIBIndex);
       dCIBCont  = c->GetCoeffInfoContent(iCIBIndex);
    } else {
-      logger.info["CalcCrossSectionv21"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
+      logger.debug["CalcCrossSectionv21"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
    }
 
    for (unsigned int i=0; i<NObsBin; i++) {
@@ -1618,7 +1618,7 @@ void fastNLOReader::CalcCrossSectionv20(fastNLOCoeffAddFix* c) {
       iCIBFlag2 = c->GetCoeffInfoBlockFlag2(iCIBIndex);
       dCIBCont  = c->GetCoeffInfoContent(iCIBIndex);
    } else {
-      logger.info["CalcCrossSectionv20"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
+      logger.debug["CalcCrossSectionv20"]<<"No CoeffInfoBlock found; uncertainties are initialised to zero."<<endl;
    }
 
    int scaleVar = c->GetNpow() == ILOord ? 0 : fScalevar;

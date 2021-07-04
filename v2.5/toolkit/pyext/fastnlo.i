@@ -1,4 +1,8 @@
-%module fastnlo
+// To be tested: Following suggestion from Dmitry Kalinkin, 12.06.2021
+%module(directors="1") fastnlo
+
+// generate directors for all classes that have virtual methods
+%feature("director");
 
 %{
 /**
@@ -47,7 +51,7 @@ namespace std {
 %}
 %include "../fastnlotoolkit/include/fastnlotk/speaker.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOPDFLinearCombinations.h"
-//%include "../fastnlotoolkit/include/fastnlotk/fastNLOConstants.h"
+%include "../fastnlotoolkit/include/fastnlotk/fastNLOConstants.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOTable.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOReader.h"
 %include "../fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h"

@@ -16,7 +16,7 @@ if ENABLE_PYEXT
 python_PYTHON = fastnlo.py
 pyexec_LTLIBRARIES = _fastnlo.la
 
-_fastnlo_la_SOURCES = fastnlo_wrap.cc
+_fastnlo_la_SOURCES = fastnlo_wrap.cc fastnlo_wrap.h
 _fastnlo_la_CPPFLAGS = $(PYTHON_CPPFLAGS) -I$(top_srcdir)/fastnlotoolkit/include/fastnlotk -I$(LHAPDFINCLUDEPATH)
 _fastnlo_la_LDFLAGS = -module -shared -avoid-version
 _fastnlo_la_LIBADD = $(top_srcdir)/fastnlotoolkit/libfastnlotoolkit.la
@@ -29,7 +29,7 @@ fastnlo_wrap.cc: fastnlo.i
 	$(SWIG) -c++ -python -I$(top_srcdir)/fastnlotoolkit/include/fastnlotk -o $@ -MD -MF $(DEPDIR)/fastnlo_wrap.Plo $<
 
 clean-local:
-	rm -f fastnlo_wrap.cc fastnlo.py
+	rm -f fastnlo_wrap.cc fastnlo_wrap.h fastnlo.py
 #$(DEPDIR)/fastnlo_wrap.Plo
 
 endif
