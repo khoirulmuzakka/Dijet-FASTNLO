@@ -55,6 +55,9 @@ public:
    virtual double GetQMass(int pdgid) const;
    int GetNLoop() const;
    int GetNFlavor() const;
+   LHAPDF::PDFSet* GetPDFSet() const { return PDFSet;};
+   LHAPDF::PDF* GetPDF() const { return PDF;};
+   
    double GetAlphasMz() const;
 
    //! Return struct with vectors containing the cross section values and the selected a_s(M_Z) uncertainty
