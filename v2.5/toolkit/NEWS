@@ -1,8 +1,35 @@
-IMPORTANT:
-==========
-To compare the actual fnlo-tk-cppread output with older revisions 2585 and earlier,
-asmz for use with GRV evolution (default) must be set explicitly to the previous
-PDG value of 0.1185. The actual one of PDG 2017, 0.1181, is the new default.
+Notes for public release of the fastNLO_toolkit package version 2.5.0, tag 2826
+===============================================================================
+The major developments included in this release are:
+- This release contains numerous updates from the development of grid productions for
+  NNLO calculations using the APPLfast interface (nnlo-bridge) to the NNLOJET program.
+  - In particular, the new grid format v2.5 allows additional information on the
+    numerical precision for each fixed-order contribution to be contained directly
+    within the grid in so-called InfoBlocks. The evaluation code is backwards compatible,
+    but new v2.5 grids require at least this release.
+  - The executable fnlo-tk-modify has been updated such that information on the
+    numerical precision can be added to the final interpolation grid directly from
+    NNLOJET dat files, log files produced by fnlo-tk-statunc from samples of e.g.
+    grids filled by NLOJet++, or from text files containing the relative
+    uncertainty. Details on which and how such modifications are configured, can
+    be found in share/fastnlo_toolkit/modify/SteerModify.str
+  - A printout of the relative statistical uncertainty can be achieved using
+    'fnlo-tk-yodaout grid.tab.gz PDF ST order'
+    See 'fnlo-tk-yodaout -h' for more options.
+- The publically accessible fastNLO repository has been migrated to the
+  gitlab server at KIT:
+  https://gitlab.etp.kit.edu/qcd-public/fastNLO
+  The Toolkit code can be found in the subdirectory v2.5/toolkit
+  and the exact release can be cloned by checking out the corresponding tag.
+  Note, however, that in order to install from a git checkout autotools and
+  compilers etc. must be available. Before doing a 'make -j cores install'
+  the steps of 'autoreconf -i' and './configure --prefix=/path/to/installation further options'
+  must be successful.
+  Some useful scripts can be found in tools and tools/plotting. Notably, fnlosrc_install.csh
+  might help to install a whole set of software packages. Run './fnlosrc_install.csh' without
+  options for more info.
+- On suggestion by D. Kalinkin the pyext code has been updated to support fastNLOreader
+  subclasses for using custom PDFs.
 
 
 

@@ -1,3 +1,1037 @@
+2021-08-21  Public release of the fastNLO_toolkit package version 2.5.0, tag 2826
+            =====================================================================
+
+2021-06-28  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.5/toolkit/fastnlotoolkit/fastNLOTools.cc: Commented trial with
+        100% max uncertainty
+
+2021-06-16  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.5/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.5/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTable.h,
+        v2.5/toolkit/pyext/Makefile.am, v2.5/toolkit/pyext/fastnlo.i: Fix
+        little issues with pyext & add D. Kalinkins suggestion; change some
+        info to debug messages
+
+2021-05-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/pyext/fastnlo.i: Fix issue with maintainer-clean; is
+        fastNLOConstants.h needed in pyext?
+
+2021-05-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/generators/nlojet++/configure.ac,
+        v2.3/toolkit/data/check/InclusiveNJets_fnr0001midpHT_I723509_v23_fi
+        x-hhc-born-2jet_stat.log,
+        v2.3/toolkit/data/check/InclusiveNJets_fnr0001midpHT_I723509_v23_fi
+        x-hhc-nlo-2jet_stat.log, v2.3/toolkit/data/modify/SteerModify.str,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLODiffReader.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffBase.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h,
+        v2.3/toolkit/src/fnlo-tk-modify.cc,
+        v2.3/toolkit/src/fnlo-tk-statunc.cc: beta version for infoblock
+        testing
+
+2021-05-19  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/README, v2.3/toolkit/TODO,
+        v2.3/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.3/toolkit/src/fnlo-tk-statunc.cc: Read also stat. uncertainties
+        from fnlo-stat-unc (NLOJet++)
+
+2021-05-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/AUTHORS, v2.3/toolkit/configure.ac,
+        v2.3/toolkit/data/modify/SteerModify.str,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddFix.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddFlex.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h
+        ,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddFix.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddFlex.h
+        , v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffBase.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTable.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/speaker.h,
+        v2.3/toolkit/src/fnlo-tk-append.cc,
+        v2.3/toolkit/src/fnlo-tk-cat.cc,
+        v2.3/toolkit/src/fnlo-tk-cppread.cc,
+        v2.3/toolkit/src/fnlo-tk-example.cc,
+        v2.3/toolkit/src/fnlo-tk-merge.cc,
+        v2.3/toolkit/src/fnlo-tk-merge2.cc,
+        v2.3/toolkit/src/fnlo-tk-modify.cc,
+        v2.3/toolkit/src/fnlo-tk-rootout.cc,
+        v2.3/toolkit/src/fnlo-tk-statunc.cc,
+        v2.3/toolkit/src/fnlo-tk-yodaout.cc: Working version of writing &
+        reading InfoBlocks with stat./numerical uncertainty
+
+2021-03-13  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/src/fnlo-tk-cppread.cc: Add kQuadraticSum option to
+        cppread
+
+2021-01-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/pyext/Makefile.am: pyext Makefile adaptation
+
+2020-11-28  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.3/toolkit/configure.ac: added python3 binding if requested by
+        configure switch --enable-pyext3
+
+2020-10-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/src/fnlo-tk-rootout.cc,
+        v2.3/toolkit/src/fnlo-tk-yodaout.cc: Fix issue opening table twice
+        in fnlo-tk-rootout; some more printout improvements also in
+        fnlo-tk-yodaout
+
+2020-10-22  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/src/fnlo-tk-rootout.cc: Fixed no. of arguments bug
+
+2020-10-21  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/src/Makefile.am, v2.3/toolkit/src/fnlo-tk-rootout.cc:
+        Update fnlo-tk-rootout for more central scales: make compilable
+        without ROOT (but then does not do much)
+
+2020-09-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        *
+        v2.3/generators/nlojet++/interface/include/fnlo_int_nlojet/fnlo_int
+        _hhc_nlojet.h,
+        v2.3/generators/nlojet++/interface/tools/fnlo_int_hhc_nlojet.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTableConstants
+        .h: Compatibility update of nlojet++ interface
+
+2020-09-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolBase.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/Makefile.am,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/{fastNLOGeneratorCons
+        tants.h => fastNLOTableConstants.h}: Use struct member
+        initialisation possible since C++11; fixes unitialised ReduceXmin
+        bug
+
+2020-06-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        v2.3/toolkit/src/fnlo-tk-cppread.cc,
+        v2.3/toolkit/src/fnlo-tk-yodaout.cc: Add kProd option to cppread and
+        yodaout; rename scale1 --> kScale1, scale2 --> kScale2
+
+2020-06-11  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        v2.3/toolkit/src/fnlo-tk-cppread.cc: Fix bug in scale labelling of
+        fastnnlo_scaleclosure.py; add kProd scale choice to cppread
+
+2020-05-30  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddFix.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffAddFlex.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffData.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCoeffMult.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOUserBlock.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h
+        ,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddFix.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddFlex.h
+        , v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffBase.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffData.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffMult.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTable.h,
+        v2.3/toolkit/src/fnlo-tk-cat.cc,
+        v2.3/toolkit/src/fnlo-tk-cppread.cc,
+        v2.3/toolkit/src/fnlo-tk-merge2.cc,
+        v2.3/toolkit/src/fnlo-tk-modify.cc,
+        v2.3/toolkit/src/fnlo-tk-statunc.cc,
+        v2.3/toolkit/src/fnlo-tk-yodaout.cc: Prepare infoblocks
+
+2020-04-08  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolBase.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h: fix
+
+2020-04-08  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolBase.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolCatmullRom.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolLagrange.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolLinear.cc,
+        v2.3/toolkit/fastnlotoolkit/fastNLOInterpolOneNode.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolBase.h
+        ,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolCatmul
+        lRom.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolLagran
+        ge.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolLinear
+        .h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolOneNod
+        e.h: ReduceXmin. new functionality to lower the Xmin value in order
+        to reduce/avoid potential inaccuracy at grid edge.
+
+2019-12-09  Johannes Hessler <jhessler@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/include/fastnlotk/zstr.hpp: Fix
+        compilation warning
+
+2019-12-02  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/src/fnlo-tk-cppread.cc: Add second version of
+        fixed-scale settings to cppread
+
+2019-11-22  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        *
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: init values
+
+2019-11-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc: Reorder some
+        statements to avoid confusing messages for the cache; set defaults
+        to 0,0,0
+
+2019-11-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOInterpolBase.cc: Some
+        untabifying ...
+
+2019-11-13  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc: improvement
+
+2019-11-13  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc: fix bug
+
+2019-11-13  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h: fix
+        cache for bin for weight-cache
+
+2019-11-12  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc: bugfix with
+        fCacheType=0
+
+2019-11-08  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: one more steer-par
+
+2019-11-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: Add steerpar NFlexScales
+
+2019-11-07  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h:
+        cachetype default set to 0
+
+2019-10-31  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.3/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.3/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: rename CacheComp
+
+2019-05-03  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc,
+        v2.0/toolkit/src/fnlo-tk-rootout.cc,
+        v2.0/toolkit/src/fnlo-tk-yodaout.cc: Added version number printout
+        to cppread, yodaout, rootout
+
+2019-05-03  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc: Add -v option to exe files on
+        feature branch
+
+2019-05-02  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h: Keep
+        binary format implementation, but switch off by default.  To
+        continue work with binary format ON use branch binary_format This reverts commit ee130502fec71ddb89fd89326ea7b97607387a5e.
+
+2019-04-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/pyext/fastnlo.i: Fix syntax issue between swig and
+        CRunDec header
+
+2019-03-30  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h:
+        Improve writing of binary files. Now significantly reduce file size
+        for .gz files
+
+2019-03-29  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTools.h: write
+        binary format
+
+2019-03-29  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddFix.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc: binary format.
+        partially working, but not active.
+
+2019-03-13  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc,
+        v2.0/toolkit/src/fnlo-tk-yodaout.cc: 3D output for cppread and
+        yodaout
+
+2019-03-13  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/NEWS: Add NEWS item to recall myself that asmz
+        default was changed from 0.1185 to 0.1181 between tags 2585 and 2608
+
+2019-03-01  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Scale vars for
+        partial flex-scale tables
+
+2019-02-22  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-statunc.cc: Bugfix
+
+2019-02-22  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Trivial tab
+        elimination
+
+2019-02-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac: Use only one doxygen install option
+
+2019-02-06  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCRunDec.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOHoppet.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOQCDNUMAS.cc: Bugfix in nloops
+        check for Hoppet
+
+2019-02-03  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac, v2.0/toolkit/fortranext/Makefile.am:
+        Fix some autotools issues../generators/nlojet++/configure.ac
+
+2019-02-02  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/Makefile.am,
+        v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h, v2.0/toolkit/src/Makefile.am,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc,
+        v2.0/toolkit/src/fnlo-tk-example.cc,
+        v2.0/toolkit/src/fnlo-tk-rootout.cc,
+        v2.0/toolkit/src/fnlo-tk-statunc.cc,
+        v2.0/toolkit/src/fnlo-tk-yodaout.cc: Fix config.h usage; never use
+        in installable headers
+
+2019-02-01  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/generators/nlojet++/m4/ax_check_zlib.m4,
+        v2.0/generators/nlojet++/m4/ax_cxx_compile_stdcxx.m4,
+        v2.0/generators/nlojet++/m4/ax_cxx_compile_stdcxx_11.m4,
+        v2.0/generators/nlojet++/m4/ax_require_defined.m4,
+        v2.0/toolkit/TODO, v2.0/toolkit/fastnlotoolkit/CRunDec.cc,
+        v2.0/toolkit/fastnlotoolkit/HoppetInterface.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOAlphas.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOCRunDec.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOHoppet.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOHoppetAs.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOLHAPDF.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOQCDNUMAS.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/CRunDec.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/HoppetInterface.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOAlphas.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCRunDec.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOHoppet.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOHoppetAs.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOLHAPDF.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOQCDNUMAS.h,
+        v2.0/toolkit/m4/ax_check_zlib.m4,
+        v2.0/toolkit/m4/ax_cxx_compile_stdcxx.m4,
+        v2.0/toolkit/m4/ax_cxx_compile_stdcxx_11.m4,
+        v2.0/toolkit/m4/ax_prog_doxygen.m4,
+        v2.0/toolkit/m4/ax_python_devel.m4,
+        v2.0/toolkit/m4/ax_require_defined.m4,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc: Add new CRunDec3; add fscheme;
+        some more adaptations to as evolution interface
+
+2019-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: Bugfix GetBin
+
+2019-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/data/check/Makefile.am: Add logs to distribution
+
+2019-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/check/fnlo-tk-zipapp.pl.in,
+        v2.0/toolkit/check/fnlo-tk-ziptest.pl.in: Add many checks
+
+2019-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/check/Makefile.am,
+        v2.0/toolkit/check/fnlo-tk-cpptest1.pl.in,
+        v2.0/toolkit/check/{fnlo-tk-cpptest.pl.in =>
+        fnlo-tk-cpptest2.pl.in},
+        v2.0/toolkit/check/fnlo-tk-hoppetastest1.pl.in,
+        v2.0/toolkit/check/fnlo-tk-hoppetastest2.pl.in,
+        v2.0/toolkit/check/fnlo-tk-lhapdftest.pl.in,
+        v2.0/toolkit/check/fnlo-tk-qcdnumastest1.pl.in,
+        v2.0/toolkit/check/fnlo-tk-qcdnumastest2.pl.in,
+        v2.0/toolkit/check/fnlo-tk-rundecastest1.pl.in,
+        v2.0/toolkit/check/fnlo-tk-rundecastest2.pl.in,
+        v2.0/toolkit/configure.ac,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_cpp.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_cpptest1.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_cpptest2.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_hoppetastest1.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_hoppetastest2.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_lhapdftest.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_qcdnumastest1.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_qcdnumastest2.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_rundecastest1.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_rundecastest2.log: Add
+        many checks
+
+2019-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Fix issue with print out of
+        multidim NLO contribution
+
+2019-01-30  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/generators/nlojet++/interface/hadron/InclusiveNJetDiffs.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOEvent.h:
+        Propagate weight for x section diffs; TODO decide which version
+
+2019-01-30  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOEvent.h:
+        Reformat for better readability
+
+2019-01-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/TODO: Fix HOPPET interface issues; respects MZ, asMZ,
+        NFlavor (new) and NLoop (new) changes; works with new HOPPET 1.2.x
+
+2019-01-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac,
+        v2.0/toolkit/fastnlotoolkit/HoppetInterface.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOHoppet.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOHoppetAs.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOHoppet.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOHoppetAs.h,
+        v2.0/toolkit/src/Makefile.am, v2.0/toolkit/src/fnlo-tk-cppread.cc:
+        Fix HOPPET interface issues; respects MZ, asMZ, NFlavor (new) and
+        NLoop (new) changes; works with new HOPPET 1.2.x
+
+2019-01-17  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/doxygen.cfg: Update doxygen.cfg to deal with
+        incompatibilty with ubuntu 18
+
+2018-12-19  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/Makefile.am,
+        v2.0/toolkit/fortranext/Makefile.am: Fixes for Mac
+
+2018-11-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: Fix issue with zlib;
+        remove forbidden tabs; add additional weight factor to accommodate x
+        section differences to be filled with wgtfac = # jetsA - # jetsB
+        within same bin
+
+2018-11-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: Fix issue with zlib; remove forbidden tabs; add additional
+        weight factor to accommodate x section differences to be filled with
+        wgtfac = # jetsA - # jetsB within same bin
+
+2018-11-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc: Fix issues with
+        doxygen and zlib; make fortranext optional
+
+2018-11-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/Makefile.am, v2.0/toolkit/configure.ac,
+        v2.0/toolkit/fortranext/Makefile.am,
+        v2.0/toolkit/m4/ax_prog_doxygen.m4,
+        v2.0/toolkit/m4/ax_python_devel.m4, v2.0/toolkit/myfullconfig: Fix
+        issues with doxygen and zlib; make fortranext optional
+
+2018-11-20  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: Read References,
+        Name for generator and process also from steering.
+
+2018-11-19  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOInterpolLinear.cc: bugfix.
+        linear interpolation
+
+2018-11-11  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac: Fix missing DX_COND conditionals ...?
+
+2018-11-08  Daniel Britzger <dnb@mppui4.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOInterpolLagrange.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h, v2.0/toolkit/src/Makefile.am: Improved caching for flex
+        tables, when filling.
+
+2018-10-19  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Fix printout
+
+2018-10-19  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/check/fnlo-tk-cppnormtest.pl.in,
+        v2.0/toolkit/check/fnlo-tk-cppscalestest.pl.in,
+        v2.0/toolkit/check/fnlo-tk-cpptest.pl.in,
+        v2.0/toolkit/check/fnlo-tk-ziptest.pl.in: Adapt check to new cppread
+        options
+
+2018-10-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOAlphas.cc,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc: Add some command line options
+        to fnlo-tk-cppread
+
+2018-10-18  Daniel Britzger <dnb@mppui2.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: do not 'exit' if
+        warmup values are empty.
+
+2018-10-04  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        *
+        v2.0/toolkit/data/check/InclusiveNJetEvents_fnl5662i_v23_fix_0-0-2_
+        cpp.log,
+        v2.0/toolkit/data/check/InclusiveNJetEvents_fnl5662i_v23_fix_2-2-2_
+        cpp.log,
+        v2.0/toolkit/data/check/InclusiveNJetEvents_fnl5662i_v23_fix_2-2_cp
+        p.log,
+        v2.0/toolkit/data/check/InclusiveNJetEvents_fnl5662i_v23_fix_norm_1
+        -12_cppnorm.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_cpp.log,
+        v2.0/toolkit/data/check/fnl1014_I902309_2-2_cppscales.log,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc: Fix log output for make check
+
+2018-09-26  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/README, v2.0/toolkit/TODO, v2.0/toolkit/mygittag:
+        Update README & TODO; add little script to git tag a release
+
+2018-09-21  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/README, v2.0/toolkit/TODO, v2.0/toolkit/configure.ac:
+        Fix some configure.ac inconsistencies; edit TODOs nd README
+
+2018-09-20  Daniel Britzger <dnb@mppui1.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOInterpolBase.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOInterpolBase.h:
+        improve printout when value is outside of bin
+
+2018-09-20  Daniel Britzger <dnb@mppui1.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: check if warmup
+        values are 1.
+
+2018-09-19  Daniel Britzger <dnb@mppui1.t2.rzg.mpg.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: check if warmup
+        value is identical to lower bin boundary (only). If so, then take
+        this value as warmup value.
+
+2018-07-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/git_commits_and_tags: Correct tagging recipe
+
+2018-07-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/git_commits_and_tags: Add git tag description
+
+2018-07-21  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Added asymmetric scale1
+        scale2 combinations to cppread
+
+2018-07-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h, v2.0/toolkit/src/fnlo-tk-cppread.cc: Toolkit updates
+
+2018-06-11  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h:
+        Trivial: Remove tabs
+
+2018-05-08  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc: ignoring
+        non-existing parton-pairs on subprocess selection
+
+2018-04-19  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: modifiers in
+        SelectProcesses are now interchangeable
+
+2018-04-13  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: changed string
+        handling in SelectSubrocesses
+
+2018-03-24  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/generators/nlojet++/interface/hadron/fastNLOjetpp.cc,
+        v2.0/toolkit/configure.ac, v2.0/toolkit/doxygen.cfg,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.0/toolkit/src/fnlo-tk-config.in: SVNREV --> GITREV
+
+2018-03-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/data/.gitignore: Updated gitignore settings
+
+2018-03-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/.gitignore, v2.0/generators/nlojet++/.gitignore,
+        v2.0/toolkit/.gitignore, v2.0/toolkit/check/.gitignore,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/.gitignore,
+        v2.0/toolkit/fortranext/.gitignore, v2.0/toolkit/pyext/.gitignore,
+        v2.0/toolkit/src/.gitignore: Updated gitignore settings
+
+2018-03-13  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/pyext/Makefile.am: hopefully fixed bug with makefile
+        dependecies in pyext
+
+2018-03-10  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: astyle'd
+
+2018-03-10  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h: Work
+        on table creators
+
+2018-03-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        *
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h: NodesPerBin was old default, not NodesMax
+
+2018-03-08  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/include/fastnlotk/read_steer.h: Typos
+
+2018-03-02  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * tools/fnlosrc_install.csh,
+        v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h
+        , v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCreate.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOGeneratorConst
+        ants.h, v2.0/toolkit/fastnlotoolkit/include/fastnlotk/read_steer.h:
+        Rearrange to allow steering files to be added to NNLOJET+fastNLO
+        configuration
+
+2018-02-21  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/configure.ac: fixed error with automake
+
+2018-02-20  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/pyext/Makefile.am, v2.0/toolkit/pyext/setup.py.in:
+        fixed make process of python bindings
+
+2018-02-19  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h: added
+        symmetric flag to SelectProcesses
+
+2018-02-13  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * tools/fastnlo_utils.cxx: Corrected fastnlo_utils.cxx
+
+2018-02-12  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: make check runs
+        again
+
+2018-02-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Some more FNLO_vars
+        replaced
+
+2018-02-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.0/toolkit/src/Makefile.am,
+        v2.0/toolkit/src/fnlo-tk-cppread.cc,
+        v2.0/toolkit/src/fnlo-tk-rootout.cc,
+        v2.0/toolkit/src/fnlo-tk-yodaout.cc: Add precompiler directives in
+        standard way
+
+2018-02-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Increase numerical precision
+        of const scales
+
+2018-02-09  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc: added more
+        subprocess information to contribution print out
+
+2018-02-08  Miguel Santos Correa <miguelsantoscorrea@gmail.com>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: fixed
+        SelectProcesses bug
+
+2018-02-07  Jakob Stark <jakob.stark@student.kit.edu>
+
+        *
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.0/toolkit/src/fnlo-tk-cppread.cc: fixed some preprocessor
+        issues
+
+2018-02-06  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: some fixes
+
+2018-02-02  Daniel Britzger <britzger@nafhh-atlas02.desy.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffBase.h:
+        fixes
+
+2018-02-01  Daniel Britzger <britzger@naf-hone02.desy.de>
+
+        * v2.0/toolkit/configure.ac,
+        v2.0/toolkit/fastnlotoolkit/fastNLODiffReader.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLODiffReader.h,
+        v2.0/toolkit/fastnlotoolkit/read_steer.cc: updates to diffractive
+        code
+
+2018-01-31  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/configure.ac: Fix line length issue
+
+2018-01-30  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h: added
+        overloaded function SelectProcesses(string) to fastNLOReader to
+        provide more advanced process selection
+
+2018-01-30  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h: basic
+        Subprocess selection to fastNLOReader (SelectProcesses and
+        UpdateProcesses)
+
+2018-01-30  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/Makefile.am, v2.0/toolkit/configure.ac: Adapt
+        autotools setup to git
+
+2018-01-28  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h:
+        added SubSelect to fastNLOCoeffAddBase to switch on/off subprocess
+        contributions based on a list of subprocesses git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2449
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-28  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h:
+        added sub_enabled to fastNLOCoeffAddBase to switch on/off single
+        subprocess contributions. SetCalculateSingleSubprocess and
+        SetCalculateSubprocesses from the fastNLOReader class are now
+        depreciated and do nothing anymore but throw out a warning. A
+        functional replacement for those functions will be presented later git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2448
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-28  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffBase.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h: added
+        enable switch to fastNLOCoeffBase class to enable/disable single
+        contributions without keeping track of it in fastNLOReader using
+        bUseSMCalc git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2447
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-23  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: Correct warmup
+        naming git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2444
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-19  Jakob Stark <jakob.stark@student.kit.edu>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h,
+        v2.0/toolkit/pyext/fastnlo.i: Added subprocess utils git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2443
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-17  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Extend cppread for constant
+        scale check git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2441
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-17  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Bugfix: Omitted PDF
+        cache regeneration git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2440
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-17  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc: Reformat only git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2439
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-16  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Print out fixed-scale x
+        sections, if possible git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2438
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/check/fnlo-tk-stattest.pl.in: Fix check problem with
+        table names for stat test git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2437
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-statunc.cc: Fix filename issue git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2435
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2018-01-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        *
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in:
+        Update PDG values git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2434
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-12-07  Daniel Britzger <daniel.britzger@desy.de>
+
+        * v2.0/toolkit/src/fnlo-tk-merge2.cc: improve usability and warning
+        messages git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2432
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-12-07  Daniel Britzger <daniel.britzger@desy.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCoeffAddBase.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOCoeffAddBase.h
+        ,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOConstants.h.in
+        , v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOTable.h,
+        v2.0/toolkit/src/fnlo-tk-merge2.cc: enable to read NNLOJET weight
+        tables. (to be tested...) git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2431
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-12-05  Daniel Britzger <daniel.britzger@desy.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h:
+        Implement new feature: center-of-mass reweighting. Tested with CMS
+        jets. Not (yet) available for DIS git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2430
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-12-05  Daniel Britzger <daniel.britzger@desy.de>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOEvent.h,
+        v2.0/toolkit/fastnlotoolkit/include/fastnlotk/fastNLOReader.h: add
+        option to calculate only a single subprocess git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2429
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-11-30  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-rootout.cc: Change fnlo-tk-rootout to
+        overwrite existing ROOT files; TBC git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2428
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-11-12  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/data/check/Makefile.am: Fix issue of superfluous data
+        installs git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2425
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-11-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/mydistconfig, v2.0/toolkit/myfullconfig: Add shortcut
+        commands for my usual configures; not for distribution git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2421
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-11-07  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOCreate.cc: Autogenerate
+        nlojet++ table name as before; naming between constructors to be
+        checked and unified ...  git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2420
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-09-20  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOLHAPDF.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOReader.cc,
+        v2.0/toolkit/fastnlotoolkit/fastNLOTools.cc,
+        v2.0/toolkit/src/fnlo-tk-rootout.cc: Allow one-member PDF sets for
+        fnlo-tk-rootout; PDF uncertainty will be zero git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2418
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-09-18  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-rootout.cc: Bugfix for root filename in
+        case of gzipped tables git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2417
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-08-15  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/generators/nlojet++/m4/ax_check_zlib.m4,
+        v2.0/generators/nlojet++/m4/ax_cxx_compile_stdcxx.m4,
+        v2.0/generators/nlojet++/m4/ax_cxx_compile_stdcxx_11.m4,
+        v2.0/generators/nlojet++/m4/ax_prog_doxygen.m4,
+        v2.0/generators/nlojet++/m4/ax_python_devel.m4,
+        v2.0/generators/nlojet++/m4/ax_require_defined.m4,
+        v2.0/toolkit/m4/ax_check_zlib.m4,
+        v2.0/toolkit/m4/ax_cxx_compile_stdcxx.m4,
+        v2.0/toolkit/m4/ax_cxx_compile_stdcxx_11.m4,
+        v2.0/toolkit/m4/ax_require_defined.m4: Deal with m4 macro issues git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2409
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-08-15  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/check/fnlo-tk-zipapp.pl.in,
+        v2.0/toolkit/data/check/zipappdiff.log: Fix issue with zipapp check git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2408
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-08-15  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOQCDNUMAS.cc,
+        v2.0/toolkit/pyext/setup.py.in: Fix missing include and issue with
+        ++11 standard for pyext git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2407
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-06-11  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/src/fnlo-tk-cppread.cc: Add scale option to cppread git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2404
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
+2017-06-09  Klaus Rabbertz <klaus.rabbertz@cern.ch>
+
+        * v2.0/toolkit/fastnlotoolkit/fastNLOTable.cc: Fix div by zero error
+        in merge2 git-svn-id:
+        https://ekptrac.physik.uni-karlsruhe.de/svn/fastNLO/trunk@2403
+        aa5437bd-d6fa-0310-9a40-cbaab9bf9339
+
 2017-05-07  Public prerelease of the fastNLO_toolkit package version 2.3.1pre, revision 2402
             ================================================================================
 
