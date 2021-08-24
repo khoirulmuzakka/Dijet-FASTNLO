@@ -789,7 +789,7 @@ if ( ! $mpnnlo ) then
 #   set arc="fastnlo_toolkit-2.3.1-2657"
 #   set arc="fastnlo_toolkit-2.3.1-2753"
 #   set arc="fastnlo_toolkit-2.3.1-2771"
-   set arc="fastnlo_toolkit-2.5.0-2819"
+   set arc="fastnlo_toolkit-2.5.0-2826"
    set rev=""
    if ( ! -e ${arc}_installed  ) then
       tar xzf ${arc}${rev}.tar.gz
