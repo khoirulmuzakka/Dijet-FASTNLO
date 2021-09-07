@@ -1,0 +1,98 @@
+28.05.2021, K. Rabbertz
+
+The script fnlosrc_install.csh allows the user to install all packages
+required to produce NLO interpolation grids with NLOJet++ and
+the fastNLO toolkit for the grids.
+
+Just typing
+./fnlosrc_install.csh
+provides a concise description of the command line arguments as follows:
+(NOTE: Some optional arguments, e.g. nos. 6, 7, 12, are still EXPERIMENTAL and not
+for public use.)
+
+#==============================================================================
+Usage: ./fnlosrc_install.csh basedir [optional_argument_2] [optional_argument_3] ...
+  1st argument: Base dir for installations, absolute path to e.g. /home/rabbertz/local
+  2nd optional argument: Base path to additional software to be taken from cvmfs,
+                         e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc700
+                         or   /cvmfs/sft.cern.ch/lcg/contrib/gcc/4.8
+                         Set to _ to only use your local system and skip this setting.
+  3rd optional argument: Sub path to GCC setup script in cvmfs software distribution.
+                         The minimally required version is gcc 4.8.1(!)
+                         e.g. external/gcc/7.0.0-omkpbe2/etc/profile.d/init
+                         or   x86_64-slc6/setup
+                         (.csh or .sh are added automatically).
+                         Set to _ to use your system compiler and skip this setting.
+  4th optional argument: Include LHAPDF6 from CVMFS? def.=0
+                         By default this script installs its own version of LHAPDF.
+                         Give path to desired bin/lhapdf-config in cvmfs to try using another one,
+                         e.g. /cvmfs/cms.cern.ch/slc6_amd64_gcc481/external/lhapdf6/6.1.5
+  5th optional argument: Include grid creation with NLOJet++? def.=1
+  6th optional argument: Include grid creation with NNLOJET? def.=0
+  7th optional argument: Include grid creation with Sherpa+MCgrid? def.=0
+  8th optional argument: Include optional packages for grid evaluation? def.=0
+  9th optional argument: Include optional python extensions to packages? def.=0
+ 10th optional argument: Include ROOT extensions to packages (def.=0, alt.=[5,6] or
+                         give path to bin/root-config of preinstalled ROOT)
+                         0: no ROOT, 5: try src install of ROOT 5 (gcc <= v5), 6: try src install of ROOT 6
+                         (requires cmake), path: try preinstalled ROOT by giving path to bin/root-config
+                         e.g. /cvmfs/sft.cern.ch/lcg/releases/ROOT/5.34.25-8ef6d/x86_64-slc6-gcc48-opt
+ 11th optional argument: No. of cores to be used, def.=8
+ 12th optional argument: Activate multithread integrations for NNLOJET standalone installation, def. = 0
+#==============================================================================
+
+
+
+The following two installation flavours are recommended:
+========================================================
+
+1. Minimal installation to produce and evaluate interpolation grids
+-------------------------------------------------------------------
+
+This requires five archives to be installed and to be present
+in the same directory as the install script fnlosrc_install.csh:
+
+fastjet-3.3.4.tar.gz
+LHAPDF-6.3.0.tar.gz
+fastnlo_toolkit-2.5.0-2823.tar.gz
+nlojet++-4.1.3-patched2.tar.gz
+fastnlo_interface_nlojet-2.5.0-2819.tar.gz
+
+They are available in the package fastNLO_archives_minimal_202105.tar.gz.
+
+The command line to be used is:
+./fnlosrc_install.csh /prefix-path/where/to/install _ _ 0 1 0 0 0 1 0 8 0
+
+
+2. Normal installation including more evaluation features
+---------------------------------------------------------
+
+In addition to the packages above this requires the packages:
+
+HepMC3-3.2.2.tar.gz
+fjcontrib-1.045.tar.gz
+YODA-1.8.3.tar.gz
+Rivet-3.1.4.tar.gz
+hoppet-1.2.0.tar.gz
+qcdnum-17-01-14.tar.gz
+
+They are available in the package fastNLO_archives_fnlo_202105.tar.gz.
+
+The command line to be used is:
+./fnlosrc_install.csh /prefix-path/where/to/install _ _ 0 1 0 0 1 1 0 8 0
+
+
+Usage of an installation
+------------------------
+
+To subsequently USE the installation, first one of the two produced files
+fnlosrc_source.sh    (bash flavour)
+fnlosrc_source.csh   (csh  flavour)
+must be 'source'd to set the proper environment variables.
+
+
+Remarks
+-------
+
+Some of the packages can also work with ROOT. Because of the large variety of ROOT versions
+and installation problems this is not described here.
