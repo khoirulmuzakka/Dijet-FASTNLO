@@ -21,7 +21,7 @@ pkglib_LTLIBRARIES =
 # Require fastjet
 #
 if HAVE_FASTJET
-   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNJetEvents.la libInclusiveNJetPairs.la libInclusiveNJetDiffs.la libInclusiveNJetsNew.la
+   pkglib_LTLIBRARIES += libInclusiveNJets.la libInclusiveNJetEvents.la libInclusiveNJetPairs.la libInclusiveNJetDiffs.la libInclusiveNJetsNew.la libCMSdijet.la
 endif
 
 #
@@ -36,6 +36,9 @@ libInclusiveNJetEvents_la_SOURCES  = InclusiveNJetEvents.cc  $(AM_SOURCES)
 libInclusiveNJetPairs_la_SOURCES   = InclusiveNJetPairs.cc   $(AM_SOURCES)
 libInclusiveNJetDiffs_la_SOURCES   = InclusiveNJetDiffs.cc   $(AM_SOURCES)
 libInclusiveNJetsNew_la_SOURCES    = InclusiveNJets_new.cc   $(AM_SOURCES) fastNLOjetpp.cc
+libCMSdijet_la_SOURCES  = CMS_dijet_dsigdeta.cc  $(AM_SOURCES)
+
+
 
 #
 # Preprocessor flags
