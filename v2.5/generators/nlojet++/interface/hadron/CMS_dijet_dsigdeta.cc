@@ -132,7 +132,7 @@ private:
    int NDim;                  // Dimensionality of distributions (no default, must be defined)
    vector<string> DimLabel;   // Dimension labels (no default, must be defined)
    // enum to switch between implemented observables (max. of 3 simultaneously)
-   enum Obs { YAVE, YMAX, YSTAR, Y1ABSRAP, Y2SIGN, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
+   enum Obs { ETADIJET, YMAX, YSTAR, Y1ABSRAP, Y2SIGN, MJJGEV, MJJTEV, PT12GEV, CHIJJ, HTHALFGEV, PTMAXGEV, DPHI12 };
    Obs obsdef[3];
    double obs[3];
    vector<string> ScaleLabel; // Scale labels (Scale1: no default, must be defined; Scale2: default is "pT_max_[GeV]")
@@ -159,6 +159,8 @@ private:
    double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2| (default is no limitation, i.e. DBL_MAX)
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
+   double etadijetmin;        // minimum of etadijet=(eta1+eta2)/2
+   double etadijetmax;        // maximum of etadijet
 };
 
 // --- fastNLO user: modify the jet selection in UserHHC::userfunc (default = cutting in |y| min, |y| max and pt min)
@@ -234,8 +236,8 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    }
    // define the observables according to the dimension labels
    for ( int i = 0; i<NDim; i++ ) {
-       if ( DimLabel[i] == "y_ave" ) {
-         obsdef[i] = YAVE;
+       if ( DimLabel[i] == "eta_dijet" ) {
+         obsdef[i] = ETADIJET;
       } else if  ( DimLabel[i] == "|y_max|" ) {
          obsdef[i] = YMAX;
       } else if ( DimLabel[i] == "y_star" ) {
@@ -427,6 +429,21 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["deltaPhi12min"] ) {
       ftable->GetParameterFromSteering("deltaPhi12min",deltaPhi12min);
    }
+
+   //minimal etadijet
+   SteeringPars["etadijetmin"] = ftable->TestParameterInSteering("etadijetmin");
+   etadijetmin = -5.; // default is -5
+   if ( SteeringPars["etadijetmin"] ) {
+      ftable->GetParameterFromSteering("etadijetmin",deltaPhi12min);
+   }
+
+   // maximal etadijetmax 
+   SteeringPars["etadijetmax"] = ftable->TestParameterInSteering("etadijetmax");
+   etadijetmax = 5.0; // default is +5
+   if ( SteeringPars["etadijetmax"] ) {
+      ftable->GetParameterFromSteering("etadijetmax",etadijetmax);
+   }
+
    // minimal number of central jets
    SteeringPars["Ncjetmin"] = ftable->TestParameterInSteering("Ncjetmin");
    Ncjetmin = 0; // default is no limitation
@@ -572,7 +589,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
 
    double eta1 = pj[1].prapidity();
    double eta2 = pj[2].prapidity();
-   double yave = (eta1+eta2)/2.;
+   double etadijet = (eta1+eta2)/2.;
 
    double phi1 = pj[1].phi();
    double phi2 = pj[2].phi();
@@ -603,9 +620,9 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // --- calculate observable of nth dimension
    for ( int i = 0; i<NDim; i++ ) {
       switch(obsdef[i]) {
-      case YAVE : 
+      case ETADIJET : 
          //average rapidity
-         obs[i] = yave;
+         obs[i] = etadijet;
          break;
       case YMAX :
          // maximal rapidity
@@ -683,6 +700,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    if ( ptj1min <= pT1  && 
         ptj2min <= pj[2].perp() &&
         deltaPhi12min <= delphi12 &&
+        etadijetmin <= etadijet &&
+        etadijet <= etadijetmax &&
         (obsmin[0] <= obs[0] && obs[0] < obsmax[0]) &&
         (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
         (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) )         

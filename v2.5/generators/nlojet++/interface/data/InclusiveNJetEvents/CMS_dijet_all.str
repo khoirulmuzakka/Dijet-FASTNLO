@@ -15,9 +15,9 @@
 #   Description of scenario
 #   (Write each line of description in quotation marks)
 # -------------------------------------------------------------------- #
-ScenarioName CMS_dijet_dsig_deta
+ScenarioName CMS_dijet_sig_all
 ScenarioDescription {
-    "dsigma-jet2+_dsig_deta_[pb_GeV]"
+    "dsigma-jet2+_sig_[pb_GeV]"
     "CMS_Collaboration"
     "Inclusive_Dijet_pT"
     "anti-kT_R=0.3" 
@@ -45,7 +45,7 @@ ptj1min                         90                 #Minimum Pt (in GeV) for firs
 ptj2min                         20                 #Minimum Pt (in GeV) for second (leading) jet
 deltaPhi12min                  2.094             # =2*pi/3, Minimum of deltaPhi12=abs(phi_1- phi_2). 
 etadijetmin                    -3.38              #minimum of etadijet = (eta1+eta2)/2
-etadijetmax                     2.535               #maximum of etadijet = (eta1+eta2)/2
+etadijetmax                    2.535               #maximum of etadijet = (eta1+eta2)/2
 
 
 # -------------------------------------------------------------------- #
@@ -58,13 +58,13 @@ etadijetmax                     2.535               #maximum of etadijet = (eta1
 #     3 : read in 'TripleDifferentialBinning'
 # -------------------------------------------------------------------- #
 LeadingOrder                      2              # Number of jets for the LO process
-DifferentialDimension             2             # Dimensionality of binning
+DifferentialDimension             1             # Dimensionality of binning
 DimensionLabels {    
    "<pT_1,2>_[GeV]"                     # Labels (symbol and unit) for the measurement dimensions (from outer to inner "loop")
-   "eta_dijet"                          # This defines the observables to be calculated!
+   "eta_dijet"                              # This defines the observables to be calculated!
 }
 DimensionIsDifferential {                        # Specify for each dimension whether
-   0 2                                           #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
+   0                                             #   0 : the cross section is NOT differential,        i.e. there are two bin borders,
 }                                                #                                                     but NO division (normalization) by bin width
                                                  #   1 : the cross section is point-wise differential, i.e. only one point is given
                                                  #   2 : the cross section is bin-wise differential,   i.e. there are two bin borders
@@ -87,16 +87,9 @@ ScaleDescriptionScale2          "<pT_1,2>_[GeV]" # Specify 2nd scale name and un
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
-#Original : -2.915 -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
-#shift -0.465 :  -3.38 -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-DoubleDifferentialBinning {{
-  1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    55        75     -3.38 -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    75        95     -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    95        115    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535  
-    115       150    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    150       400    -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    }}
+SingleDifferentialBinning {
+    55 75 95 115 150 400
+}
 
 # ==================================================================== #
 #
@@ -127,7 +120,7 @@ PDF2                            2212        # PDF of 2nd hadron (following PDG c
 GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
-OutputFilename   CMS_dijet_dsig_deta12.tab    # Filename of fastNLO output table
+OutputFilename   CMS_dijet_sig.tab    # Filename of fastNLO output table
 OutputPrecision                 8           # Number of decimal digits to store in output table, def.=8.
 FlexibleScaleTable              false       # Create table fully flexible in mu_f (larger size), true, or
                                             # table with fixed number of mu_f scale factors, def.=false.
