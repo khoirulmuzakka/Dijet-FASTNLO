@@ -83,8 +83,7 @@ namespace UsefulNlojetTools {
       ProcConsts.IPDFdef3LO = 1;
       ProcConsts.IPDFdef3NLO = 2;
       ProcConsts.IPDFdef3NNLO = 2;
-      // Default: Half-matrix storage
-      ProcConsts.NPDFDim = 1;
+      ProcConsts.NPDFDim = 2;
       // To test full-matrix storage uncomment the following line or set NPDFDim in
       // steering explicitly!
       //      ProcConsts.NPDFDim = 2;

@@ -118,6 +118,7 @@ CenterOfMassEnergy              5020.       # Center-of-mass energy in GeV.
 #                              14000.       # LHC Design Run
 PDF1                            2212        # PDF of 1st hadron (following PDG convention).
 PDF2                            2212        # PDF of 2nd hadron (following PDG convention).
+NPDFDim                         2           # Use full matrix notation
 
 # ==================================================================== #
 #
