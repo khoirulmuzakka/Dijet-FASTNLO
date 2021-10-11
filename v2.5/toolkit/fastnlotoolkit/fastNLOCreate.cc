@@ -2434,7 +2434,7 @@ void fastNLOCreate::FillAllSubprocesses(const vector<vector<fnloEvent> >& events
 
    // KR TODO Check to replace wgtfac by _wo
    //   cout << "WWW: wgtfac = " << wgtfac << "_wo = " << scen._wo << endl;
-   const bool bFasterCode = true; // experimental developement: try to make code faster
+   bool bFasterCode = true; // experimental developement: try to make code faster
    if (GetTheCoeffTable()->GetNPDFDim() == 2) bFasterCode = false;
    if (bFasterCode && !fIsWarmup && !fIsFlexibleScale) {
       // make filling code a little bit faster ... ~40%
