@@ -44,8 +44,8 @@ Njetmin                         2                # Minimal number of jets requir
 ptj1min                         90                 #Minimum Pt (in GeV) for first (leading) jet
 ptj2min                         20                 #Minimum Pt (in GeV) for second (leading) jet
 deltaPhi12min                  2.094             # =2*pi/3, Minimum of deltaPhi12=abs(phi_1- phi_2). 
-etadijetmin                    -3.38              #minimum of etadijet = (eta1+eta2)/2
-etadijetmax                     2.535               #maximum of etadijet = (eta1+eta2)/2
+etadijetmin                    -3.0             #minimum of etadijet = (eta1+eta2)/2
+etadijetmax                     3.0               #maximum of etadijet = (eta1+eta2)/2
 
 
 # -------------------------------------------------------------------- #
@@ -87,17 +87,27 @@ ScaleDescriptionScale2          "<pT_1,2>_[GeV]" # Specify 2nd scale name and un
 #     'TripleDifferentialBinning'
 #   in accord with 'DifferentialDimension' above
 # -------------------------------------------------------------------- #
-#Original : -2.915 -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
+#
+#Original :     -2.915 -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
 #shift -0.465 :  -3.38 -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
+#DoubleDifferentialBinning {{
+#  1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
+#   55        75     -3.38 -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
+#    75        95     -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
+#    95        115    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535  
+#    115       150    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
+#    150       400    -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
+#    }}
+#
+#
 DoubleDifferentialBinning {{
   1stDimLo   1stDimUp    "----- Array of bin-grid for 2nd dimension -----"
-    55        75     -3.38 -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    75        95     -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    95        115    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535  
-    115       150    -3.128 -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    150       400    -2.535 -2.253 -1.972 -1.69 -1.408 -1.127 -0.845 -0.563 -0.282 0.0 0.282 0.563 0.845 1.127 1.408 1.972 2.535
-    }}
-
+    55        75      -2.915 -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
+    75        95      -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
+    95        115     -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00 
+    115       150     -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
+    150       400     -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00
+}}
 # ==================================================================== #
 #
 #   Process specific and therefore at least partially theory-code
@@ -105,17 +115,6 @@ DoubleDifferentialBinning {{
 #
 # ==================================================================== #
 CenterOfMassEnergy              5020.       # Center-of-mass energy in GeV.
-# Some examples from the past:   200.       # RHI -2.915 -2.663 -2.070 -1.788  -1.507 -1.225 -0.943 -0.662 -0.380 -0.098 0.183 0.465 0.747 1.028 1.310 1.592 1.873 2.437 3.00C
-#                               1800.       # TeV Run I
-#                               1960.       # TeV Run II
-#                                900.       # LHC Injection Run
-#                               2360.       # LHC Initial Run
-#                               2760.       # LHC HIpp base Run
-#                               5020.       # LHC HIpp base Run
-#                               7000.       # LHC First Run  (2010/2011)
-#                               8000.       # LHC Second Run (2012)
-#                              13000.       # LHC Next Run ? (2015)
-#                              14000.       # LHC Design Run
 PDF1                            2212        # PDF of 1st hadron (following PDG convention).
 PDF2                            2212        # PDF of 2nd hadron (following PDG convention).
 NPDFDim                         2           # Use full matrix notation
@@ -125,7 +124,7 @@ NPDFDim                         2           # Use full matrix notation
 #   General fastNLO settings
 #
 # ==================================================================== #
-GlobalVerbosity                 WARNING     # Global output verbosity of fastNLO toolkit, def.=WARNING,
+GlobalVerbosity                 INFO     # Global output verbosity of fastNLO toolkit, def.=WARNING,
                                             #   (and of user scenario code if implemented).
                                             # Possible values are: DEBUG, MANUAL, INFO, WARNING, ERROR, SILENT
 OutputFilename   CMS_dijet_dsig_deta12.tab    # Filename of fastNLO output table
@@ -166,7 +165,7 @@ CheckScaleLimitsAgainstBins     true        # Set limits for scale nodes to bin 
 # -------------------------------------------------------------------- #
 X_Kernel                        Lagrange
 X_DistanceMeasure               "sqrtlog10"
-X_NNodes                        15
+X_NNodes                        30
 X_NoOfNodesPerMagnitude         false
 
 Mu1_Kernel                      Lagrange
