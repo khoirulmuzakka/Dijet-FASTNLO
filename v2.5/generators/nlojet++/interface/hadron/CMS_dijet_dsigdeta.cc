@@ -159,8 +159,6 @@ private:
    double ystarmax;           // Maximal y_star  = 0.5 * |y1 - y2| (default is no limitation, i.e. DBL_MAX)
    double obsmin[3];          // Minimum in observable in nth dimension (default derived from binning)
    double obsmax[3];          // Maximum in observable in nth dimension (default derived from binning)
-   double etadijetmin;        // minimum of etadijet=(eta1+eta2)/2
-   double etadijetmax;        // maximum of etadijet
 };
 
 // --- fastNLO user: modify the jet selection in UserHHC::userfunc (default = cutting in |y| min, |y| max and pt min)
@@ -171,8 +169,8 @@ struct fNLOSelector {
    double _ymin, _ymax, _ptmin;
    bool _pseudo;
    bool operator() (const lorentzvector<double> &a) {
-      if (!_pseudo) return ! (_ymin <= abs(a.rapidity())  && abs(a.rapidity())  < _ymax && _ptmin <= a.perp());
-      else          return ! (_ymin <= abs(a.prapidity()) && abs(a.prapidity()) < _ymax && _ptmin <= a.perp());
+      if (!_pseudo) return ! (_ymin <= a.rapidity()  && a.rapidity()  < _ymax && _ptmin <= a.perp());
+      else          return ! (_ymin <= a.prapidity() && a.prapidity() < _ymax && _ptmin <= a.perp());
    };
 };
 
@@ -429,21 +427,6 @@ void UserHHC::phys_output(const std::basic_string<char>& __file_name, unsigned l
    if ( SteeringPars["deltaPhi12min"] ) {
       ftable->GetParameterFromSteering("deltaPhi12min",deltaPhi12min);
    }
-
-   //minimal etadijet
-   SteeringPars["etadijetmin"] = ftable->TestParameterInSteering("etadijetmin");
-   etadijetmin = -5.; // default is -5
-   if ( SteeringPars["etadijetmin"] ) {
-      ftable->GetParameterFromSteering("etadijetmin",deltaPhi12min);
-   }
-
-   // maximal etadijetmax 
-   SteeringPars["etadijetmax"] = ftable->TestParameterInSteering("etadijetmax");
-   etadijetmax = 5.0; // default is +5
-   if ( SteeringPars["etadijetmax"] ) {
-      ftable->GetParameterFromSteering("etadijetmax",etadijetmax);
-   }
-
    // minimal number of central jets
    SteeringPars["Ncjetmin"] = ftable->TestParameterInSteering("Ncjetmin");
    Ncjetmin = 0; // default is no limitation
@@ -699,12 +682,7 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
    // --- Further Njet phase space cuts?
    if ( ptj1min <= pT1  && 
         ptj2min <= pj[2].perp() &&
-        deltaPhi12min <= delphi12 &&
-        etadijetmin <= etadijet &&
-        etadijet <= etadijetmax &&
-        (obsmin[0] <= obs[0] && obs[0] < obsmax[0]) &&
-        (NDim < 2 || (obsmin[1] <= obs[1] && obs[1] < obsmax[1])) &&
-        (NDim < 3 || (obsmin[2] <= obs[2] && obs[2] < obsmax[2])) )         
+        deltaPhi12min <= delphi12  )         
         {
 
       // --- event accepted
@@ -712,6 +690,8 @@ void UserHHC::userfunc(const event_hhc& p, const amplitude_hhc& amp) {
          say::debug["ScenarioCode"]  << "----------------- Event/jet accepted! ------------------" << endl;
          say::debug["ScenarioCode"]  << "====================  End of event  ====================" << endl;
       }
+
+     // std::cout << pT1 << " " << pj[2].perp()  << " " << eta1 << " "<< eta2 << " "<< delphi12<< "\n";
 
       // --- set the renormalization and factorization scales
       // --- calculate the requested scales
